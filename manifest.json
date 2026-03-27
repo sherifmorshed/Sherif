@@ -1,15 +1,34 @@
 {
-  "name": "Land Wells Lookup",
-  "short_name": "WellsData",
-  "start_url": "index.html",
+  "name": "Sherif Land Wells",
+  "short_name": "Sherif Wells",
+  "description": "A professional tool for looking up land well data and coordinates offline.",
+  "categories": ["business", "productivity"],
+  "start_url": ".",
   "display": "standalone",
   "background_color": "#0a0e14",
   "theme_color": "#00d4ff",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/807/807183.png",
+      "src": "icon.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Homescreen"
+    },
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Search View"
     }
   ]
 }
