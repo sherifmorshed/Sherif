@@ -6,21 +6,11 @@
 <meta name="theme-color" content="#0a0e14">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#00d4ff">
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then(reg => console.log('Service Worker registered!'))
-          .catch(err => console.log('Service Worker failed', err));
-      });
-    }
-  </script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Wells">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="description" content="PERTOBEL Land Wells Situation — Well Data Lookup System">
-<link rel="manifest" href="manifest.json">
 <!-- PWA icons inline via canvas — no external files needed -->
 <title>Land Wells — PERTOBEL</title>
 <style>
@@ -1388,8 +1378,5 @@ window.addEventListener('load', function() {
       });
     }
     </script>
-
-</body>
-</html>
 </body>
 </html>
