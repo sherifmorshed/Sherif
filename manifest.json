@@ -1,9 +1,9 @@
 {
-  "id": "com.sherif.wells.app.v1",
-  "name": "Sherif Land Wells Data",
+  "id": "com.sherif.wells.app.v2",
+  "name": "Sherif Land Wells",
   "short_name": "Sherif Wells",
-  "description": "A professional tool for looking up land well data, coordinates, and site information offline.",
-  "categories": ["business", "productivity", "utilities"],
+  "description": "Professional tool for well data lookup and land coordinates.",
+  "categories": ["business", "productivity"],
   "start_url": "/Sherif/",
   "scope": "/Sherif/",
   "display": "standalone",
@@ -11,8 +11,6 @@
   "background_color": "#0a0e14",
   "theme_color": "#00d4ff",
   "lang": "en-US",
-  "dir": "ltr",
-  "prefer_related_applications": false,
   "icons": [
     {
       "src": "icon.png",
@@ -24,24 +22,17 @@
   "screenshots": [
     {
       "src": "icon.png",
-      "sizes": "1920x1080",
+      "sizes": "512x512",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "Sherif Wells Desktop View"
+      "label": "Sherif Wells Main Screen"
     },
     {
       "src": "icon.png",
-      "sizes": "1080x1920",
+      "sizes": "512x512",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "Sherif Wells Mobile View"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "Search Wells",
-      "url": "/Sherif/",
-      "icons": [{ "src": "icon.png", "sizes": "1920x1080" }]
+      "label": "Sherif Wells Mobile Screen"
     }
   ]
 }
