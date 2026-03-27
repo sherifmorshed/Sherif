@@ -1,16 +1,13 @@
 {
-  "id": "com.sherif.wells.app.v2",
+  "id": "com.sherif.wells.app.v4",
   "name": "Sherif Land Wells",
   "short_name": "Sherif Wells",
   "description": "Professional tool for well data lookup and land coordinates.",
-  "categories": ["business", "productivity"],
-  "start_url": "./",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "orientation": "any",
   "background_color": "#0a0e14",
   "theme_color": "#00d4ff",
-  "lang": "en-US",
   "icons": [
     {
       "src": "icon.png",
