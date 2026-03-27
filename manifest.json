@@ -4,8 +4,8 @@
   "short_name": "Sherif Wells",
   "description": "Professional tool for well data lookup and land coordinates.",
   "categories": ["business", "productivity"],
-  "start_url": "/Sherif/",
-  "scope": "/Sherif/",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#0a0e14",
@@ -17,22 +17,6 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "icon.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "Sherif Wells Main Screen"
-    },
-    {
-      "src": "icon.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Sherif Wells Mobile Screen"
     }
   ]
 }
