@@ -1,21 +1,20 @@
-const CACHE_NAME = 'sherif-wells-v1';
-const ASSETS = [
+const CACHE_NAME = 'sherif-wells-cache-v2';
+const assets = [
   '/Sherif/',
   '/Sherif/index.html',
   '/Sherif/manifest.json',
-  '/Sherif/icon.png'
+  '/Sherif/icon.png',
+  '/Sherif/sw.js'
 ];
 
-// Install Service Worker
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS);
+      return cache.addAll(assets);
     })
   );
 });
 
-// Fetch Assets from Cache
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request).then((response) => {
