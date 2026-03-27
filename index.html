@@ -665,7 +665,7 @@ function loadWells() {
     const saved = localStorage.getItem('sm_wells');
     if (saved) return JSON.parse(saved);
   } catch(e){}
-  return BUILT_IN_WELLS;
+  return normalizeWellDataset(BUILT_IN_WELLS);
 }
 function saveWells(arr) {
   try { localStorage.setItem('sm_wells', JSON.stringify(arr)); } catch(e){
@@ -675,7 +675,7 @@ function saveWells(arr) {
 function resetToBuiltIn() {
   if (!confirm('Reset to built-in data? Custom uploads will be lost.')) return;
   localStorage.removeItem('sm_wells');
-  WELLS = [...BUILT_IN_WELLS];
+  WELLS = normalizeWellDataset(BUILT_IN_WELLS);
   updateDBStats();
   showToast('✅ Reset to built-in data');
 }
@@ -718,6 +718,50 @@ function updateCounters() {
   document.getElementById('today-tests').textContent=testLog.filter(x=>x.date===t).length;
   document.getElementById('wc-updates').textContent=Object.keys(wcOverrides).length;
 }
+
+function normalizeHeaderName(name){
+  return String(name||'').replace(/\s+/g,' ').trim().toLowerCase();
+}
+function findColumnName(row, candidates){
+  const keys = Object.keys(row||{});
+  for(const candidate of candidates){
+    const target = normalizeHeaderName(candidate);
+    const match = keys.find(k => normalizeHeaderName(k) === target);
+    if(match) return match;
+  }
+  return null;
+}
+function getCell(row, candidates){
+  const key = findColumnName(row, candidates);
+  if(!key) return null;
+  const value = row[key];
+  return value == null ? null : String(value).trim();
+}
+function isSummaryWellName(name){
+  const well = String(name||'').replace(/\s+/g,' ').trim().toUpperCase();
+  return [
+    'NO. OF WELLS',
+    'TOTAL M3/D',
+    'TOTAL M3/HR',
+    'TOTAL B/D',
+    'TOTAL B/HR'
+  ].includes(well);
+}
+function isRealWellRow(row){
+  const well = getCell(row,['Well','Well Name','well','well name']);
+  return !!(well && !isSummaryWellName(well));
+}
+function normalizeWellRow(row){
+  const out = {};
+  for(const k of Object.keys(row||{})) out[String(k).trim()] = row[k];
+  return out;
+}
+function normalizeWellDataset(rows){
+  return (rows||[])
+    .map(normalizeWellRow)
+    .filter(isRealWellRow);
+}
+
 function updateDBStats() {
   document.getElementById('db-count').textContent=WELLS.length;
   document.getElementById('total-count').textContent=WELLS.length;
@@ -1173,8 +1217,7 @@ function resetWcUpload(){pendingWcRows=[];document.getElementById('wcPreviewArea
 document.getElementById('dataFileInput').addEventListener('change',function(){
   if(!this.files[0])return;
   parseFile(this.files[0],rows=>{
-    // Filter rows that have a 'Well' column with a value
-    const valid=rows.filter(r=>col(r,['well','well name'])&&col(r,['well','well name']).trim());
+    const valid = normalizeWellDataset(rows);
     if(!valid.length){showToast('No valid well data found in file',true);return;}
     pendingDataRows=valid;
     document.getElementById('dataPreviewCount').textContent=valid.length;
@@ -1188,12 +1231,7 @@ document.getElementById('dataFileInput').addEventListener('change',function(){
 
 function importDataFile(){
   if(!pendingDataRows.length)return;
-  // Normalize keys to match expected column names
-  WELLS=pendingDataRows.map(row=>{
-    const out={};
-    for(const k of Object.keys(row)) out[k.trim()]=row[k];
-    return out;
-  });
+  WELLS = normalizeWellDataset(pendingDataRows);
   saveWells(WELLS);
   document.getElementById('dataPreviewArea').style.display='none';
   document.getElementById('dataUploadOk').style.display='block';
@@ -1227,8 +1265,14 @@ function parseFile(file, cb, isData=false){
           ? (wb.SheetNames.find(s=>s.trim().toUpperCase()==='DATA BASE')||wb.SheetNames[0])
           : wb.SheetNames[0];
         const ws=wb.Sheets[sheetName];
-        // For data sheet, skip first row (empty) and use row 2 as header
-        const data=XLSX.utils.sheet_to_json(ws,{defval:'', raw:false});
+        const data = XLSX.utils.sheet_to_json(ws, isData ? {
+          range: 1,
+          defval: '',
+          raw: false
+        } : {
+          defval: '',
+          raw: false
+        });
         cb(data);
       }catch(err){showToast('Error reading file: '+err.message,true);}
     };
