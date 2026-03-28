@@ -1,4 +1,5 @@
-const CACHE_NAME = 'sherif-wells-cache-v4';
+const CACHE_NAME = 'sherif-wells-cache-v6';
+
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -13,7 +14,7 @@ self.addEventListener('install', (event) => {
         try {
           await cache.add(asset);
         } catch (err) {
-          console.warn('Failed to cache:', asset, err);
+          console.warn('Cache fail:', asset);
         }
       }
     })
@@ -25,9 +26,8 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(
-        keys
-          .filter((key) => key !== CACHE_NAME)
-          .map((key) => caches.delete(key))
+        keys.filter((key) => key !== CACHE_NAME)
+            .map((key) => caches.delete(key))
       )
     ).then(() => self.clients.claim())
   );
@@ -37,27 +37,17 @@ self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) return cachedResponse;
+    caches.match(event.request).then((cached) => {
+      return cached || fetch(event.request).then((response) => {
+        if (!response || response.status !== 200) return response;
 
-      return fetch(event.request)
-        .then((networkResponse) => {
-          if (
-            !networkResponse ||
-            networkResponse.status !== 200 ||
-            networkResponse.type !== 'basic'
-          ) {
-            return networkResponse;
-          }
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(event.request, clone);
+        });
 
-          const responseClone = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseClone);
-          });
-
-          return networkResponse;
-        })
-        .catch(() => caches.match('./index.html'));
+        return response;
+      }).catch(() => caches.match('./index.html'));
     })
   );
 });
