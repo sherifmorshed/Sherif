@@ -371,6 +371,13 @@ body{
 }
 .substation-mini-btn:active{opacity:.75;}
 
+.nav-back-btn{
+  background:transparent;color:var(--accent);border:1.5px solid var(--accent);
+  border-radius:10px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;
+  letter-spacing:.8px;text-transform:uppercase;padding:10px 14px;cursor:pointer;white-space:nowrap;
+}
+.nav-back-btn:active{opacity:.75;}
+
 /* TOAST */
 .toast{
   position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
@@ -1022,11 +1029,12 @@ function goSearch(){
     <p>No well found for <strong style="color:var(--accent)">"${q}"</strong></p></div>`;
 }
 
-function selectWell(name){
+function selectWell(name, source='lookup'){
   const w=WELLS.find(x=>x['Well']===name);
   searchInput.value=name;
   document.getElementById('clearBtn').style.display='block';
   suggEl.classList.remove('show');
+  currentWellBackTarget = source === 'substation' ? 'substation' : 'lookup';
   if(w) renderWell(w);
 }
 
@@ -1050,6 +1058,7 @@ document.addEventListener('click',e=>{
 const substationInput = document.getElementById('substationInput');
 const substationSuggEl = document.getElementById('substationSuggestions');
 let currentSubstationName = '';
+let currentWellBackTarget = 'lookup';
 
 function normalizeSubstationName(v){
   return String(v||'').replace(/\s+/g,' ').trim().toLowerCase();
@@ -1084,11 +1093,11 @@ function currentWcForWell(w){
   const name = w['Well'];
   return wcOverrides[name] ? wcOverrides[name].wc : (w['ACT.W.C %']||'');
 }
-function roundToNearestFiveDisplay(v){
+function roundToNearestWholeDisplay(v){
   if (v===''||v==null) return null;
   const n = parseFloat(v);
   if (isNaN(n)) return String(v).trim()||null;
-  return String(Math.round(n / 5) * 5);
+  return String(Math.round(n));
 }
 function sumNumeric(rows, candidates){
   return rows.reduce((sum, row)=>{
@@ -1159,6 +1168,7 @@ function renderSubstationResult(name){
     <div class="substation-summary">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
         <div class="substation-name">${name}</div>
+        <button class="nav-back-btn" onclick="backToSubstationList()">← Back</button>
       </div>
       <div class="substation-meta">
         <div class="badge live">${wells.length} Wells</div>
@@ -1198,7 +1208,7 @@ function renderSubstationResult(name){
               <td class="status-cell" style="color:${DOT[statusClass]}">${w['Status']||'—'}</td>
               <td>${fn(actRate)||'—'}</td>
               <td>${fn(wc)||'—'}</td>
-              <td>${roundToNearestFiveDisplay(actNet)||'—'}</td>
+              <td>${roundToNearestWholeDisplay(actNet)||'—'}</td>
               <td><button class="substation-mini-btn" onclick="openWellFromSubstation('${safeWell}')">Open</button></td>
             </tr>`;
           }).join('')}
@@ -1239,7 +1249,7 @@ function backToSubstationList(){
 }
 function openWellFromSubstation(name){
   showPage('lookup');
-  selectWell(name);
+  selectWell(name, 'substation');
 }
 function refreshSubstationView(){
   if(currentSubstationName && getWellsBySubstation(currentSubstationName).length){
@@ -1268,6 +1278,15 @@ document.addEventListener('click',e=>{
 // ══════════════════════════════════════════
 //  RENDER WELL CARD
 // ══════════════════════════════════════════
+function backFromWell(){
+  if(currentWellBackTarget === 'substation' && currentSubstationName && getWellsBySubstation(currentSubstationName).length){
+    showPage('substation');
+    renderSubstationResult(currentSubstationName);
+    return;
+  }
+  currentWellBackTarget = 'lookup';
+  clearSearch();
+}
 function renderWell(w) {
   const name=w['Well'], s=sc(w['Status']);
   const tests=testLog.filter(t=>t.well===name).sort((a,b)=>b.ts-a.ts);
@@ -1309,6 +1328,9 @@ function renderWell(w) {
     </div>`:'';
 
   document.getElementById('wellResult').innerHTML=`
+    <div style="display:flex;justify-content:flex-end;margin-bottom:10px;">
+      <button class="nav-back-btn" onclick="backFromWell()">← Back</button>
+    </div>
     <div class="well-hero ${s}">
       <div class="well-big-name">${name}</div>
       <div class="badges">
