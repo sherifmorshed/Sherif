@@ -6,15 +6,7 @@
 <meta name="theme-color" content="#0a0e14">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#00d4ff">
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then(reg => console.log('Service Worker registered!'))
-          .catch(err => console.log('Service Worker failed', err));
-      });
-    }
-  </script>
+  <!-- Service Worker registered at bottom of file -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Wells">
@@ -333,6 +325,52 @@ body{
 .step-text h4{font-size:14px;font-weight:700;color:var(--text);margin-bottom:2px;}
 .step-text p{font-size:12px;color:var(--muted);line-height:1.5;}
 
+/* SUBSTATION PAGE */
+.substation-summary{
+  background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:14px;margin-bottom:12px;
+}
+.substation-name{
+  font-family:'Space Mono',monospace;font-size:24px;font-weight:700;color:var(--accent);line-height:1.15;
+}
+.substation-meta{
+  display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;
+}
+.substation-note{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6;}
+.substation-list-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-top:12px;
+}
+.substation-chip{
+  background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  padding:10px 12px;cursor:pointer;transition:background .15s,border-color .15s;
+}
+.substation-chip:active{background:rgba(0,212,255,.08);border-color:var(--accent);}
+.substation-chip-name{font-family:'Space Mono',monospace;font-size:14px;font-weight:700;color:var(--accent);}
+.substation-chip-count{font-size:11px;color:var(--muted);margin-top:3px;}
+.substation-table-wrap{
+  background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:auto;
+}
+.substation-table{
+  width:100%;border-collapse:collapse;font-family:'Space Mono',monospace;font-size:12px;min-width:640px;
+}
+.substation-table th{
+  background:var(--surface);color:var(--accent);padding:10px 8px;text-align:left;
+  border-bottom:1px solid var(--border);font-size:10px;letter-spacing:.7px;white-space:nowrap;
+  position:sticky;top:0;z-index:1;
+}
+.substation-table td{
+  padding:9px 8px;border-bottom:1px solid rgba(30,45,61,.5);white-space:nowrap;vertical-align:middle;
+}
+.substation-table tr:last-child td{border-bottom:none;}
+.substation-table .well-link{font-weight:700;color:var(--accent);}
+.substation-table .status-cell{font-size:11px;}
+.substation-mini-btn{
+  background:transparent;color:var(--accent);border:1px solid var(--accent);border-radius:7px;
+  font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.6px;
+  text-transform:uppercase;padding:5px 9px;cursor:pointer;white-space:nowrap;
+}
+.substation-mini-btn:active{opacity:.75;}
+
 /* TOAST */
 .toast{
   position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
@@ -384,6 +422,7 @@ pre{
 <!-- NAV -->
 <nav class="nav" id="mainNav">
   <button class="nav-btn active" onclick="showPage('lookup')" id="nav-lookup"><span class="icon">🔍</span>Lookup</button>
+  <button class="nav-btn" onclick="showPage('substation')" id="nav-substation"><span class="icon">⚡</span>Substation</button>
   <button class="nav-btn" onclick="showPage('test')" id="nav-test"><span class="icon">📋</span>Test Data</button>
   <button class="nav-btn" onclick="showPage('wc')" id="nav-wc"><span class="icon">💧</span>W.C Update</button>
   <button class="nav-btn" onclick="showPage('data')" id="nav-data"><span class="icon">🗄️</span>Update Data</button>
@@ -423,12 +462,83 @@ pre{
 
   <div class="well-card-area" id="wellResult">
     <div class="empty-state">
-      <div class="big">⛽</div>
+      <div class="big"><svg class="rig-svg" viewBox="0 0 120 130" xmlns="http://www.w3.org/2000/svg" style="width:70px;height:76px;opacity:0.35;">
+  <!-- Base platform -->
+  <rect x="20" y="115" width="80" height="6" rx="3" fill="#00d4ff"/>
+  <!-- Left leg -->
+  <line x1="35" y1="115" x2="25" y2="85" stroke="#00d4ff" stroke-width="4" stroke-linecap="round"/>
+  <!-- Right leg -->
+  <line x1="85" y1="115" x2="95" y2="85" stroke="#00d4ff" stroke-width="4" stroke-linecap="round"/>
+  <!-- Inner left leg -->
+  <line x1="45" y1="115" x2="40" y2="85" stroke="#00d4ff" stroke-width="3" stroke-linecap="round"/>
+  <!-- Inner right leg -->
+  <line x1="75" y1="115" x2="80" y2="85" stroke="#00d4ff" stroke-width="3" stroke-linecap="round"/>
+  <!-- Cross braces lower -->
+  <line x1="25" y1="103" x2="95" y2="103" stroke="#00d4ff" stroke-width="2.5" opacity="0.7"/>
+  <line x1="27" y1="93" x2="93" y2="93" stroke="#00d4ff" stroke-width="2.5" opacity="0.7"/>
+  <!-- X brace lower left -->
+  <line x1="25" y1="103" x2="40" y2="85" stroke="#00d4ff" stroke-width="1.5" opacity="0.5"/>
+  <line x1="40" y1="103" x2="25" y2="85" stroke="#00d4ff" stroke-width="1.5" opacity="0.5"/>
+  <!-- X brace lower right -->
+  <line x1="80" y1="103" x2="95" y2="85" stroke="#00d4ff" stroke-width="1.5" opacity="0.5"/>
+  <line x1="95" y1="103" x2="80" y2="85" stroke="#00d4ff" stroke-width="1.5" opacity="0.5"/>
+  <!-- Tower body -->
+  <line x1="40" y1="85" x2="52" y2="20" stroke="#00d4ff" stroke-width="4" stroke-linecap="round"/>
+  <line x1="80" y1="85" x2="68" y2="20" stroke="#00d4ff" stroke-width="4" stroke-linecap="round"/>
+  <!-- Tower cross braces -->
+  <line x1="40" y1="85" x2="68" y2="20" stroke="#00d4ff" stroke-width="1.5" opacity="0.5"/>
+  <line x1="80" y1="85" x2="52" y2="20" stroke="#00d4ff" stroke-width="1.5" opacity="0.5"/>
+  <line x1="42" y1="72" x2="78" y2="72" stroke="#00d4ff" stroke-width="2" opacity="0.6"/>
+  <line x1="45" y1="58" x2="75" y2="58" stroke="#00d4ff" stroke-width="2" opacity="0.6"/>
+  <line x1="48" y1="44" x2="72" y2="44" stroke="#00d4ff" stroke-width="2" opacity="0.6"/>
+  <line x1="51" y1="30" x2="69" y2="30" stroke="#00d4ff" stroke-width="2" opacity="0.6"/>
+  <!-- Crown block -->
+  <rect x="48" y="12" width="24" height="10" rx="2" fill="#00d4ff" opacity="0.9"/>
+  <!-- Vertical drill string -->
+  <line x1="60" y1="22" x2="60" y2="115" stroke="#ffd740" stroke-width="2" stroke-dasharray="4 3" opacity="0.6"/>
+  <!-- Hook/traveling block -->
+  <rect x="54" y="60" width="12" height="8" rx="2" fill="#ffd740" opacity="0.8"/>
+  <!-- Derrick top pip -->
+  <line x1="60" y1="12" x2="60" y2="2" stroke="#00d4ff" stroke-width="3" stroke-linecap="round"/>
+  <!-- Pump jack arm (right side) -->
+  <line x1="85" y1="100" x2="105" y2="88" stroke="#00d4ff" stroke-width="3.5" stroke-linecap="round"/>
+  <circle cx="105" cy="88" r="5" fill="none" stroke="#00d4ff" stroke-width="2.5"/>
+  <line x1="105" y1="88" x2="105" y2="115" stroke="#00d4ff" stroke-width="2.5" stroke-linecap="round"/>
+</svg></div>
       <p>Type a well name and tap <strong style="color:var(--accent)">GO ▶</strong><br>or pick from the suggestions</p>
     </div>
   </div>
 </div>
 
+
+<!-- ══════════════ PAGE 1B: SUBSTATION ══════════════ -->
+<div class="page" id="page-substation">
+  <div class="page-hdr">
+    <h2>⚡ Substation Lookup</h2>
+    <p>Pick a substation to see all its wells in one table</p>
+  </div>
+
+  <div class="search-section">
+    <div class="search-row">
+      <div class="search-input-wrap">
+        <span class="s-icon">⚡</span>
+        <input class="search-input" id="substationInput" type="text"
+          placeholder="Substation name..." autocomplete="off" spellcheck="false"
+          autocorrect="off" autocapitalize="none" inputmode="text">
+        <button class="s-clear" id="substationClearBtn" onclick="clearSubstationSearch()">✕</button>
+      </div>
+      <button class="go-btn" onclick="goSubstationSearch()">GO ▶</button>
+    </div>
+    <div class="suggestions" id="substationSuggestions"></div>
+  </div>
+
+  <div class="well-card-area" id="substationResult">
+    <div class="empty-state">
+      <div class="big">⚡</div>
+      <p>Type or pick a substation to see all connected wells</p>
+    </div>
+  </div>
+</div>
 
 <!-- ══════════════ PAGE 2: TEST DATA ══════════════ -->
 <div class="page" id="page-test">
@@ -695,6 +805,7 @@ function resetToBuiltIn() {
   localStorage.removeItem('sm_wells');
   WELLS = normalizeWellDataset(BUILT_IN_WELLS);
   updateDBStats();
+  refreshSubstationView();
   showToast('✅ Reset to built-in data');
 }
 
@@ -715,6 +826,30 @@ function fn(v) {
   const n = parseFloat(v);
   if (isNaN(n)) return String(v).trim()||null;
   return Number.isInteger(n)?String(n):n.toFixed(2);
+}
+function calcRunningDays(dateStr) {
+  if (!dateStr) return null;
+  const s = String(dateStr).trim();
+  let d = null;
+  if (s.includes('/')) {
+    const parts = s.split('/').map(x => x.trim());
+    if (parts.length === 3) {
+      const day = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10);
+      const year = parseInt(parts[2], 10);
+      if (!Number.isNaN(day) && !Number.isNaN(month) && !Number.isNaN(year)) {
+        d = new Date(year, month - 1, day);
+      }
+    }
+  } else if (s.includes('-')) {
+    d = new Date(s);
+  }
+  if (!d || Number.isNaN(d.getTime())) return null;
+  const start = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const diffMs = today - start;
+  return diffMs < 0 ? 0 : Math.floor(diffMs / 86400000);
 }
 function fld(label, val, opts={}) {
   const v = val===''||val==null?null:String(val).trim()||null;
@@ -757,6 +892,21 @@ function getCell(row, candidates){
   const value = row[key];
   return value == null ? null : String(value).trim();
 }
+
+function getWellValue(row, candidates){
+  return getCell(row, candidates);
+}
+function getMotorHp(row){
+  return getWellValue(row, ['MOTOR , HP', 'MOTOR , HP ', 'Motor HP', 'MOTOR HP', 'HP']);
+}
+function getHz(row){
+  const direct = getWellValue(row, ['HZ', 'HZ ', 'Hz']);
+  if(direct) return direct;
+  const ampHz = getWellValue(row, ['AMP/HZ', 'AMP / HZ', 'AMP-HZ']);
+  if(!ampHz || !String(ampHz).includes('/')) return null;
+  const hzPart = String(ampHz).split('/')[1].trim();
+  return hzPart || null;
+}
 function isSummaryWellName(name){
   const well = String(name||'').replace(/\s+/g,' ').trim().toUpperCase();
   return [
@@ -797,6 +947,7 @@ function showPage(page) {
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
   document.getElementById('nav-'+page).classList.add('active');
+  if(page==='substation') refreshSubstationView();
   if(page==='test'){renderLog(); document.getElementById('t-date').value=today();}
   if(page==='wc') renderWcUpdated();
   if(page==='data') updateDBStats();
@@ -885,12 +1036,234 @@ function clearSearch(){
   document.getElementById('clearBtn').style.display='none';
   suggEl.classList.remove('show');
   document.getElementById('wellResult').innerHTML=`
-    <div class="empty-state"><div class="big">⛽</div>
+    <div class="empty-state"><div class="big"><svg viewBox="0 0 120 130" xmlns="http://www.w3.org/2000/svg" style="width:70px;height:76px;opacity:0.35;"><rect x="20" y="115" width="80" height="6" rx="3" fill="#00d4ff"/><line x1="35" y1="115" x2="25" y2="85" stroke="#00d4ff" stroke-width="4" stroke-linecap="round"/><line x1="85" y1="115" x2="95" y2="85" stroke="#00d4ff" stroke-width="4" stroke-linecap="round"/><line x1="45" y1="115" x2="40" y2="85" stroke="#00d4ff" stroke-width="3" stroke-linecap="round"/><line x1="75" y1="115" x2="80" y2="85" stroke="#00d4ff" stroke-width="3" stroke-linecap="round"/><line x1="25" y1="103" x2="95" y2="103" stroke="#00d4ff" stroke-width="2.5" opacity="0.7"/><line x1="27" y1="93" x2="93" y2="93" stroke="#00d4ff" stroke-width="2.5" opacity="0.7"/><line x1="40" y1="85" x2="52" y2="20" stroke="#00d4ff" stroke-width="4" stroke-linecap="round"/><line x1="80" y1="85" x2="68" y2="20" stroke="#00d4ff" stroke-width="4" stroke-linecap="round"/><line x1="40" y1="85" x2="68" y2="20" stroke="#00d4ff" stroke-width="1.5" opacity="0.5"/><line x1="80" y1="85" x2="52" y2="20" stroke="#00d4ff" stroke-width="1.5" opacity="0.5"/><line x1="42" y1="72" x2="78" y2="72" stroke="#00d4ff" stroke-width="2" opacity="0.6"/><line x1="45" y1="58" x2="75" y2="58" stroke="#00d4ff" stroke-width="2" opacity="0.6"/><line x1="48" y1="44" x2="72" y2="44" stroke="#00d4ff" stroke-width="2" opacity="0.6"/><rect x="48" y="12" width="24" height="10" rx="2" fill="#00d4ff" opacity="0.9"/><line x1="60" y1="22" x2="60" y2="115" stroke="#ffd740" stroke-width="2" stroke-dasharray="4 3" opacity="0.6"/><rect x="54" y="60" width="12" height="8" rx="2" fill="#ffd740" opacity="0.8"/><line x1="60" y1="12" x2="60" y2="2" stroke="#00d4ff" stroke-width="3" stroke-linecap="round"/><line x1="85" y1="100" x2="105" y2="88" stroke="#00d4ff" stroke-width="3.5" stroke-linecap="round"/><circle cx="105" cy="88" r="5" fill="none" stroke="#00d4ff" stroke-width="2.5"/><line x1="105" y1="88" x2="105" y2="115" stroke="#00d4ff" stroke-width="2.5" stroke-linecap="round"/></svg></div>
     <p>Type a well name and tap <strong style="color:var(--accent)">GO ▶</strong></p></div>`;
 }
 
 document.addEventListener('click',e=>{
   if(!e.target.closest('.search-section')) suggEl.classList.remove('show');
+});
+
+
+// ══════════════════════════════════════════
+//  SUBSTATION SEARCH
+// ══════════════════════════════════════════
+const substationInput = document.getElementById('substationInput');
+const substationSuggEl = document.getElementById('substationSuggestions');
+let currentSubstationName = '';
+
+function normalizeSubstationName(v){
+  return String(v||'').replace(/\s+/g,' ').trim().toLowerCase();
+}
+function getSubstationValue(w){
+  return String(w['SUBSTATION']||'').replace(/\s+/g,' ').trim();
+}
+function getAllSubstations(){
+  const seen = new Map();
+  WELLS.forEach(w=>{
+    const raw = getSubstationValue(w);
+    if(!raw) return;
+    const key = normalizeSubstationName(raw);
+    if(!seen.has(key)) seen.set(key, raw);
+  });
+  return Array.from(seen.values()).sort((a,b)=>a.localeCompare(b, undefined, {numeric:true, sensitivity:'base'}));
+}
+function getWellsBySubstation(name){
+  const key = normalizeSubstationName(name);
+  return WELLS.filter(w=>normalizeSubstationName(getSubstationValue(w))===key)
+    .sort((a,b)=>String(a['Well']||'').localeCompare(String(b['Well']||''), undefined, {numeric:true, sensitivity:'base'}));
+}
+function getSubstationMatches(q, limit=12){
+  if(!q) return [];
+  const lq = normalizeSubstationName(q);
+  return getAllSubstations().filter(name=>normalizeSubstationName(name).includes(lq)).slice(0,limit);
+}
+function substationSafe(name){
+  return String(name||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+}
+function currentWcForWell(w){
+  const name = w['Well'];
+  return wcOverrides[name] ? wcOverrides[name].wc : (w['ACT.W.C %']||'');
+}
+function roundToNearestFiveDisplay(v){
+  if (v===''||v==null) return null;
+  const n = parseFloat(v);
+  if (isNaN(n)) return String(v).trim()||null;
+  return String(Math.round(n / 5) * 5);
+}
+function sumNumeric(rows, candidates){
+  return rows.reduce((sum, row)=>{
+    const value = getWellValue(row, candidates);
+    const n = parseFloat(value);
+    return sum + (isNaN(n) ? 0 : n);
+  }, 0);
+}
+function renderSubstationSuggestions(matches,q){
+  if(!matches.length){
+    substationSuggEl.innerHTML=`<div class="sug-item"><span class="sug-name" style="color:var(--muted)">No match for "${q}"</span></div>`;
+    substationSuggEl.classList.add('show');
+    return;
+  }
+  substationSuggEl.innerHTML = matches.map(name=>{
+    const count = getWellsBySubstation(name).length;
+    const safe = substationSafe(name);
+    return `<div class="sug-item" onclick="selectSubstation('${safe}')">
+      <span class="sug-name">${name}</span>
+      <span class="sug-info">${count} wells</span>
+    </div>`;
+  }).join('');
+  substationSuggEl.classList.add('show');
+}
+function renderSubstationLanding(){
+  currentSubstationName = '';
+  const list = getAllSubstations();
+  const resultEl = document.getElementById('substationResult');
+  resultEl.innerHTML = `
+    <div class="substation-summary">
+      <div class="substation-name">${list.length}</div>
+      <div class="substation-note">Unique substations in the current database. This page updates automatically when you upload a new <strong style="color:var(--text)">LAND WELLS SITUATION</strong> Excel file from Update Data.</div>
+      <div class="substation-meta">
+        <div class="badge live">${WELLS.length} Wells</div>
+        <div class="badge other">Auto-refresh from uploaded database</div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="sec-title">All Substations</div>
+      <div style="padding:12px 14px;">
+        <div class="substation-list-grid">
+          ${list.map(name=>{
+            const safe = substationSafe(name);
+            return `<div class="substation-chip" onclick="selectSubstation('${safe}')">
+              <div class="substation-chip-name">${name}</div>
+              <div class="substation-chip-count">${getWellsBySubstation(name).length} wells</div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+    </div>`;
+}
+function renderSubstationResult(name){
+  const wells = getWellsBySubstation(name);
+  const resultEl = document.getElementById('substationResult');
+  if(!wells.length){
+    resultEl.innerHTML = `<div class="empty-state"><div class="big">⚡</div><p>No wells found for <strong style="color:var(--accent)">"${name}"</strong></p></div>`;
+    return;
+  }
+  currentSubstationName = name;
+  const actRateTotal = sumNumeric(wells, ['ACT , M3/D', 'ACT, M3/D', 'ACT M3/D']);
+  const actNetTotal = sumNumeric(wells, ['ACT NET', 'ACT NET ', 'ACT. NET', 'ACT NET M3/D']);
+  const producerCount = wells.filter(w => sc(w['Status']) === 'producer').length;
+  const waitingCount = wells.filter(w => sc(w['Status']) === 'waiting').length;
+  const rigCount = wells.filter(w => sc(w['Status']) === 'rig').length;
+  resultEl.innerHTML = `
+    <div class="substation-summary">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+        <div class="substation-name">${name}</div>
+        <button class="btn-secondary" style="width:auto;margin-top:0;padding:9px 14px;font-size:13px;" onclick="backToSubstationList()">← Back</button>
+      </div>
+      <div class="substation-meta">
+        <div class="badge live">${wells.length} Wells</div>
+        <div class="badge producer">${producerCount} Producer</div>
+        <div class="badge waiting">${waitingCount} Waiting Work Over</div>
+        <div class="badge rig">${rigCount} Rig On</div>
+        <div class="badge tb">ACT ${fn(actRateTotal) || '0'} M3/D</div>
+        <div class="badge rep">NET ${roundToNearestFiveDisplay(actNetTotal) || '0'}</div>
+      </div>
+      <div class="substation-note">Compact table showing well name first, then TK Battery, ACT rate, W.C and ACT NET rounded to nearest 5. Use <strong style="color:var(--text)">Open</strong> to jump to the full well card.</div>
+    </div>
+
+    <div class="substation-table-wrap">
+      <table class="substation-table">
+        <thead>
+          <tr>
+            <th>WELL</th>
+            <th>TK BATTERY</th>
+            <th>STATUS</th>
+            <th>ACT M3/D</th>
+            <th>W.C %</th>
+            <th>ACT NET</th>
+            <th>OPEN</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${wells.map(w=>{
+            const safeWell = substationSafe(w['Well']||'');
+            const wc = currentWcForWell(w);
+            const statusClass = sc(w['Status']);
+            const tkBattery = getWellValue(w, ['TK Battery', 'TK Battery ', 'TK BATTERY']);
+            const actRate = getWellValue(w, ['ACT , M3/D', 'ACT, M3/D', 'ACT M3/D']);
+            const actNet = getWellValue(w, ['ACT NET', 'ACT NET ', 'ACT. NET', 'ACT NET M3/D']);
+            return `<tr>
+              <td class="well-link">${w['Well']||'—'}</td>
+              <td>${tkBattery||'—'}</td>
+              <td class="status-cell" style="color:${DOT[statusClass]}">${w['Status']||'—'}</td>
+              <td>${fn(actRate)||'—'}</td>
+              <td>${fn(wc)||'—'}</td>
+              <td>${roundToNearestFiveDisplay(actNet)||'—'}</td>
+              <td><button class="substation-mini-btn" onclick="openWellFromSubstation('${safeWell}')">Open</button></td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function selectSubstation(name){
+  substationInput.value = name;
+  document.getElementById('substationClearBtn').style.display = 'block';
+  substationSuggEl.classList.remove('show');
+  renderSubstationResult(name);
+}
+function goSubstationSearch(){
+  const q = substationInput.value.trim();
+  if(!q){ refreshSubstationView(); return; }
+  const exact = getAllSubstations().find(name=>normalizeSubstationName(name)===normalizeSubstationName(q));
+  if(exact){ selectSubstation(exact); return; }
+  const matches = getSubstationMatches(q);
+  if(matches.length===1){ selectSubstation(matches[0]); return; }
+  if(matches.length>1){ renderSubstationSuggestions(matches,q); return; }
+  renderSubstationResult(q);
+}
+function clearSubstationSearch(){
+  substationInput.value = '';
+  document.getElementById('substationClearBtn').style.display = 'none';
+  substationSuggEl.classList.remove('show');
+  refreshSubstationView();
+}
+function backToSubstationList(){
+  currentSubstationName = '';
+  substationInput.value = '';
+  document.getElementById('substationClearBtn').style.display = 'none';
+  substationSuggEl.classList.remove('show');
+  renderSubstationLanding();
+}
+function openWellFromSubstation(name){
+  showPage('lookup');
+  selectWell(name);
+}
+function refreshSubstationView(){
+  if(currentSubstationName && getWellsBySubstation(currentSubstationName).length){
+    renderSubstationResult(currentSubstationName);
+  } else {
+    renderSubstationLanding();
+  }
+}
+
+substationInput.addEventListener('input',()=>{
+  const q = substationInput.value.trim();
+  document.getElementById('substationClearBtn').style.display = q ? 'block' : 'none';
+  if(!q){ substationSuggEl.classList.remove('show'); renderSubstationLanding(); return; }
+  const exact = getAllSubstations().find(name=>normalizeSubstationName(name)===normalizeSubstationName(q));
+  if(exact){ renderSubstationResult(exact); substationSuggEl.classList.remove('show'); return; }
+  renderSubstationSuggestions(getSubstationMatches(q), q);
+});
+substationInput.addEventListener('keydown',e=>{
+  if(e.key==='Enter'||e.keyCode===13){ goSubstationSearch(); substationInput.blur(); }
+  if(e.key==='Escape'){ substationSuggEl.classList.remove('show'); substationInput.blur(); }
+});
+document.addEventListener('click',e=>{
+  if(!e.target.closest('#page-substation .search-section')) substationSuggEl.classList.remove('show');
 });
 
 // ══════════════════════════════════════════
@@ -979,10 +1352,10 @@ function renderWell(w) {
       <div class="sec-title">⚡ Pump & Electrical</div>
       <div>
         ${fld('DH Pump',w['DH Pump'],{hi:true})}
-        ${fld('Motor HP',fn(w['MOTOR , HP ']))}
+        ${fld('Motor HP',fn(getMotorHp(w)))}
         ${fld('Design AMP',fn(w['DESGIN AMP.']))}
         ${fld('AMP',w['AMP'])}
-        ${fld('HZ',w['HZ'])}
+        ${fld('HZ',fn(getHz(w)))}
         ${fld('Stages',w['STG'])}
         ${fld('VSD',w['VSD'])}
         ${fld('Panel Type',w['Panel Type'])}
@@ -1015,6 +1388,7 @@ function renderWell(w) {
       <div class="sec-title">📋 Other</div>
       <div>
         ${fld('Last W.O',w['LAST W.O'])}
+        ${fld('Running Days', calcRunningDays(w['LAST W.O']) !== null ? calcRunningDays(w['LAST W.O']) + ' days' : null, {hi:true})}
         ${fld('Timer',w['Timer '])}
         ${fld('Well No.',w['No.'])}
       </div>
@@ -1258,6 +1632,7 @@ function importDataFile(){
   document.getElementById('dataUploadOk').innerHTML=`✅ Database updated!<br>${WELLS.length} wells loaded<br><span style="font-size:11px;color:var(--muted)">Go to Lookup to search wells</span>`;
   pendingDataRows=[];
   updateDBStats(); updateCounters();
+  refreshSubstationView();
   showToast(`✅ ${WELLS.length} wells loaded`);
 }
 
@@ -1409,7 +1784,5 @@ window.addEventListener('load', function() {
     }
     </script>
 
-</body>
-</html>
 </body>
 </html>
