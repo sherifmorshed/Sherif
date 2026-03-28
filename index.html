@@ -401,6 +401,138 @@ body{
 }
 .page-hdr.has-icon .hdr-copy{min-width:0;}
 
+
+/* CHEMICAL PAGE */
+.chem-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:10px;
+}
+.chem-card{
+  background:linear-gradient(135deg, rgba(0,212,255,.06), rgba(22,29,40,.98));
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:12px;
+  cursor:pointer;
+  transition:border-color .15s, transform .15s, background .15s;
+}
+.chem-card:active{border-color:var(--accent);transform:translateY(1px);}
+.chem-name{
+  font-family:'Space Mono',monospace;
+  font-size:13px;
+  color:var(--accent);
+  font-weight:700;
+  line-height:1.5;
+}
+.chem-count{
+  margin-top:6px;
+  font-size:12px;
+  color:var(--text);
+}
+.chem-sub{
+  margin-top:4px;
+  font-size:11px;
+  color:var(--muted);
+}
+.chem-pill-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-top:10px;
+}
+.chem-pill{
+  padding:4px 10px;
+  border-radius:999px;
+  border:1px solid rgba(0,212,255,.22);
+  background:rgba(0,212,255,.08);
+  color:var(--text);
+  font-family:'Space Mono',monospace;
+  font-size:11px;
+}
+.chem-pill.active{
+  border-color:var(--accent);
+  color:var(--accent);
+  box-shadow:0 0 0 1px rgba(0,212,255,.12) inset;
+}
+.chem-pill.mix{
+  border-color:var(--yellow);
+  background:rgba(255,215,64,.08);
+  color:var(--yellow);
+}
+.chem-well{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:12px 14px;
+  margin-bottom:10px;
+}
+.chem-well-top{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.chem-well-name{
+  font-family:'Space Mono',monospace;
+  font-size:16px;
+  font-weight:700;
+  color:var(--accent);
+}
+.chem-well-meta{
+  font-size:11px;
+  color:var(--muted);
+  font-family:'Space Mono',monospace;
+  margin-top:3px;
+}
+.chem-mix-note{
+  display:none;
+}
+.chem-search-row{
+  display:flex;
+  gap:8px;
+  align-items:stretch;
+  margin-bottom:12px;
+}
+.chem-search-wrap{
+  flex:1;
+  position:relative;
+}
+.chem-search-input{
+  width:100%;
+  background:var(--surface);
+  border:1.5px solid var(--border);
+  border-radius:10px;
+  color:var(--text);
+  font-family:'Space Mono',monospace;
+  font-size:15px;
+  padding:12px 40px 12px 38px;
+  outline:none;
+}
+.chem-search-input:focus{
+  border-color:var(--accent);
+}
+.chem-search-clear{
+  position:absolute;
+  right:8px;
+  top:50%;
+  transform:translateY(-50%);
+  background:none;
+  border:none;
+  color:var(--muted);
+  font-size:18px;
+  cursor:pointer;
+  padding:4px;
+  display:none;
+}
+.chem-search-empty{
+  padding:18px 8px 6px;
+  text-align:center;
+  color:var(--muted);
+  font-size:13px;
+  font-family:'Space Mono',monospace;
+}
+
 /* TOAST */
 .toast{
   position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
@@ -468,6 +600,7 @@ pre{
   <path class="rig-stroke" d="M86 88 V102"/>
   <path class="rig-stroke" d="M44 92 H76"/>
 </svg></span>Manifold</button>
+  <button class="nav-btn" onclick="showPage('chemical')" id="nav-chemical"><span class="icon">🧪</span>Chemical</button>
   <button class="nav-btn" onclick="showPage('data')" id="nav-data"><span class="icon">🗄️</span>Update Data</button>
 </nav>
 
@@ -478,6 +611,10 @@ pre{
     <div class="sub">PERTOBEL — WELL DATA LOOKUP SYSTEM</div>
     <div class="header-stats">
       <div class="stat-pill"><span id="total-count">439</span> Wells</div>
+      <div class="stat-pill"><span id="producer-count">0</span> Producers</div>
+      <div class="stat-pill"><span id="inactive-count">0</span> Waiting WO + Rig</div>
+      <div class="stat-pill"><span id="esp-producer-count">0</span> ESP Producers</div>
+      <div class="stat-pill"><span id="sr-producer-count">0</span> SR Producers</div>
     </div>
   </div>
 
@@ -799,6 +936,35 @@ pre{
 </div>
 
 
+
+<!-- ══════════════ PAGE 1D: CHEMICAL ══════════════ -->
+<div class="page" id="page-chemical">
+  <div class="page-hdr">
+    <h2>🧪 Chemical Injection</h2>
+    <p>Search active wells under chemical injection service and review chemical coverage by type</p>
+  </div>
+
+  <div class="search-section">
+    <div class="search-row">
+      <div class="search-input-wrap">
+        <span class="s-icon">🧪</span>
+        <input class="search-input" id="chemicalInput" type="text"
+          placeholder="Search injected well..." autocomplete="off" spellcheck="false"
+          autocorrect="off" autocapitalize="none" inputmode="text">
+        <button class="s-clear" id="chemicalClearBtn" onclick="clearChemicalSearch()">✕</button>
+      </div>
+    </div>
+    <div class="suggestions" id="chemicalSuggestions"></div>
+  </div>
+
+  <div class="well-card-area" id="chemicalResult">
+    <div class="empty-state">
+      <div class="big">🧪</div>
+      <p>Search for an active injected well or browse the chemical types below</p>
+    </div>
+  </div>
+</div>
+
 <!-- ══════════════ PAGE 4: UPDATE DATA ══════════════ -->
 <div class="page" id="page-data">
   <div class="page-hdr">
@@ -951,15 +1117,23 @@ function calcRunningDays(dateStr) {
   return diffMs < 0 ? 0 : Math.floor(diffMs / 86400000);
 }
 function fld(label, val, opts={}) {
-  const v = val===''||val==null?null:String(val).trim()||null;
-  if (!v) return `<div class="field"><span class="f-label">${label}</span><span class="f-val empty">—</span></div>`;
+  const raw = val===''||val==null?null:String(val).trim()||null;
+  if (!raw) return `<div class="field"><span class="f-label">${label}</span><span class="f-val empty">—</span></div>`;
+  let display = raw;
+  if(opts.roundWhole){
+    const n = parseFloat(raw);
+    if(!isNaN(n)) display = String(Math.round(n));
+  }
   let cls='f-val';
   if(opts.hi) cls+=' hi';
   if(opts.lv) cls+=' lv';
   if(opts.pos) cls+=' pos';
   if(opts.neg) cls+=' neg';
-  if(opts.diff){cls+=parseFloat(v)>=0?' pos':' neg';}
-  return `<div class="field"><span class="f-label">${label}</span><span class="${cls}">${v}</span></div>`;
+  if(opts.diff){
+    const n = parseFloat(raw);
+    cls += (!isNaN(n) && n >= 0) ? ' pos' : ' neg';
+  }
+  return `<div class="field"><span class="f-label">${label}</span><span class="${cls}">${display}</span></div>`;
 }
 function showToast(msg, err=false) {
   const t=document.getElementById('toast');
@@ -1034,6 +1208,22 @@ function normalizeWellDataset(rows){
 function updateDBStats() {
   document.getElementById('db-count').textContent=WELLS.length;
   document.getElementById('total-count').textContent=WELLS.length;
+
+  const producerCount = WELLS.filter(w => sc(w['Status']) === 'producer').length;
+  const inactiveCount = WELLS.filter(w => {
+    const status = String(w['Status'] || '').toLowerCase();
+    const shut = String(w['Shut Down Reason'] || '').toLowerCase();
+    const type = String(w['Type'] || '').toLowerCase();
+    return status.includes('waiting work over') || status.includes('work over') || status.includes('rig') || shut.includes('rig') || type.includes('rig');
+  }).length;
+  const espProducerCount = WELLS.filter(w => sc(w['Status']) === 'producer' && String(w['Type'] || '').trim().toUpperCase() === 'ESP').length;
+  const srProducerCount = WELLS.filter(w => sc(w['Status']) === 'producer' && String(w['Type'] || '').trim().toUpperCase() === 'SR').length;
+
+  document.getElementById('producer-count').textContent = producerCount;
+  document.getElementById('inactive-count').textContent = inactiveCount;
+  document.getElementById('esp-producer-count').textContent = espProducerCount;
+  document.getElementById('sr-producer-count').textContent = srProducerCount;
+
   const src=localStorage.getItem('sm_wells') ? 'Custom Upload' : 'Built-in';
   document.getElementById('db-date').textContent=src;
 }
@@ -1048,6 +1238,7 @@ function showPage(page) {
   document.getElementById('nav-'+page).classList.add('active');
   if(page==='substation') refreshSubstationView();
   if(page==='manifold') refreshManifoldView();
+  if(page==='chemical') refreshChemicalView();
   if(page==='test'){renderLog(); document.getElementById('t-date').value=today();}
   if(page==='wc') renderWcUpdated();
   if(page==='data') updateDBStats();
@@ -1100,7 +1291,7 @@ searchInput.addEventListener('input',()=>{
   document.getElementById('clearBtn').style.display=q?'block':'none';
   if(!q){suggEl.classList.remove('show');return;}
   const exact=WELLS.find(w=>w['Well'].toLowerCase()===q.toLowerCase());
-  if(exact){renderWell(exact);suggEl.classList.remove('show');return;}
+  if(exact){selectWell(exact['Well']);return;}
   renderSugg(getMatches(q),q,suggEl,'selectWell');
 });
 
@@ -1124,12 +1315,15 @@ function goSearch(){
 }
 
 function selectWell(name, source='lookup'){
-  const w=WELLS.find(x=>x['Well']===name);
-  searchInput.value=name;
+  const w=WELLS.find(x=>String(x['Well']||'').toLowerCase()===String(name||'').toLowerCase());
+  searchInput.value = w ? (w['Well']||name) : name;
   document.getElementById('clearBtn').style.display='block';
   suggEl.classList.remove('show');
-  currentWellBackTarget = source === 'substation' ? 'substation' : (source === 'manifold' ? 'manifold' : 'lookup');
-  if(w) renderWell(w);
+  currentWellBackTarget = source === 'substation' ? 'substation' : (source === 'manifold' ? 'manifold' : (source === 'chemical' ? 'chemical' : 'lookup'));
+  if(w){
+    showPage('lookup');
+    renderWell(w, source);
+  }
 }
 
 function clearSearch(){
@@ -1153,6 +1347,121 @@ const substationInput = document.getElementById('substationInput');
 const substationSuggEl = document.getElementById('substationSuggestions');
 let currentSubstationName = '';
 let currentWellBackTarget = 'lookup';
+let currentRenderedWellName = '';
+
+function backFromWellCard(){
+  if(currentWellBackTarget === 'substation'){
+    showPage('substation');
+    return;
+  }
+  if(currentWellBackTarget === 'manifold'){
+    showPage('manifold');
+    return;
+  }
+  if(currentWellBackTarget === 'chemical'){
+    showPage('chemical');
+    return;
+  }
+  clearSearch();
+  showLookupEmptyState();
+  showPage('lookup');
+}
+
+function renderWell(well, source='lookup'){
+  if(!well) return;
+  currentRenderedWellName = String(well['Well'] || '');
+  currentWellBackTarget = source === 'substation' ? 'substation' : (source === 'manifold' ? 'manifold' : (source === 'chemical' ? 'chemical' : 'lookup'));
+
+  const statusClass = sc(well['Status']);
+  const wc = currentWcForWell(well);
+  const repNet = getWellValue(well, ['REP. NET', 'REP. NET ', 'REP NET']);
+  const actRate = getWellValue(well, ['ACT , M3/D', 'ACT, M3/D', 'ACT M3/D']);
+  const actNet = getWellValue(well, ['ACT NET', 'ACT NET ', 'ACT. NET', 'ACT NET M3/D']);
+  const diff = getWellValue(well, ['DIFF']);
+  const manifold = getWellValue(well, ['Loc. Manifold', 'Loc. Manifold ']);
+  const battery = getWellValue(well, ['TK Battery', 'TK Battery ']);
+  const substation = getWellValue(well, ['SUBSTATION']);
+  const whp = getWellValue(well, ['WHP2', 'WHP', 'WHP PINCHING']);
+  const amp = getWellValue(well, ['AMP']);
+  const hz = getHz(well);
+  const hp = getMotorHp(well);
+  const chem = getWellValue(well, ['CHEMICAL', 'CHEMICAL ']);
+  const runningDays = calcRunningDays(getWellValue(well, ['LAST W.O', 'LAST WO']));
+  const chemicalBadge = chem ? `<span class="badge other">${String(chem).replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>` : '';
+
+  document.getElementById('wellResult').innerHTML = `
+    <div style="display:flex;justify-content:flex-start;margin-bottom:10px;">
+      <button class="nav-back-btn" onclick="backFromWellCard()">← Back</button>
+    </div>
+
+    <div class="well-hero ${statusClass}">
+      <div class="well-big-name">${String(well['Well']||'—').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+      <div class="badges">
+        <span class="badge ${statusClass}">${String(well['Status']||'—').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>
+        <span class="badge tb">${String(well['Type']||'—').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>
+        ${chemicalBadge}
+      </div>
+    </div>
+
+    <div class="live-box">
+      <div class="live-title">Current Production Snapshot</div>
+      <div class="live-grid">
+        <div class="live-metric">
+          <div class="lm-val">${fn(actRate)||'—'}</div>
+          <div class="lm-lbl">ACT M3/D</div>
+        </div>
+        <div class="live-metric">
+          <div class="lm-val">${fn(wc)||'—'}</div>
+          <div class="lm-lbl">ACT W.C %</div>
+        </div>
+        <div class="live-metric">
+          <div class="lm-val">${fn(actNet)||'—'}</div>
+          <div class="lm-lbl">ACT NET</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section actual-section">
+      <div class="sec-title actual-title">Main Details</div>
+      ${fld('Type', well['Type'])}
+      ${fld('Status', well['Status'])}
+      ${fld('Reporting', getWellValue(well, ['Reporting Status']))}
+      ${fld('Shut Down', getWellValue(well, ['Shut Down Reason']))}
+      ${fld('Chemical', chem, {hi:true})}
+    </div>
+
+    <div class="section">
+      <div class="sec-title">Location</div>
+      ${fld('Manifold', manifold)}
+      ${fld('TK Battery', battery)}
+      ${fld('Substation', substation)}
+    </div>
+
+    <div class="section actual-section">
+      <div class="sec-title actual-title">Production Data</div>
+      ${fld('REP M3/D', getWellValue(well, ['RATE , M3/D', 'RATE, M3/D']))}
+      ${fld('REP W.C %', getWellValue(well, ['W.C %']))}
+      ${fld('REP NET', repNet, {roundWhole:true})}
+      ${fld('ACT M3/D', actRate, {hi:true})}
+      ${fld('ACT W.C %', wc)}
+      ${fld('ACT NET', actNet, {pos:true, roundWhole:true})}
+      ${fld('DIFF', diff, {diff:true, roundWhole:true})}
+    </div>
+
+    <div class="section">
+      <div class="sec-title">Equipment</div>
+      ${fld('WHP', whp)}
+      ${fld('AMP', amp)}
+      ${fld('HZ', hz)}
+      ${fld('Motor HP', hp)}
+      ${fld('Pump', getWellValue(well, ['DH Pump']))}
+      ${fld('Stages', getWellValue(well, ['STG']))}
+      ${fld('Timer', getWellValue(well, ['Timer ']))}
+      ${fld('Running Days', runningDays==null?null:String(runningDays))}
+    </div>
+  `;
+}
+
 
 function normalizeSubstationName(v){
   return String(v||'').replace(/\s+/g,' ').trim().toLowerCase();
@@ -1697,6 +2006,407 @@ manifoldInput.addEventListener('keydown',e=>{
 document.addEventListener('click',e=>{
   if(!e.target.closest('#page-manifold .search-section')) manifoldSuggEl.classList.remove('show');
 });
+
+
+// ══════════════════════════════════════════
+//  CHEMICAL INJECTION
+// ══════════════════════════════════════════
+const chemicalInput = document.getElementById('chemicalInput');
+const chemicalSuggEl = document.getElementById('chemicalSuggestions');
+let currentChemicalName = '';
+let currentChemicalWellFilter = '';
+let currentChemicalFocusedWell = '';
+
+function getChemicalValue(w){
+  const keys = ['CHEMICAL', 'CHEMICAL ', 'Chemical', 'Chemical '];
+  for(const key of keys){
+    if(w && Object.prototype.hasOwnProperty.call(w,key)){
+      const val = String(w[key] ?? '').replace(/\s+/g,' ').trim();
+      if(val) return val;
+    }
+  }
+  for(const key of Object.keys(w||{})){
+    if(String(key).trim().toLowerCase()==='chemical'){
+      const val = String(w[key] ?? '').replace(/\s+/g,' ').trim();
+      if(val) return val;
+    }
+  }
+  return '';
+}
+function chemTitleCase(v){
+  return String(v||'').toLowerCase().replace(/\b([a-z])/g, m => m.toUpperCase());
+}
+function canonicalChemicalName(name){
+  const raw = String(name||'').replace(/\s+/g,' ').trim();
+  if(!raw) return '';
+  const upper = raw.toUpperCase()
+    .replace(/\s+/g,' ')
+    .replace(/SCAVANGER/g,'SCAVENGER')
+    .replace(/DEMULSIFER/g,'DEMULSIFIER')
+    .replace(/DEMLUSIFER/g,'DEMULSIFIER');
+
+  if(/^H2S(\s+SCAVENGER)?$/.test(upper)) return 'H2S';
+  if(/^DIESEL(\s+IN\s+SURFACE)?$/.test(upper)) return 'Diesel';
+  if(upper.includes('DEMULSIFIER')) return 'Demulsifier';
+
+  const map = {
+    'WATER':'Water',
+    'ACETIC ACID':'Acetic Acid',
+    'MUTUAL SOLVENT':'Mutual Solvent',
+    'SCALE INHIBITOR':'Scale Inhibitor',
+    'ANTIFOULANT':'Antifoulant',
+    'XYLENE':'Xylene'
+  };
+  if(map[upper]) return map[upper];
+  return chemTitleCase(raw);
+}
+function splitChemicalTokens(raw){
+  const clean = String(raw||'').replace(/\s+/g,' ').trim();
+  if(!clean) return [];
+  const parts = clean
+    .split(/\s*\+\s*|\s*\/\s*|\s*&\s*|\s*,\s*|\s*;\s*/)
+    .map(canonicalChemicalName)
+    .filter(Boolean);
+  return [...new Set(parts)];
+}
+function normalizeChemicalName(name){
+  return canonicalChemicalName(name).toLowerCase();
+}
+function isExcludedChemicalWell(w){
+  const status = String(w['Status'] || '').toLowerCase();
+  const shut = String(w['Shut Down Reason'] || '').toLowerCase();
+  const type = String(w['Type'] || '').toLowerCase();
+  return status.includes('waiting work over') || status.includes('work over') || status.includes('rig') || shut.includes('rig') || type.includes('rig');
+}
+function getChemicalRecords(){
+  return WELLS
+    .filter(w => !isExcludedChemicalWell(w))
+    .map(w=>{
+      const raw = getChemicalValue(w);
+      const chemicals = splitChemicalTokens(raw);
+      return { well:w, raw, chemicals };
+    }).filter(rec=>rec.chemicals.length);
+}
+
+function getChemicalWellMatches(q, limit=12){
+  if(!q) return [];
+  const lq = String(q).replace(/\s+/g,' ').trim().toLowerCase();
+  return getChemicalRecords().filter(rec=>{
+    const wellName = String(rec.well['Well']||'').toLowerCase();
+    const battery = String(getBatteryValue(rec.well)||'').toLowerCase();
+    const manifold = String(getManifoldValue(rec.well)||'').toLowerCase();
+    const substation = String(getSubstationValue(rec.well)||'').toLowerCase();
+    const chemicals = rec.chemicals.join(' ').toLowerCase();
+    return wellName.includes(lq) || battery.includes(lq) || manifold.includes(lq) || substation.includes(lq) || chemicals.includes(lq);
+  }).sort((a,b)=>String(a.well['Well']||'').localeCompare(String(b.well['Well']||''), undefined, {numeric:true, sensitivity:'base'})).slice(0,limit);
+}
+function getChemicalRecordByWell(name){
+  const q = String(name||'').trim().toLowerCase();
+  return getChemicalRecords().find(rec=>String(rec.well['Well']||'').trim().toLowerCase()===q) || null;
+}
+function getChemicalGroups(){
+  const map = new Map();
+  getChemicalRecords().forEach(rec=>{
+    rec.chemicals.forEach(name=>{
+      const key = normalizeChemicalName(name);
+      if(!map.has(key)) map.set(key, { key, name, records:[], mixedCount:0, pairs:new Map(), batteries:new Set() });
+      const group = map.get(key);
+      group.records.push(rec);
+      if(rec.chemicals.length>1){
+        group.mixedCount += 1;
+        rec.chemicals.filter(x=>normalizeChemicalName(x)!==key).forEach(other=>{
+          const oKey = canonicalChemicalName(other);
+          group.pairs.set(oKey, (group.pairs.get(oKey)||0)+1);
+        });
+      }
+      const battery = getBatteryValue(rec.well);
+      if(battery) group.batteries.add(battery);
+    });
+  });
+  return Array.from(map.values()).map(g=>({
+    key:g.key,
+    name:g.name,
+    records:g.records.sort((a,b)=>String(a.well['Well']||'').localeCompare(String(b.well['Well']||''), undefined, {numeric:true, sensitivity:'base'})),
+    mixedCount:g.mixedCount,
+    batteryCount:g.batteries.size,
+    pairSummary:Array.from(g.pairs.entries()).sort((a,b)=>b[1]-a[1] || a[0].localeCompare(b[0], undefined, {numeric:true, sensitivity:'base'}))
+  })).sort((a,b)=>b.records.length-a.records.length || a.name.localeCompare(b.name, undefined, {numeric:true, sensitivity:'base'}));
+}
+function getChemicalByKey(key){
+  return getChemicalGroups().find(g=>g.key===key) || null;
+}
+function getChemicalMatches(q, limit=12){
+  if(!q) return [];
+  const lq = String(q).replace(/\s+/g,' ').trim().toLowerCase();
+  return getChemicalGroups().filter(group=>group.name.toLowerCase().includes(lq)).slice(0,limit);
+}
+function chemicalSafe(v){
+  return String(v||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+}
+function renderChemicalSuggestions(matches,q){
+  if(!matches.length){
+    chemicalSuggEl.innerHTML=`<div class="sug-item"><span class="sug-name" style="color:var(--muted)">No injected well match for "${q}"</span></div>`;
+    chemicalSuggEl.classList.add('show');
+    return;
+  }
+  chemicalSuggEl.innerHTML = matches.map(rec=>{
+    const safe = chemicalSafe(rec.well['Well']);
+    const chemText = rec.chemicals.join(' & ');
+    return `<div class="sug-item" onclick="selectChemicalWell('${safe}')">
+      <span class="sug-name">${rec.well['Well']}</span>
+      <span class="sug-info">Injected with: ${chemText}<br>${getBatteryValue(rec.well)||'No TK'} • ${getManifoldValue(rec.well)||'No Manifold'}</span>
+    </div>`;
+  }).join('');
+  chemicalSuggEl.classList.add('show');
+}
+function renderChemicalLanding(){
+  currentChemicalName = '';
+  currentChemicalWellFilter = '';
+  currentChemicalFocusedWell = '';
+  const groups = getChemicalGroups();
+  const mixedWellCount = getChemicalRecords().filter(rec=>rec.chemicals.length>1).length;
+  const resultEl = document.getElementById('chemicalResult');
+  resultEl.innerHTML = `
+    <div class="substation-summary">
+      <div class="substation-name">${groups.length}</div>
+      <div class="substation-note">Search active wells receiving chemical injection treatment or browse the current program by chemical type. Results update automatically whenever a new LAND WELLS SITUATION file is uploaded.</div>
+      <div class="substation-meta">
+        <div class="badge live">${getChemicalRecords().length} Injected Wells</div>
+        <div class="badge tb">${mixedWellCount} Mixed Injection Wells</div>
+        <div class="badge other">Chemical-first dashboard</div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="sec-title">Chemical Types</div>
+      <div style="padding:12px 14px;">
+        <div class="chem-grid">
+          ${groups.map(group=>{
+            const safe = chemicalSafe(group.key);
+            return `<div class="chem-card" onclick="selectChemical('${safe}')">
+              <div class="chem-name">${group.name}</div>
+              <div class="chem-count">${group.records.length} wells</div>
+              <div class="chem-sub">${group.mixedCount ? `${group.mixedCount} mixed with another chemical` : `Single-chemical injection only`}</div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+    </div>`;
+}
+function renderChemicalWellFocus(wellName){
+  const rec = getChemicalRecordByWell(wellName);
+  const resultEl = document.getElementById('chemicalResult');
+  if(!rec){
+    resultEl.innerHTML = `<div class="empty-state"><div class="big">🧪</div><p>No injected well found for this search</p></div>`;
+    return;
+  }
+  currentChemicalName = '';
+  currentChemicalWellFilter = '';
+  currentChemicalFocusedWell = rec.well['Well'] || '';
+  const w = rec.well;
+  const isMixed = rec.chemicals.length > 1;
+  const pills = rec.chemicals.map(token=>`<span class="chem-pill active">${token}</span>`).join('');
+  resultEl.innerHTML = `
+    <div class="substation-summary">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+        <div>
+          <div class="substation-name">${w['Well']||'—'}</div>
+          <div class="substation-note" style="margin-top:4px;">Active injected chemical profile for this well.</div><div style="margin-top:10px;font-family:'Space Mono',monospace;font-size:22px;font-weight:700;line-height:1.35;color:var(--accent2);">${rec.chemicals.join(" & ")}</div>
+        </div>
+        <button class="nav-back-btn" onclick="backToChemicalLanding()">← Back</button>
+      </div>
+      <div class="substation-meta">
+        <div class="badge live">${rec.chemicals.length} Chemical${rec.chemicals.length>1?'s':''}</div>
+        <div class="badge ${isMixed ? 'waiting' : 'producer'}">${isMixed ? 'Mixed Chemical' : 'Single Chemical'}</div>
+        <div class="badge other">TK ${getBatteryValue(w)||'—'}</div>
+        <div class="badge tb">${getSubstationValue(w)||'No Substation'}</div>
+      </div>
+      <div class="substation-note" style="margin-top:8px;">Manifold: <strong style="color:var(--text)">${getManifoldValue(w)||'—'}</strong> • Status: <strong style="color:${DOT[sc(w['Status'])]}">${w['Status']||'—'}</strong></div>
+    </div>
+    <div class="section">
+      <div class="sec-title">Injected Chemicals</div>
+      <div style="padding:12px 14px;">
+        <div class="chem-pill-row" style="margin-bottom:12px;">${pills}</div>
+        <button class="btn-secondary" style="margin-top:0;" onclick="openWellFromChemical('${chemicalSafe(w['Well'])}')">Open Full Well Data</button>
+      </div>
+    </div>`;
+}
+
+function renderChemicalResult(key){
+  const group = getChemicalByKey(key);
+  const resultEl = document.getElementById('chemicalResult');
+  if(!group || !group.records.length){
+    resultEl.innerHTML = `<div class="empty-state"><div class="big">🧪</div><p>No wells found for this chemical type</p></div>`;
+    return;
+  }
+  currentChemicalName = key;
+  const singleCount = group.records.filter(rec=>rec.chemicals.length===1).length;
+  const mixedCount = group.records.length - singleCount;
+  const pairText = group.pairSummary.slice(0,3).map(([name,count])=>`${name} (${count})`).join(' • ');
+  const filter = currentChemicalWellFilter.trim().toLowerCase();
+  const filteredRecords = filter
+    ? group.records.filter(rec => {
+        const wellName = String(rec.well['Well']||'').toLowerCase();
+        const battery = String(getBatteryValue(rec.well)||'').toLowerCase();
+        const manifold = String(getManifoldValue(rec.well)||'').toLowerCase();
+        const substation = String(getSubstationValue(rec.well)||'').toLowerCase();
+        return wellName.includes(filter) || battery.includes(filter) || manifold.includes(filter) || substation.includes(filter);
+      })
+    : group.records;
+  resultEl.innerHTML = `
+    <div class="substation-summary">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+        <div>
+          <div class="substation-name">${group.name}</div>
+          <div class="substation-note" style="margin-top:4px;">Open wells below to review which ones are injected with only this chemical and which ones are injected with multiple chemicals.</div>
+        </div>
+        <button class="nav-back-btn" onclick="backToChemicalLanding()">← Back</button>
+      </div>
+      <div class="substation-meta">
+        <div class="badge live">${group.records.length} Wells</div>
+        <div class="badge producer">${singleCount} Single Chemical</div>
+        <div class="badge waiting">${mixedCount} Mixed Chemical</div>
+        <div class="badge tb">${group.batteryCount} TK Batteries</div>
+        ${filter ? `<div class="badge other">Filtered: ${filteredRecords.length}</div>` : ``}
+      </div>
+      ${pairText ? `<div class="substation-note" style="margin-top:8px;">Common pairings with <strong style="color:var(--text)">${group.name}</strong>: ${pairText}</div>` : `<div class="substation-note" style="margin-top:8px;">All listed wells currently show this chemical as the only active injected type.</div>`}
+    </div>
+
+    <div class="section">
+      <div class="sec-title">${group.name} — Injected Wells</div>
+      <div style="padding:12px 14px;">
+        <div class="chem-search-row">
+          <div class="chem-search-wrap">
+            <span class="s-icon">🔎</span>
+            <input class="chem-search-input" id="chemicalWellSearchInput" type="text" placeholder="Search well inside ${group.name}..." value="${String(currentChemicalWellFilter||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}" autocomplete="off" spellcheck="false">
+            <button class="chem-search-clear" id="chemicalWellSearchClear" onclick="clearChemicalWellSearch()">✕</button>
+          </div>
+          <button class="go-btn" style="height:auto;padding:0 16px;" onclick="goChemicalWellSearch()">GO ▶</button>
+        </div>
+        ${filteredRecords.length ? filteredRecords.map(rec=>{
+          const w = rec.well;
+          const statusClass = sc(w['Status']);
+          const isMixed = rec.chemicals.length > 1;
+          const pills = rec.chemicals.map(token=>{
+            const active = normalizeChemicalName(token)===key ? 'active' : '';
+            return `<span class="chem-pill ${active}">${token}</span>`;
+          }).join('');
+          return `<div class="chem-well">
+            <div class="chem-well-top">
+              <div>
+                <div class="chem-well-name">${w['Well']||'—'}</div>
+                <div class="chem-well-meta">TK ${getBatteryValue(w)||'—'} • Manifold ${getManifoldValue(w)||'—'} • <span style="color:${DOT[statusClass]}">${w['Status']||'—'}</span></div>
+              </div>
+              <div class="badges" style="margin-top:0;">
+                <div class="badge ${isMixed ? 'waiting' : 'producer'}">${isMixed ? rec.chemicals.length + ' Chemicals' : 'Single Chemical'}</div>
+                <div class="badge other">${getSubstationValue(w)||'No Substation'}</div>
+              </div>
+            </div>
+            <div class="chem-pill-row">${pills}</div>
+          </div>`;
+        }).join('') : `<div class="chem-search-empty">No wells matched this search inside ${group.name}.</div>`}
+      </div>
+    </div>
+  `;
+  const input = document.getElementById('chemicalWellSearchInput');
+  const clearBtn = document.getElementById('chemicalWellSearchClear');
+  if(clearBtn) clearBtn.style.display = currentChemicalWellFilter ? 'block' : 'none';
+  if(input){
+    input.addEventListener('input', ()=>{
+      currentChemicalWellFilter = input.value;
+      if(clearBtn) clearBtn.style.display = input.value.trim() ? 'block' : 'none';
+    });
+    input.addEventListener('keydown', e=>{
+      if(e.key==='Enter'||e.keyCode===13){ goChemicalWellSearch(); input.blur(); }
+      if(e.key==='Escape'){ clearChemicalWellSearch(); input.blur(); }
+    });
+  }
+}
+function selectChemical(key){
+  const group = getChemicalByKey(key);
+  currentChemicalFocusedWell = '';
+  chemicalInput.value = group ? group.name : '';
+  document.getElementById('chemicalClearBtn').style.display = chemicalInput.value ? 'block' : 'none';
+  chemicalSuggEl.classList.remove('show');
+  currentChemicalWellFilter = '';
+  renderChemicalResult(key);
+}
+function goChemicalSearch(){
+  const q = chemicalInput.value.trim();
+  if(!q){ refreshChemicalView(); return; }
+  const exactWell = getChemicalRecordByWell(q);
+  if(exactWell){ selectChemicalWell(exactWell.well['Well']); return; }
+  const matches = getChemicalWellMatches(q);
+  if(matches.length===1){ selectChemicalWell(matches[0].well['Well']); return; }
+  if(matches.length>1){ renderChemicalSuggestions(matches,q); return; }
+  renderChemicalSuggestions([], q);
+}
+function goChemicalWellSearch(){
+  if(!currentChemicalName) return;
+  const input = document.getElementById('chemicalWellSearchInput');
+  currentChemicalWellFilter = input ? input.value.trim() : currentChemicalWellFilter.trim();
+  renderChemicalResult(currentChemicalName);
+}
+function clearChemicalWellSearch(){
+  currentChemicalWellFilter = '';
+  if(currentChemicalName) renderChemicalResult(currentChemicalName);
+}
+
+function selectChemicalWell(name){
+  const rec = getChemicalRecordByWell(name);
+  chemicalInput.value = rec ? (rec.well['Well']||name) : name;
+  document.getElementById('chemicalClearBtn').style.display = chemicalInput.value ? 'block' : 'none';
+  chemicalSuggEl.classList.remove('show');
+  renderChemicalWellFocus(name);
+}
+function openWellFromChemical(name){
+  const well = WELLS.find(x=>String(x['Well']||'').toLowerCase()===String(name||'').toLowerCase());
+  if(!well) return;
+  currentChemicalFocusedWell = name;
+  showPage('lookup');
+  selectWell(well['Well'], 'chemical');
+}
+
+function clearChemicalSearch(){
+  currentChemicalName = '';
+  currentChemicalWellFilter = '';
+  currentChemicalFocusedWell = '';
+  chemicalInput.value = '';
+  document.getElementById('chemicalClearBtn').style.display = 'none';
+  chemicalSuggEl.classList.remove('show');
+  renderChemicalLanding();
+}
+function backToChemicalLanding(){
+  currentChemicalName = '';
+  currentChemicalWellFilter = '';
+  currentChemicalFocusedWell = '';
+  renderChemicalLanding();
+}
+function refreshChemicalView(){
+  if(currentChemicalFocusedWell && getChemicalRecordByWell(currentChemicalFocusedWell)){
+    renderChemicalWellFocus(currentChemicalFocusedWell);
+  } else if(currentChemicalName && getChemicalByKey(currentChemicalName)){
+    renderChemicalResult(currentChemicalName);
+  } else {
+    renderChemicalLanding();
+  }
+}
+
+chemicalInput.addEventListener('input',()=>{
+  const q = chemicalInput.value.trim();
+  document.getElementById('chemicalClearBtn').style.display = q ? 'block' : 'none';
+  if(!q){ chemicalSuggEl.classList.remove('show'); renderChemicalLanding(); return; }
+  const exactWell = getChemicalRecordByWell(q);
+  if(exactWell){ renderChemicalWellFocus(exactWell.well['Well']); chemicalSuggEl.classList.remove('show'); return; }
+  renderChemicalSuggestions(getChemicalWellMatches(q), q);
+});
+chemicalInput.addEventListener('keydown',e=>{
+  if(e.key==='Enter'||e.keyCode===13){ goChemicalSearch(); chemicalInput.blur(); }
+  if(e.key==='Escape'){ chemicalSuggEl.classList.remove('show'); chemicalInput.blur(); }
+});
+document.addEventListener('click',e=>{
+  if(!e.target.closest('#page-chemical .search-section')) chemicalSuggEl.classList.remove('show');
+});
+
 
 // ══════════════════════════════════════════
 //  TEST DATA — MANUAL
