@@ -1,10 +1,7 @@
 {
-  "id": "com.sherif.wells.app.v6",
-  "name": "Sherif Land Wells",
+  "name": "Wells Data",
   "short_name": "Wells",
-  "description": "Well Data Lookup System",
   "start_url": "./index.html",
-  "scope": "./",
   "display": "standalone",
   "background_color": "#0a0e14",
   "theme_color": "#00d4ff",
@@ -12,8 +9,7 @@
     {
       "src": "icon.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     }
   ]
 }
