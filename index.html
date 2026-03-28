@@ -378,6 +378,29 @@ body{
 }
 .nav-back-btn:active{opacity:.75;}
 
+
+.manifold-icon{
+  width:22px;height:22px;object-fit:contain;display:block;filter:brightness(1.08);
+}
+.manifold-icon.lg{
+  width:42px;height:42px;
+}
+.manifold-icon.hero{
+  width:72px;height:72px;opacity:.88;
+}
+.manifold-icon-wrap{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:50px;height:50px;border-radius:14px;
+  background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.18);
+  box-shadow:0 0 18px rgba(0,212,255,.08);
+}
+50%{transform:translateY(-4px) scale(1.03);}
+}
+.page-hdr.has-icon{
+  display:flex;align-items:center;gap:12px;
+}
+.page-hdr.has-icon .hdr-copy{min-width:0;}
+
 /* TOAST */
 .toast{
   position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
@@ -430,6 +453,21 @@ pre{
 <nav class="nav" id="mainNav">
   <button class="nav-btn active" onclick="showPage('lookup')" id="nav-lookup"><span class="icon">🔍</span>Lookup</button>
   <button class="nav-btn" onclick="showPage('substation')" id="nav-substation"><span class="icon">⚡</span>Substation</button>
+  <button class="nav-btn" onclick="showPage('manifold')" id="nav-manifold"><span class="icon"><svg viewBox="0 0 120 120" class="manifold-svg" aria-hidden="true">
+  <path class="rig-stroke" d="M60 10 L74 100 H46 Z"/>
+  <path class="rig-stroke" d="M60 10 L46 100"/>
+  <path class="rig-stroke" d="M60 10 L74 100"/>
+  <path class="rig-stroke" d="M49 86 L71 86 M51 72 L69 72 M53 58 L67 58 M55 44 L65 44 M57 30 L63 30"/>
+  <path class="rig-stroke" d="M50 86 L70 72 M70 86 L50 72 M52 58 L68 44 M68 58 L52 44 M55 30 L65 18 M65 30 L55 18"/>
+  <rect class="rig-fill" x="54" y="6" width="12" height="6" rx="1.5"/>
+  <path class="rig-stroke" d="M28 102 H92"/>
+  <path class="rig-stroke" d="M42 102 L35 112 H85 L78 102"/>
+  <path class="rig-stroke" d="M26 108 H94"/>
+  <circle class="rig-fill" cx="86" cy="88" r="4"/>
+  <path class="rig-stroke" d="M82 88 H96"/>
+  <path class="rig-stroke" d="M86 88 V102"/>
+  <path class="rig-stroke" d="M44 92 H76"/>
+</svg></span>Manifold</button>
   <button class="nav-btn" onclick="showPage('data')" id="nav-data"><span class="icon">🗄️</span>Update Data</button>
 </nav>
 
@@ -538,6 +576,65 @@ pre{
     <div class="empty-state">
       <div class="big">⚡</div>
       <p>Type or pick a substation to see all connected wells</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ PAGE 1C: MANIFOLD ══════════════ -->
+<div class="page" id="page-manifold">
+  <div class="page-hdr has-icon">
+    <div class="manifold-icon-wrap"><svg viewBox="0 0 120 120" class="manifold-svg" aria-hidden="true">
+  <path class="rig-stroke" d="M60 10 L74 100 H46 Z"/>
+  <path class="rig-stroke" d="M60 10 L46 100"/>
+  <path class="rig-stroke" d="M60 10 L74 100"/>
+  <path class="rig-stroke" d="M49 86 L71 86 M51 72 L69 72 M53 58 L67 58 M55 44 L65 44 M57 30 L63 30"/>
+  <path class="rig-stroke" d="M50 86 L70 72 M70 86 L50 72 M52 58 L68 44 M68 58 L52 44 M55 30 L65 18 M65 30 L55 18"/>
+  <rect class="rig-fill" x="54" y="6" width="12" height="6" rx="1.5"/>
+  <path class="rig-stroke" d="M28 102 H92"/>
+  <path class="rig-stroke" d="M42 102 L35 112 H85 L78 102"/>
+  <path class="rig-stroke" d="M26 108 H94"/>
+  <circle class="rig-fill" cx="86" cy="88" r="4"/>
+  <path class="rig-stroke" d="M82 88 H96"/>
+  <path class="rig-stroke" d="M86 88 V102"/>
+  <path class="rig-stroke" d="M44 92 H76"/>
+</svg></div>
+    <div class="hdr-copy">
+      <h2>Manifold Lookup</h2>
+      <p>Pick a TK Battery first, then open any manifold inside it</p>
+    </div>
+  </div>
+
+  <div class="search-section">
+    <div class="search-row">
+      <div class="search-input-wrap">
+        <span class="s-icon">🧭</span>
+        <input class="search-input" id="manifoldInput" type="text"
+          placeholder="TK Battery..." autocomplete="off" spellcheck="false"
+          autocorrect="off" autocapitalize="none" inputmode="text">
+        <button class="s-clear" id="manifoldClearBtn" onclick="clearManifoldSearch()">✕</button>
+      </div>
+    </div>
+    <div class="suggestions" id="manifoldSuggestions"></div>
+  </div>
+
+  <div class="well-card-area" id="manifoldResult">
+    <div class="empty-state">
+      <div class="big"><svg viewBox="0 0 120 120" class="manifold-svg" aria-hidden="true">
+  <path class="rig-stroke" d="M60 10 L74 100 H46 Z"/>
+  <path class="rig-stroke" d="M60 10 L46 100"/>
+  <path class="rig-stroke" d="M60 10 L74 100"/>
+  <path class="rig-stroke" d="M49 86 L71 86 M51 72 L69 72 M53 58 L67 58 M55 44 L65 44 M57 30 L63 30"/>
+  <path class="rig-stroke" d="M50 86 L70 72 M70 86 L50 72 M52 58 L68 44 M68 58 L52 44 M55 30 L65 18 M65 30 L55 18"/>
+  <rect class="rig-fill" x="54" y="6" width="12" height="6" rx="1.5"/>
+  <path class="rig-stroke" d="M28 102 H92"/>
+  <path class="rig-stroke" d="M42 102 L35 112 H85 L78 102"/>
+  <path class="rig-stroke" d="M26 108 H94"/>
+  <circle class="rig-fill" cx="86" cy="88" r="4"/>
+  <path class="rig-stroke" d="M82 88 H96"/>
+  <path class="rig-stroke" d="M86 88 V102"/>
+  <path class="rig-stroke" d="M44 92 H76"/>
+</svg></div>
+      <p>Type or pick a TK Battery to open its manifolds</p>
     </div>
   </div>
 </div>
@@ -950,6 +1047,7 @@ function showPage(page) {
   document.getElementById('page-'+page).classList.add('active');
   document.getElementById('nav-'+page).classList.add('active');
   if(page==='substation') refreshSubstationView();
+  if(page==='manifold') refreshManifoldView();
   if(page==='test'){renderLog(); document.getElementById('t-date').value=today();}
   if(page==='wc') renderWcUpdated();
   if(page==='data') updateDBStats();
@@ -1030,7 +1128,7 @@ function selectWell(name, source='lookup'){
   searchInput.value=name;
   document.getElementById('clearBtn').style.display='block';
   suggEl.classList.remove('show');
-  currentWellBackTarget = source === 'substation' ? 'substation' : 'lookup';
+  currentWellBackTarget = source === 'substation' ? 'substation' : (source === 'manifold' ? 'manifold' : 'lookup');
   if(w) renderWell(w);
 }
 
@@ -1275,147 +1373,330 @@ document.addEventListener('click',e=>{
   if(!e.target.closest('#page-substation .search-section')) substationSuggEl.classList.remove('show');
 });
 
+
 // ══════════════════════════════════════════
-//  RENDER WELL CARD
+//  MANIFOLD SEARCH
 // ══════════════════════════════════════════
-function backFromWell(){
-  if(currentWellBackTarget === 'substation' && currentSubstationName && getWellsBySubstation(currentSubstationName).length){
-    showPage('substation');
-    renderSubstationResult(currentSubstationName);
+const manifoldInput = document.getElementById('manifoldInput');
+const manifoldSuggEl = document.getElementById('manifoldSuggestions');
+let currentManifoldKey = '';
+let currentManifoldBattery = '';
+
+function getManifoldValue(w){
+  return String(w['Loc. Manifold']||w['Loc. Manifold ']||'').replace(/\s+/g,' ').trim();
+}
+function getBatteryValue(w){
+  return String(w['TK Battery']||w['TK Battery ']||w['TK BATTERY']||'').replace(/\s+/g,' ').trim();
+}
+function normalizeManifoldKey(manifold, battery){
+  return `${String(manifold||'').replace(/\s+/g,' ').trim().toLowerCase()}||${String(battery||'').replace(/\s+/g,' ').trim().toLowerCase()}`;
+}
+function normalizeBatteryKey(battery){
+  return String(battery||'').replace(/\s+/g,' ').trim().toLowerCase();
+}
+function getManifoldLabel(group){
+  return group.battery ? `${group.manifold} • ${group.battery}` : group.manifold;
+}
+function getAllManifoldGroups(){
+  const seen = new Map();
+  WELLS.forEach(w=>{
+    const manifold = getManifoldValue(w);
+    const battery = getBatteryValue(w);
+    if(!manifold || !battery) return;
+    const key = normalizeManifoldKey(manifold, battery);
+    if(!seen.has(key)) seen.set(key, { key, manifold, battery });
+  });
+  return Array.from(seen.values()).sort((a,b)=>{
+    const left = `${a.battery} ${a.manifold}`.trim();
+    const right = `${b.battery} ${b.manifold}`.trim();
+    return left.localeCompare(right, undefined, {numeric:true, sensitivity:'base'});
+  });
+}
+function getAllBatteryGroups(){
+  const map = new Map();
+  WELLS.forEach(w=>{
+    const battery = getBatteryValue(w);
+    const manifold = getManifoldValue(w);
+    if(!battery) return;
+    const bKey = normalizeBatteryKey(battery);
+    if(!map.has(bKey)) map.set(bKey, { key:bKey, battery, manifolds:new Set(), wellCount:0 });
+    const group = map.get(bKey);
+    group.wellCount += 1;
+    if(manifold) group.manifolds.add(manifold);
+  });
+  return Array.from(map.values()).map(g=>({
+    key:g.key,
+    battery:g.battery,
+    wellCount:g.wellCount,
+    manifoldCount:g.manifolds.size
+  })).sort((a,b)=>a.battery.localeCompare(b.battery, undefined, {numeric:true, sensitivity:'base'}));
+}
+function getBatteryByKey(key){
+  return getAllBatteryGroups().find(g=>g.key===key) || null;
+}
+function getWellsByBatteryKey(key){
+  return WELLS.filter(w=>normalizeBatteryKey(getBatteryValue(w))===key)
+    .sort((a,b)=>String(a['Well']||'').localeCompare(String(b['Well']||''), undefined, {numeric:true, sensitivity:'base'}));
+}
+function getManifoldGroupsByBatteryKey(key){
+  return getAllManifoldGroups().filter(g=>normalizeBatteryKey(g.battery)===key);
+}
+function getWellsByManifoldKey(key){
+  return WELLS.filter(w=>normalizeManifoldKey(getManifoldValue(w), getBatteryValue(w))===key)
+    .sort((a,b)=>String(a['Well']||'').localeCompare(String(b['Well']||''), undefined, {numeric:true, sensitivity:'base'}));
+}
+function getBatteryMatches(q, limit=12){
+  if(!q) return [];
+  const lq = String(q).replace(/\s+/g,' ').trim().toLowerCase();
+  return getAllBatteryGroups().filter(group=> group.battery.toLowerCase().includes(lq)).slice(0,limit);
+}
+function renderManifoldSuggestions(matches,q){
+  if(!matches.length){
+    manifoldSuggEl.innerHTML=`<div class="sug-item"><span class="sug-name" style="color:var(--muted)">No TK Battery match for "${q}"</span></div>`;
+    manifoldSuggEl.classList.add('show');
     return;
   }
-  currentWellBackTarget = 'lookup';
-  clearSearch();
+  manifoldSuggEl.innerHTML = matches.map(group=>{
+    const safe = substationSafe(group.key);
+    return `<div class="sug-item" onclick="selectManifoldBattery('${safe}')">
+      <span class="sug-name">${group.battery}</span>
+      <span class="sug-info">${group.manifoldCount} manifolds • ${group.wellCount} wells</span>
+    </div>`;
+  }).join('');
+  manifoldSuggEl.classList.add('show');
 }
-function renderWell(w) {
-  const name=w['Well'], s=sc(w['Status']);
-  const tests=testLog.filter(t=>t.well===name).sort((a,b)=>b.ts-a.ts);
-  const lt=tests[0], wco=wcOverrides[name];
-  const actRate=lt?lt.rate:w['ACT , M3/D'];
-  const actWc=wco?wco.wc:(lt?lt.wc:w['ACT.W.C %']);
-  const hasLive=!!(lt||wco);
-
-  const liveBox=hasLive?`
-    <div class="live-box">
-      <div class="live-title">⚡ Live Updated Data</div>
-      <div class="live-grid">
-        <div class="live-metric">
-          <div class="lm-val">${actRate||'—'}</div>
-          <div class="lm-lbl">ACT M3/D</div>
-          <div class="lm-date">${lt?lt.date:''}</div>
+function renderManifoldLanding(){
+  currentManifoldKey = '';
+  currentManifoldBattery = '';
+  const batteries = getAllBatteryGroups();
+  const resultEl = document.getElementById('manifoldResult');
+  resultEl.innerHTML = `
+    <div class="substation-summary">
+      <div class="substation-name">${batteries.length}</div>
+      <div class="substation-note">TK Batteries available in the current database. Open one battery first, then choose any manifold inside it. This page updates automatically when you upload a new <strong style="color:var(--text)">LAND WELLS SITUATION</strong> Excel file from Update Data.</div>
+      <div class="substation-meta">
+        <div class="badge live">${WELLS.length} Wells</div>
+        <div class="badge other">Battery-first manifold view</div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="sec-title">All TK Batteries</div>
+      <div style="padding:12px 14px;">
+        <div class="substation-list-grid">
+          ${batteries.map(group=>{
+            const safe = substationSafe(group.key);
+            return `<div class="substation-chip" onclick="selectManifoldBattery('${safe}')">
+              <div class="substation-chip-name">${group.battery}</div>
+              <div class="substation-chip-count">${group.manifoldCount} manifolds • ${group.wellCount} wells</div>
+            </div>`;
+          }).join('')}
         </div>
-        <div class="live-metric">
-          <div class="lm-val" style="color:var(--yellow)">${actWc||'—'}%</div>
-          <div class="lm-lbl">W.C %</div>
-          <div class="lm-date">${wco?wco.date:''}</div>
-        </div>
-        <div class="live-metric">
-          <div class="lm-val" style="color:var(--muted);font-size:16px">${lt&&lt.t24?lt.t24:'—'}</div>
-          <div class="lm-lbl">24hr Test</div>
-        </div>
       </div>
-    </div>` : '';
-
-  const hist=tests.length?`
-    <div class="section">
-      <div class="sec-title">🔬 Test History</div>
-      <div>${tests.slice(0,5).map(t=>`
-        <div class="field">
-          <span class="f-label">${t.date}</span>
-          <span class="f-val">ACT:<b style="color:var(--green)">${t.rate}</b> · WC:<b style="color:var(--yellow)">${t.wc||'—'}%</b> · 24h:${t.t24||'—'}</span>
-        </div>`).join('')}
-      </div>
-    </div>`:'';
-
-  document.getElementById('wellResult').innerHTML=`
-    <div style="display:flex;justify-content:flex-end;margin-bottom:10px;">
-      <button class="nav-back-btn" onclick="backFromWell()">← Back</button>
-    </div>
-    <div class="well-hero ${s}">
-      <div class="well-big-name">${name}</div>
-      <div class="badges">
-        <span class="badge ${s}">${w['Status']||'Unknown'}</span>
-        <span class="badge tb">${w['Type']||'—'}</span>
-        ${w['Reporting Status']==='Reported'?'<span class="badge rep">Reported</span>':w['Reporting Status']?'<span class="badge notrep">Not Reported</span>':''}
-        ${(w['H2S WELL']||'').toUpperCase()==='YES'?'<span class="badge h2s">H2S</span>':''}
-        ${(w['Timer ']||'').toUpperCase()==='YES'?'<span class="badge tmr">Timer</span>':''}
-        ${hasLive?'<span class="badge live">Updated</span>':''}
-      </div>
-    </div>
-    ${liveBox}
-    <div class="section">
-      <div class="sec-title">📍 Location</div>
-      <div>
-        ${fld('Manifold',w['Loc. Manifold'],{hi:true})}
-        ${fld('TK Battery',w['TK Battery'])}
-        ${fld('Substation',w['SUBSTATION'])}
-        ${fld('Shut Down Reason',w['Shut Down Reason'])}
-      </div>
-    </div>
-    <div class="section">
-      <div class="sec-title">📊 Reported Production</div>
-      <div>
-        ${fld('Rate M3/D',fn(w['RATE , M3/D']),{hi:true})}
-        ${fld('W.C %',fn(w['W.C %']))}
-        ${fld('REP NET M3/D',fn(w['REP. NET']))}
-      </div>
-    </div>
-    <div class="section actual-section">
-      <div class="sec-title actual-title">📈 Actual Production</div>
-      <div>
-        ${fld('ACT Rate M3/D',fn(actRate),{lv:hasLive})}
-        ${fld('ACT W.C %',fn(actWc),{lv:!!wco})}
-        ${fld('ACT NET M3/D',fn(w['ACT NET']),{pos:true})}
-        ${fld('DIFF',fn(w['DIFF']))}
-      </div>
-    </div>
-    <div class="section">
-      <div class="sec-title">⚡ Pump & Electrical</div>
-      <div>
-        ${fld('DH Pump',w['DH Pump'],{hi:true})}
-        ${fld('Motor HP',fn(getMotorHp(w)))}
-        ${fld('Design AMP',fn(w['DESGIN AMP.']))}
-        ${fld('AMP',w['AMP'])}
-        ${fld('HZ',fn(getHz(w)))}
-        ${fld('Stages',w['STG'])}
-        ${fld('VSD',w['VSD'])}
-        ${fld('Panel Type',w['Panel Type'])}
-        ${fld('Running Hrs',w['RUNNING HRs'])}
-      </div>
-    </div>
-    <div class="section">
-      <div class="sec-title">🛢️ Well Head</div>
-      <div>
-        ${fld('WHP',w['WHP2'])}
-        ${fld('Pinching',w['Pinching Status'])}
-        ${fld('WHP Pinching',w['WHP PINCHING'])}
-        ${fld('W.C Analyser',w['W.C Anaylzer'])}
-      </div>
-    </div>
-    <div class="section">
-      <div class="sec-title">💉 Chemical & H2S</div>
-      <div>
-        ${fld('Chemical',w['CHEMICAL '])}
-        ${fld('H2S Well',w['H2S WELL'])}
-        ${fld('H2S PPM',fn(w['H2S (PPM)']))}
-        ${fld('H2S Dose L/D',fn(w['H2S Dose (L/D)']))}
-        ${fld('Demulsifer L/D',fn(w['Demulsifer Dose (L/D)']))}
-        ${fld('DH Control Line',w['DH Control Line'])}
-        ${fld('Injection Spot',w['Injection Spot'])}
-        ${fld('Distance MT',w['Distance from Manifold (MT)'])}
-      </div>
-    </div>
-    <div class="section">
-      <div class="sec-title">📋 Other</div>
-      <div>
-        ${fld('Last W.O',w['LAST W.O'])}
-        ${fld('Running Days', calcRunningDays(w['LAST W.O']) !== null ? calcRunningDays(w['LAST W.O']) + ' days' : null, {hi:true})}
-        ${fld('Timer',w['Timer '])}
-        ${fld('Well No.',w['No.'])}
-      </div>
-    </div>
-    ${hist}`;
+    </div>`;
 }
+function renderBatteryManifoldResult(batteryKey){
+  const battery = getBatteryByKey(batteryKey);
+  const wells = getWellsByBatteryKey(batteryKey);
+  const manifolds = getManifoldGroupsByBatteryKey(batteryKey);
+  const resultEl = document.getElementById('manifoldResult');
+  if(!battery || !wells.length){
+    resultEl.innerHTML = `<div class="empty-state"><div class="big">🧭</div><p>No wells found for this TK Battery</p></div>`;
+    return;
+  }
+  currentManifoldBattery = batteryKey;
+  currentManifoldKey = '';
+  const producerCount = wells.filter(w => sc(w['Status']) === 'producer').length;
+  const waitingCount = wells.filter(w => sc(w['Status']) === 'waiting').length;
+  const rigCount = wells.filter(w => sc(w['Status']) === 'rig').length;
+  resultEl.innerHTML = `
+    <div class="substation-summary">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+        <div>
+          <div class="substation-name">${battery.battery}</div>
+          <div class="substation-note" style="margin-top:4px;">Choose a manifold below to see all connected wells for this TK Battery.</div>
+        </div>
+        <button class="nav-back-btn" onclick="backToBatteryLanding()">← Back</button>
+      </div>
+      <div class="substation-meta">
+        <div class="badge tb">${battery.manifoldCount} Manifolds</div>
+        <div class="badge live">${battery.wellCount} Wells</div>
+        <div class="badge producer">${producerCount} Producer</div>
+        <div class="badge waiting">${waitingCount} Waiting Work Over</div>
+        <div class="badge rig">${rigCount} Rig On</div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="sec-title">Manifolds in ${battery.battery}</div>
+      <div style="padding:12px 14px;">
+        <div class="substation-list-grid">
+          ${manifolds.map(group=>{
+            const safe = substationSafe(group.key);
+            return `<div class="substation-chip" onclick="selectManifold('${safe}')">
+              <div class="substation-chip-name">${group.manifold}</div>
+              <div class="substation-chip-count">${getWellsByManifoldKey(group.key).length} wells</div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+    </div>`;
+}
+function renderManifoldResult(key){
+  const wells = getWellsByManifoldKey(key);
+  const resultEl = document.getElementById('manifoldResult');
+  if(!wells.length){
+    resultEl.innerHTML = `<div class="empty-state"><div class="big" style="display:flex;justify-content:center;align-items:center;width:84px;height:84px;margin:0 auto 10px;"><svg viewBox="0 0 120 120" class="manifold-svg" aria-hidden="true">
+  <path class="rig-stroke" d="M60 10 L74 100 H46 Z"/>
+  <path class="rig-stroke" d="M60 10 L46 100"/>
+  <path class="rig-stroke" d="M60 10 L74 100"/>
+  <path class="rig-stroke" d="M49 86 L71 86 M51 72 L69 72 M53 58 L67 58 M55 44 L65 44 M57 30 L63 30"/>
+  <path class="rig-stroke" d="M50 86 L70 72 M70 86 L50 72 M52 58 L68 44 M68 58 L52 44 M55 30 L65 18 M65 30 L55 18"/>
+  <rect class="rig-fill" x="54" y="6" width="12" height="6" rx="1.5"/>
+  <path class="rig-stroke" d="M28 102 H92"/>
+  <path class="rig-stroke" d="M42 102 L35 112 H85 L78 102"/>
+  <path class="rig-stroke" d="M26 108 H94"/>
+  <circle class="rig-fill" cx="86" cy="88" r="4"/>
+  <path class="rig-stroke" d="M82 88 H96"/>
+  <path class="rig-stroke" d="M86 88 V102"/>
+  <path class="rig-stroke" d="M44 92 H76"/>
+</svg></div><p>No wells found for this manifold group</p></div>`;
+    return;
+  }
+  currentManifoldKey = key;
+  const group = getAllManifoldGroups().find(g=>g.key===key) || { manifold: getManifoldValue(wells[0]), battery: getBatteryValue(wells[0]) };
+  currentManifoldBattery = normalizeBatteryKey(group.battery);
+  const actRateTotal = sumNumeric(wells, ['ACT , M3/D', 'ACT, M3/D', 'ACT M3/D']);
+  const actNetTotal = sumNumeric(wells, ['ACT NET', 'ACT NET ', 'ACT. NET', 'ACT NET M3/D']);
+  const actNetBblPerDay = actNetTotal * 6.28981;
+  const producerCount = wells.filter(w => sc(w['Status']) === 'producer').length;
+  const waitingCount = wells.filter(w => sc(w['Status']) === 'waiting').length;
+  const rigCount = wells.filter(w => sc(w['Status']) === 'rig').length;
+  resultEl.innerHTML = `
+    <div class="substation-summary">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+        <div>
+          <div class="substation-name">${group.manifold}</div>
+          <div class="substation-note" style="margin-top:4px;">TK Battery: <strong style="color:var(--text)">${group.battery || '—'}</strong></div>
+        </div>
+        <button class="nav-back-btn" onclick="backToBatteryList()">← Back</button>
+      </div>
+      <div class="substation-meta">
+        <div class="badge live">${wells.length} Wells</div>
+        <div class="badge tb">${group.battery || 'No TK'}</div>
+        <div class="badge producer">${producerCount} Producer</div>
+        <div class="badge waiting">${waitingCount} Waiting Work Over</div>
+        <div class="badge rig">${rigCount} Rig On</div>
+        <div class="badge tb">ACT ${fn(actRateTotal) || '0'} M3/D</div>
+        <div class="badge rep">NET ${fn(actNetTotal) || '0'} M3/D • ${fn(actNetBblPerDay) || '0'} BBL/D</div>
+      </div>
+      <div class="substation-note">Compact table showing well name first, then substation, status, ACT rate, W.C and ACT NET. Use <strong style="color:var(--text)">Open</strong> to jump to the full well card.</div>
+    </div>
+
+    <div class="substation-table-wrap">
+      <table class="substation-table">
+        <thead>
+          <tr>
+            <th>WELL</th>
+            <th>SUBSTATION</th>
+            <th>STATUS</th>
+            <th>ACT M3/D</th>
+            <th>W.C %</th>
+            <th>ACT NET</th>
+            <th>OPEN</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${wells.map(w=>{
+            const safeWell = substationSafe(w['Well']||'');
+            const wc = currentWcForWell(w);
+            const statusClass = sc(w['Status']);
+            const substation = getSubstationValue(w);
+            const actRate = getWellValue(w, ['ACT , M3/D', 'ACT, M3/D', 'ACT M3/D']);
+            const actNet = getWellValue(w, ['ACT NET', 'ACT NET ', 'ACT. NET', 'ACT NET M3/D']);
+            return `<tr>
+              <td class="well-link">${w['Well']||'—'}</td>
+              <td>${substation||'—'}</td>
+              <td class="status-cell" style="color:${DOT[statusClass]}">${w['Status']||'—'}</td>
+              <td>${fn(actRate)||'—'}</td>
+              <td>${fn(wc)||'—'}</td>
+              <td>${roundToNearestWholeDisplay(actNet)||'—'}</td>
+              <td><button class="substation-mini-btn" onclick="openWellFromManifold('${safeWell}')">Open</button></td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+function selectManifoldBattery(key){
+  const battery = getBatteryByKey(key);
+  manifoldInput.value = battery ? battery.battery : '';
+  document.getElementById('manifoldClearBtn').style.display = 'block';
+  manifoldSuggEl.classList.remove('show');
+  renderBatteryManifoldResult(key);
+}
+function selectManifold(key){
+  manifoldSuggEl.classList.remove('show');
+  renderManifoldResult(key);
+}
+function goManifoldSearch(){
+  const q = manifoldInput.value.trim();
+  if(!q){ refreshManifoldView(); return; }
+  const exact = getAllBatteryGroups().find(group => group.battery.toLowerCase()===q.toLowerCase());
+  if(exact){ selectManifoldBattery(exact.key); return; }
+  const matches = getBatteryMatches(q);
+  if(matches.length===1){ selectManifoldBattery(matches[0].key); return; }
+  if(matches.length>1){ renderManifoldSuggestions(matches,q); return; }
+  renderManifoldSuggestions([], q);
+}
+function clearManifoldSearch(){
+  currentManifoldKey = '';
+  currentManifoldBattery = '';
+  manifoldInput.value = '';
+  document.getElementById('manifoldClearBtn').style.display = 'none';
+  manifoldSuggEl.classList.remove('show');
+  renderManifoldLanding();
+}
+function backToBatteryLanding(){
+  currentManifoldKey = '';
+  currentManifoldBattery = '';
+  renderManifoldLanding();
+}
+function backToBatteryList(){
+  if(currentManifoldBattery){
+    renderBatteryManifoldResult(currentManifoldBattery);
+  } else {
+    renderManifoldLanding();
+  }
+}
+function openWellFromManifold(name){
+  showPage('lookup');
+  selectWell(name, 'manifold');
+}
+function refreshManifoldView(){
+  if(currentManifoldKey && getWellsByManifoldKey(currentManifoldKey).length){
+    renderManifoldResult(currentManifoldKey);
+  } else if(currentManifoldBattery && getWellsByBatteryKey(currentManifoldBattery).length){
+    renderBatteryManifoldResult(currentManifoldBattery);
+  } else {
+    renderManifoldLanding();
+  }
+}
+
+manifoldInput.addEventListener('input',()=>{
+  const q = manifoldInput.value.trim();
+  document.getElementById('manifoldClearBtn').style.display = q ? 'block' : 'none';
+  if(!q){ manifoldSuggEl.classList.remove('show'); renderManifoldLanding(); return; }
+  const exact = getAllBatteryGroups().find(group => group.battery.toLowerCase()===q.toLowerCase());
+  if(exact){ renderBatteryManifoldResult(exact.key); manifoldSuggEl.classList.remove('show'); return; }
+  renderManifoldSuggestions(getBatteryMatches(q), q);
+});
+manifoldInput.addEventListener('keydown',e=>{
+  if(e.key==='Enter'||e.keyCode===13){ goManifoldSearch(); manifoldInput.blur(); }
+  if(e.key==='Escape'){ manifoldSuggEl.classList.remove('show'); manifoldInput.blur(); }
+});
+document.addEventListener('click',e=>{
+  if(!e.target.closest('#page-manifold .search-section')) manifoldSuggEl.classList.remove('show');
+});
 
 // ══════════════════════════════════════════
 //  TEST DATA — MANUAL
@@ -1776,6 +2057,8 @@ document.addEventListener('click',e=>{
 // ══════════════════════════════════════════
 updateCounters();
 updateDBStats();
+renderSubstationLanding();
+renderManifoldLanding();
 document.getElementById('t-date').value=today();
   // This makes the loading screen fade away
 window.addEventListener('load', function() {
