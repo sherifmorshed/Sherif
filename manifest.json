@@ -1,8 +1,8 @@
 {
-  "id": "com.sherif.wells.app.v4",
+  "id": "com.sherif.wells.app.v6",
   "name": "Sherif Land Wells",
-  "short_name": "Sherif Wells",
-  "description": "Professional tool for well data lookup and land coordinates.",
+  "short_name": "Wells",
+  "description": "Well Data Lookup System",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
