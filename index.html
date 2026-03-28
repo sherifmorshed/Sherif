@@ -430,8 +430,6 @@ pre{
 <nav class="nav" id="mainNav">
   <button class="nav-btn active" onclick="showPage('lookup')" id="nav-lookup"><span class="icon">🔍</span>Lookup</button>
   <button class="nav-btn" onclick="showPage('substation')" id="nav-substation"><span class="icon">⚡</span>Substation</button>
-  <button class="nav-btn" onclick="showPage('test')" id="nav-test"><span class="icon">📋</span>Test Data</button>
-  <button class="nav-btn" onclick="showPage('wc')" id="nav-wc"><span class="icon">💧</span>W.C Update</button>
   <button class="nav-btn" onclick="showPage('data')" id="nav-data"><span class="icon">🗄️</span>Update Data</button>
 </nav>
 
@@ -442,8 +440,6 @@ pre{
     <div class="sub">PERTOBEL — WELL DATA LOOKUP SYSTEM</div>
     <div class="header-stats">
       <div class="stat-pill"><span id="total-count">439</span> Wells</div>
-      <div class="stat-pill"><span id="today-tests">0</span> Tests Today</div>
-      <div class="stat-pill"><span id="wc-updates">0</span> W.C Updated</div>
     </div>
   </div>
 
@@ -876,8 +872,8 @@ function showToast(msg, err=false) {
 }
 function updateCounters() {
   const t=today();
-  document.getElementById('today-tests').textContent=testLog.filter(x=>x.date===t).length;
-  document.getElementById('wc-updates').textContent=Object.keys(wcOverrides).length;
+  const todayTestsEl = document.getElementById('today-tests'); if (todayTestsEl) todayTestsEl.textContent=testLog.filter(x=>x.date===t).length;
+  const wcUpdatesEl = document.getElementById('wc-updates'); if (wcUpdatesEl) wcUpdatesEl.textContent=Object.keys(wcOverrides).length;
 }
 
 function normalizeHeaderName(name){
