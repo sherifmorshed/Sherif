@@ -1157,6 +1157,8 @@ function renderSubstationResult(name){
   const actRateTotal = sumNumeric(wells, ['ACT , M3/D', 'ACT, M3/D', 'ACT M3/D']);
   const actNetTotal = sumNumeric(wells, ['ACT NET', 'ACT NET ', 'ACT. NET', 'ACT NET M3/D']);
   const actNetBblPerDay = actNetTotal * 6.28981;
+  const actNetPerHour = actNetTotal / 24;
+  const actNetBblPerHour = actNetBblPerDay / 24;
   const producerCount = wells.filter(w => sc(w['Status']) === 'producer').length;
   const waitingCount = wells.filter(w => sc(w['Status']) === 'waiting').length;
   const rigCount = wells.filter(w => sc(w['Status']) === 'rig').length;
@@ -1173,8 +1175,9 @@ function renderSubstationResult(name){
         <div class="badge rig">${rigCount} Rig On</div>
         <div class="badge tb">ACT ${fn(actRateTotal) || '0'} M3/D</div>
         <div class="badge rep">NET ${fn(actNetTotal) || '0'} M3/D • ${fn(actNetBblPerDay) || '0'} BBL/D</div>
+        <div class="badge h2s">NET/HR ${fn(actNetPerHour) || '0'} M3/H • ${fn(actNetBblPerHour) || '0'} BBL/H</div>
       </div>
-      <div class="substation-note">Compact table showing well name first, then TK Battery, ACT rate, W.C and ACT NET. NET is also shown above in both <strong style="color:var(--text)">M3/D</strong> and <strong style="color:var(--text)">BBL/D</strong>. Use <strong style="color:var(--text)">Open</strong> to jump to the full well card.</div>
+      <div class="substation-note">Compact table showing well name first, then TK Battery, ACT rate, W.C and ACT NET. NET is also shown above in <strong style="color:var(--text)">M3/D</strong>, <strong style="color:var(--text)">BBL/D</strong>, and hourly values in <strong style="color:var(--text)">M3/H</strong> and <strong style="color:var(--text)">BBL/H</strong>. Use <strong style="color:var(--text)">Open</strong> to jump to the full well card.</div>
     </div>
 
     <div class="substation-table-wrap">
@@ -1231,10 +1234,11 @@ function goSubstationSearch(){
   renderSubstationResult(q);
 }
 function clearSubstationSearch(){
+  currentSubstationName = '';
   substationInput.value = '';
   document.getElementById('substationClearBtn').style.display = 'none';
   substationSuggEl.classList.remove('show');
-  refreshSubstationView();
+  renderSubstationLanding();
 }
 function backToSubstationList(){
   currentSubstationName = '';
