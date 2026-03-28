@@ -527,7 +527,6 @@ pre{
           autocorrect="off" autocapitalize="none" inputmode="text">
         <button class="s-clear" id="substationClearBtn" onclick="clearSubstationSearch()">✕</button>
       </div>
-      <button class="go-btn" onclick="goSubstationSearch()">GO ▶</button>
     </div>
     <div class="suggestions" id="substationSuggestions"></div>
   </div>
@@ -1152,6 +1151,7 @@ function renderSubstationResult(name){
   currentSubstationName = name;
   const actRateTotal = sumNumeric(wells, ['ACT , M3/D', 'ACT, M3/D', 'ACT M3/D']);
   const actNetTotal = sumNumeric(wells, ['ACT NET', 'ACT NET ', 'ACT. NET', 'ACT NET M3/D']);
+  const actNetBblPerDay = actNetTotal * 6.28981;
   const producerCount = wells.filter(w => sc(w['Status']) === 'producer').length;
   const waitingCount = wells.filter(w => sc(w['Status']) === 'waiting').length;
   const rigCount = wells.filter(w => sc(w['Status']) === 'rig').length;
@@ -1159,7 +1159,6 @@ function renderSubstationResult(name){
     <div class="substation-summary">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
         <div class="substation-name">${name}</div>
-        <button class="btn-secondary" style="width:auto;margin-top:0;padding:9px 14px;font-size:13px;" onclick="backToSubstationList()">← Back</button>
       </div>
       <div class="substation-meta">
         <div class="badge live">${wells.length} Wells</div>
@@ -1167,9 +1166,9 @@ function renderSubstationResult(name){
         <div class="badge waiting">${waitingCount} Waiting Work Over</div>
         <div class="badge rig">${rigCount} Rig On</div>
         <div class="badge tb">ACT ${fn(actRateTotal) || '0'} M3/D</div>
-        <div class="badge rep">NET ${roundToNearestFiveDisplay(actNetTotal) || '0'}</div>
+        <div class="badge rep">NET ${fn(actNetTotal) || '0'} M3/D • ${fn(actNetBblPerDay) || '0'} BBL/D</div>
       </div>
-      <div class="substation-note">Compact table showing well name first, then TK Battery, ACT rate, W.C and ACT NET rounded to nearest 5. Use <strong style="color:var(--text)">Open</strong> to jump to the full well card.</div>
+      <div class="substation-note">Compact table showing well name first, then TK Battery, ACT rate, W.C and ACT NET. NET is also shown above in both <strong style="color:var(--text)">M3/D</strong> and <strong style="color:var(--text)">BBL/D</strong>. Use <strong style="color:var(--text)">Open</strong> to jump to the full well card.</div>
     </div>
 
     <div class="substation-table-wrap">
