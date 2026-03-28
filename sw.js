@@ -1,4 +1,4 @@
-const CACHE_NAME = 'well-lookup-cache-v13';
+const CACHE_NAME = 'well-lookup-cache-v24';
 
 const urlsToCache = [
   './',
@@ -7,19 +7,18 @@ const urlsToCache = [
   './icon.png'
 ];
 
-// Install Service Worker
+// INSTALL
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('[SW] Opened cache');
-        return cache.addAll(urlsToCache);
-      })
+    caches.open(CACHE_NAME).then(cache => {
+      console.log('[SW] Cache opened');
+      return cache.addAll(urlsToCache);
+    })
   );
   self.skipWaiting();
 });
 
-// Activate Service Worker
+// ACTIVATE
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(cacheNames => {
@@ -31,34 +30,39 @@ self.addEventListener('activate', event => {
           }
         })
       );
-    })
+    }).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
-// Fetch Event (Cache First Strategy)
+// FETCH (Cache First + Dynamic Cache)
 self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        if (response) {
-          return response;
-        }
+  if (event.request.method !== 'GET') return;
 
-        return fetch(event.request)
-          .then(networkResponse => {
-            // Optional: cache new requests dynamically
-            return caches.open(CACHE_NAME).then(cache => {
-              cache.put(event.request, networkResponse.clone());
-              return networkResponse;
-            });
+  event.respondWith(
+    caches.match(event.request).then(cachedResponse => {
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+
+      return fetch(event.request)
+        .then(networkResponse => {
+          if (!networkResponse || networkResponse.status !== 200) {
+            return networkResponse;
+          }
+
+          const responseClone = networkResponse.clone();
+
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, responseClone);
           });
-      })
-      .catch(() => {
-        // Offline fallback
-        if (event.request.destination === 'document') {
-          return caches.match('./index.html');
-        }
-      })
+
+          return networkResponse;
+        })
+        .catch(() => {
+          if (event.request.destination === 'document') {
+            return caches.match('./index.html');
+          }
+        });
+    })
   );
 });
