@@ -1,0 +1,26 @@
+{
+  "id": "com.sherif.wells.app.v5",
+  "name": "Land Wells - PERTOBEL",
+  "short_name": "Wells",
+  "description": "PERTOBEL Land Wells Situation - Well Data Lookup System",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a0e14",
+  "theme_color": "#00d4ff",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
