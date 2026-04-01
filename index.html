@@ -623,6 +623,43 @@ pre{
 .well-list-row-status{font-size:11px;font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px;}
 .well-list-overlay-count{font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;padding:6px 0 10px;}
 
+
+/* ── T.B PRODUCTION PAGE ── */
+.tb-header-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface);border-bottom:1px solid var(--border);}
+.tb-date-pill{font-family:'Space Mono',monospace;font-size:11px;color:var(--accent);background:rgba(0,200,240,.1);border:1px solid rgba(0,200,240,.2);border-radius:20px;padding:3px 12px;}
+.tb-total-strip{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;padding:10px 14px 0;}
+.tb-total-cell{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 6px;text-align:center;}
+.tb-total-val{font-size:18px;font-weight:700;font-family:'Space Mono',monospace;}
+.tb-total-val.rep{color:#d8eaf8;}
+.tb-total-val.act{color:var(--accent2);}
+.tb-total-val.net{color:var(--green);}
+.tb-total-lbl{font-size:8px;color:var(--muted);margin-top:3px;letter-spacing:.4px;text-transform:uppercase;}
+.tb-battery{margin:10px 14px 0;background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.tb-battery-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface);cursor:pointer;user-select:none;}
+.tb-battery-hdr:active{background:rgba(0,200,240,.06);}
+.tb-battery-name{font-size:15px;font-weight:700;color:var(--accent);font-family:'Space Mono',monospace;letter-spacing:1px;}
+.tb-battery-sum{font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;margin-top:2px;}
+.tb-battery-chevron{font-size:12px;color:var(--muted);transition:transform .2s;}
+.tb-battery-chevron.open{transform:rotate(180deg);}
+.tb-battery-body{display:none;}
+.tb-battery-body.open{display:block;}
+.tb-sum-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;gap:0;border-bottom:2px solid var(--border);}
+.tb-manifold-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;gap:0;border-bottom:1px solid rgba(26,45,66,.7);}
+.tb-manifold-row:last-child{border-bottom:none;}
+.tb-manifold-row:hover{background:rgba(0,200,240,.03);}
+.tb-cell{padding:7px 5px;font-size:11px;font-family:'Space Mono',monospace;text-align:right;}
+.tb-cell:first-child{text-align:left;padding-left:12px;font-weight:600;color:var(--text);font-size:10px;}
+.tb-sum-row .tb-cell{background:rgba(0,200,240,.05);font-weight:700;}
+.tb-sum-row .tb-cell:first-child{color:var(--accent);}
+.tb-col-rep{color:#d8eaf8;}
+.tb-col-act{color:var(--accent2);}
+.tb-col-wc{color:#7ec8e3;}
+.tb-col-net{color:var(--green);}
+.tb-col-diff-pos{color:var(--yellow);}
+.tb-col-diff-neg{color:var(--red);}
+.tb-thead{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;gap:0;background:rgba(5,10,15,.9);position:sticky;top:0;z-index:2;}
+.tb-thead .tb-cell{font-size:8.5px;color:var(--muted);letter-spacing:.3px;text-transform:uppercase;padding:6px 5px;}
+.tb-badge-strip{display:flex;gap:6px;padding:8px 14px;flex-wrap:wrap;border-bottom:1px solid var(--border);}
 ::-webkit-scrollbar{width:4px;}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
 </style>
@@ -665,6 +702,7 @@ pre{
   <rect x="49" y="12" width="22" height="7" rx="3" class="rig-fill"/>
 </svg></span>Manifold</button>
   <button class="nav-btn" onclick="showPage('chemical')" id="nav-chemical"><span class="icon">🧪</span>Chemical</button>
+  <button class="nav-btn" onclick="showPage('tb')" id="nav-tb"><span class="icon">🏭</span>T.B.</button>
   <button class="nav-btn" onclick="showPage('data')" id="nav-data"><span class="icon">🗄️</span>Update DB</button>
 </nav>
 
@@ -972,6 +1010,33 @@ pre{
   </div>
 </div>
 
+<!-- ══════════════ PAGE: T.B PRODUCTION ══════════════ -->
+<div class="page" id="page-tb">
+  <div class="page-hdr">
+    <h2>🏭 T.B. Production</h2>
+    <p>Tank Battery manifold production — reported vs actual</p>
+  </div>
+  <div class="tb-header-bar">
+    <div id="tb-date-display" class="tb-date-pill">📅 —</div>
+    <div style="font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;">Updates with Excel upload</div>
+  </div>
+  <div class="tb-total-strip">
+    <div class="tb-total-cell">
+      <div class="tb-total-val rep" id="tb-grand-rep">—</div>
+      <div class="tb-total-lbl">Rep. Rate M3/D</div>
+    </div>
+    <div class="tb-total-cell">
+      <div class="tb-total-val act" id="tb-grand-act">—</div>
+      <div class="tb-total-lbl">Act. Rate M3/D</div>
+    </div>
+    <div class="tb-total-cell">
+      <div class="tb-total-val net" id="tb-grand-net">—</div>
+      <div class="tb-total-lbl">Act. Net M3/D</div>
+    </div>
+  </div>
+  <div id="tb-batteries-container" style="padding-bottom:30px;"></div>
+</div>
+
 <div class="footer">Powered by <span>Sherif Morshed</span></div>
 <div class="toast" id="toast"></div>
 
@@ -1235,6 +1300,7 @@ function showPage(page, pushState=true) {
   if(page==='manifold') refreshManifoldView();
   if(page==='chemical') refreshChemicalView();
   if(page==='data') updateDBStats();
+  if(page==='tb') renderTBPage();
   // Push history state for Android back button
   if(pushState) history.pushState({page}, '', '');
 }
@@ -2767,6 +2833,140 @@ function openWellFromOverlay(name){
 
 // ══════════════════════════════════════════
 //  INIT
+// ══════════════════════════════════════════
+//  T.B PRODUCTION
+// ══════════════════════════════════════════
+const TB_DATA = {
+  date: '2026-03-31',
+  batteries: [
+    { name:'T.B 6/1', manifolds:[
+      {name:'6-1 A', repRate:1115,repWc:70.8,repNet:325.7,actRate:1450,actWc:76.2,actNet:344.4,diff:-18.7},
+      {name:'6-1 B', repRate:790,repWc:77.4,repNet:178.4,actRate:865,actWc:85.7,actNet:123.7,diff:54.6},
+      {name:'6-1 C', repRate:740,repWc:72.8,repNet:201.2,actRate:895,actWc:86.0,actNet:125.0,diff:76.2},
+      {name:'6-1 D', repRate:1575,repWc:87.2,repNet:202.1,actRate:1920,actWc:85.6,actNet:277.1,diff:-75.0},
+      {name:'6-1 E', repRate:410,repWc:81.3,repNet:76.7,actRate:455,actWc:91.4,actNet:39.0,diff:37.7},
+    ], sum:{repRate:4630,repWc:78.7,repNet:984.1,actRate:5585,actWc:83.7,actNet:909.2,diff:74.9}},
+    { name:'T.B 6/2', manifolds:[
+      {name:'6-2 A', repRate:790,repWc:66.9,repNet:261.6,actRate:820,actWc:78.9,actNet:172.8,diff:88.8},
+      {name:'6-2 B', repRate:570,repWc:69.5,repNet:173.8,actRate:775,actWc:88.5,actNet:89.2,diff:84.6},
+      {name:'6-2 C', repRate:940,repWc:84.0,repNet:150.4,actRate:1100,actWc:78.3,actNet:238.6,diff:-88.2},
+      {name:'6-2 D', repRate:735,repWc:89.0,repNet:131.8,actRate:865,actWc:63.0,actNet:104.7,diff:27.1},
+    ], sum:{repRate:3035,repWc:76.4,repNet:717.5,actRate:3560,actWc:83.0,actNet:605.2,diff:112.2}},
+    { name:'T.B 8/1', manifolds:[
+      {name:'8-1 A', repRate:1510,repWc:79.1,repNet:315.9,actRate:1845,actWc:85.5,actNet:266.6,diff:49.3},
+      {name:'8-1 B', repRate:1170,repWc:68.5,repNet:369.0,actRate:1260,actWc:76.2,actNet:300.1,diff:68.8},
+      {name:'8-1 C', repRate:785,repWc:64.5,repNet:278.7,actRate:1215,actWc:79.3,actNet:251.6,diff:27.1},
+    ], sum:{repRate:3465,repWc:72.2,repNet:963.6,actRate:4320,actWc:81.1,actNet:818.4,diff:145.3}},
+    { name:'T.B 8/2', manifolds:[
+      {name:'8-2 A', repRate:1170,repWc:75.7,repNet:284.5,actRate:1350,actWc:85.9,actNet:190.3,diff:94.2},
+      {name:'8-2 B', repRate:1120,repWc:78.9,repNet:236.7,actRate:1340,actWc:81.1,actNet:252.9,diff:-16.3},
+      {name:'8-2 C', repRate:425,repWc:58.2,repNet:177.6,actRate:560,actWc:82.6,actNet:97.3,diff:80.3},
+      {name:'8-2 D', repRate:725,repWc:76.4,repNet:171.4,actRate:770,actWc:85.8,actNet:109.6,diff:61.8},
+      {name:'8-2 E', repRate:565,repWc:71.7,repNet:159.7,actRate:715,actWc:87.7,actNet:87.8,diff:71.9},
+      {name:'8-2 F', repRate:720,repWc:75.2,repNet:178.8,actRate:925,actWc:75.2,actNet:229.8,diff:-51.0},
+      {name:'8-2 A.Island', repRate:210,repWc:63.2,repNet:77.2,actRate:320,actWc:67.7,actNet:103.4,diff:-26.2},
+      {name:'8-2 Sub Island', repRate:70,repWc:83.9,repNet:11.3,actRate:85,actWc:83.3,actNet:14.2,diff:-2.9},
+    ], sum:{repRate:5005,repWc:74.1,repNet:1297.2,actRate:6065,actWc:82.1,actNet:1085.4,diff:211.9}},
+    { name:'T.B 10/1', manifolds:[
+      {name:'10-1 C',    repRate:450,repWc:54.5,repNet:204.6,actRate:475,actWc:68.0,actNet:151.8,diff:52.8},
+      {name:'6" LINE',   repRate:0,  repWc:null, repNet:0,   actRate:0,  actWc:null, actNet:0,   diff:0},
+      {name:'8" LINE',   repRate:660,repWc:70.3,repNet:196.2,actRate:590,actWc:78.6,actNet:126.2,diff:70.0},
+      {name:'2020-LINE', repRate:285,repWc:41.0,repNet:168.1,actRate:380,actWc:33.9,actNet:251.1,diff:-83.0},
+      {name:'New SID',   repRate:370,repWc:19.3,repNet:298.7,actRate:400,actWc:43.6,actNet:225.7,diff:73.0},
+      {name:'C+',        repRate:365,repWc:37.4,repNet:228.7,actRate:360,actWc:48.5,actNet:185.5,diff:43.2},
+      {name:'10/1 B',    repRate:615,repWc:49.9,repNet:308.1,actRate:575,actWc:62.0,actNet:218.6,diff:89.5},
+      {name:'SID-2020',  repRate:285,repWc:41.0,repNet:168.1,actRate:380,actWc:33.9,actNet:251.1,diff:-83.0},
+      {name:'OLD SID',   repRate:0,  repWc:null, repNet:0,   actRate:120,actWc:87.5,actNet:15.0,diff:-15.0},
+    ], sum:{repRate:3030,repWc:48.1,repNet:1572.5,actRate:3280,actWc:56.6,actNet:1425.0,diff:147.5}},
+  ]
+};
+
+function renderTBPage(){
+  const dateEl = document.getElementById('tb-date-display');
+  if(dateEl) dateEl.textContent = '📅 ' + TB_DATA.date;
+  const grandRep = TB_DATA.batteries.reduce((s,b)=>s+b.sum.repRate,0);
+  const grandAct = TB_DATA.batteries.reduce((s,b)=>s+b.sum.actRate,0);
+  const grandNet = TB_DATA.batteries.reduce((s,b)=>s+b.sum.actNet,0);
+  document.getElementById('tb-grand-rep').textContent = grandRep.toLocaleString();
+  document.getElementById('tb-grand-act').textContent = grandAct.toLocaleString();
+  document.getElementById('tb-grand-net').textContent = Math.round(grandNet).toLocaleString();
+  const container = document.getElementById('tb-batteries-container');
+  if(!container) return;
+  container.innerHTML = TB_DATA.batteries.map((bat,bi)=>{
+    const diffSign = bat.sum.diff >= 0 ? '+' : '';
+    const diffCls  = bat.sum.diff >= 0 ? 'tb-col-diff-pos' : 'tb-col-diff-neg';
+    const rows = bat.manifolds.map(m=>{
+      if(m.actRate===0 && m.repRate===0) return '';
+      const ds = m.diff >= 0 ? '+' : '';
+      const dc = m.diff >= 0 ? 'tb-col-diff-pos' : 'tb-col-diff-neg';
+      return `<div class="tb-manifold-row">
+        <div class="tb-cell">${m.name}</div>
+        <div class="tb-cell tb-col-rep">${m.repRate||'—'}</div>
+        <div class="tb-cell tb-col-wc">${m.repWc!=null?m.repWc+'%':'—'}</div>
+        <div class="tb-cell tb-col-rep">${m.repNet||'—'}</div>
+        <div class="tb-cell tb-col-act">${m.actRate||'—'}</div>
+        <div class="tb-cell tb-col-wc">${m.actWc!=null?m.actWc+'%':'—'}</div>
+        <div class="tb-cell tb-col-net">${m.actNet||'—'}</div>
+        <div class="tb-cell ${dc}">${m.diff!==0?ds+m.diff:'—'}</div>
+      </div>`;
+    }).join('');
+    return `<div class="tb-battery">
+      <div class="tb-battery-hdr" onclick="toggleTB(${bi})">
+        <div>
+          <div class="tb-battery-name">${bat.name}</div>
+          <div class="tb-battery-sum">Act ${bat.sum.actRate.toLocaleString()} m³/d &nbsp;•&nbsp; Net ${Math.round(bat.sum.actNet).toLocaleString()} m³/d &nbsp;•&nbsp; W.C ${bat.sum.actWc}%</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="badge ${bat.sum.diff>=0?'producer':'waiting'}" style="font-family:'Space Mono',monospace;font-size:10px;">${bat.sum.diff>=0?'+':''}${bat.sum.diff}</div>
+          <div class="tb-battery-chevron" id="tb-chev-${bi}">▼</div>
+        </div>
+      </div>
+      <div class="tb-battery-body" id="tb-body-${bi}">
+        <div class="tb-badge-strip">
+          <div class="badge live">Rep ${bat.sum.repRate.toLocaleString()} m³/d</div>
+          <div class="badge other">Rep Net ${bat.sum.repNet} m³/d</div>
+          <div class="badge producer">Act ${bat.sum.actRate.toLocaleString()} m³/d</div>
+          <div class="badge producer">Net ${Math.round(bat.sum.actNet)} m³/d</div>
+          <div class="badge ${bat.sum.diff>=0?'producer':'waiting'}">Diff ${bat.sum.diff>=0?'+':''}${bat.sum.diff}</div>
+        </div>
+        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+          <div style="min-width:560px;">
+            <div class="tb-thead">
+              <div class="tb-cell">Manifold</div>
+              <div class="tb-cell">Rep M3</div>
+              <div class="tb-cell">Rep W.C</div>
+              <div class="tb-cell">Rep Net</div>
+              <div class="tb-cell">Act M3</div>
+              <div class="tb-cell">Act W.C</div>
+              <div class="tb-cell">Act Net</div>
+              <div class="tb-cell">Diff</div>
+            </div>
+            ${rows}
+            <div class="tb-sum-row">
+              <div class="tb-cell">TOTAL</div>
+              <div class="tb-cell tb-col-rep">${bat.sum.repRate.toLocaleString()}</div>
+              <div class="tb-cell tb-col-wc">${bat.sum.repWc}%</div>
+              <div class="tb-cell tb-col-rep">${bat.sum.repNet}</div>
+              <div class="tb-cell tb-col-act">${bat.sum.actRate.toLocaleString()}</div>
+              <div class="tb-cell tb-col-wc">${bat.sum.actWc}%</div>
+              <div class="tb-cell tb-col-net">${Math.round(bat.sum.actNet)}</div>
+              <div class="tb-cell ${diffCls}">${diffSign}${bat.sum.diff}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function toggleTB(i){
+  const body = document.getElementById('tb-body-'+i);
+  const chev = document.getElementById('tb-chev-'+i);
+  if(!body) return;
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open',!isOpen);
+  if(chev) chev.classList.toggle('open',!isOpen);
+}
+
 // ══════════════════════════════════════════
 updateCounters();
 updateDBStats();
