@@ -639,12 +639,12 @@ pre{
 .tb-header-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface);border-bottom:1px solid var(--border);}
 .tb-date-pill{font-family:'Space Mono',monospace;font-size:11px;color:var(--accent);background:rgba(0,200,240,.1);border:1px solid rgba(0,200,240,.2);border-radius:20px;padding:3px 12px;}
 .tb-total-strip{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;padding:10px 14px 0;}
-.tb-total-cell{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 6px;text-align:center;}
-.tb-total-val{font-size:18px;font-weight:700;font-family:'Space Mono',monospace;}
+.tb-total-cell{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 6px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.tb-total-val{font-size:20px;font-weight:700;font-family:'Space Mono',monospace;line-height:1.1;}
 .tb-total-val.rep{color:#d8eaf8;}
 .tb-total-val.act{color:var(--accent2);}
 .tb-total-val.net{color:var(--green);}
-.tb-total-lbl{font-size:8px;color:var(--muted);margin-top:3px;letter-spacing:.4px;text-transform:uppercase;}
+.tb-total-lbl{font-size:15px;color:var(--muted);margin-top:3px;letter-spacing:.4px;text-transform:uppercase;}
 .tb-battery{margin:10px 14px 0;background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
 .tb-battery-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface);cursor:pointer;user-select:none;}
 .tb-battery-hdr:active{background:rgba(0,200,240,.06);}
@@ -720,7 +720,18 @@ pre{
   <rect x="49" y="12" width="22" height="7" rx="3" class="rig-fill"/>
 </svg></span>Manifold</button>
   <button class="nav-btn" onclick="showPage('chemical')" id="nav-chemical"><span class="icon">🧪</span>Chemical</button>
-  <button class="nav-btn" onclick="showPage('tb')" id="nav-tb"><span class="icon">🏭</span>T.B.</button>
+  <button class="nav-btn" onclick="showPage('tb')" id="nav-tb"><span class="icon" style="display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;display:block;">
+  <rect x="2" y="8" width="20" height="10" rx="3" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <line x1="7" y1="8" x2="7" y2="18" stroke="currentColor" stroke-width="1.2"/>
+  <line x1="12" y1="8" x2="12" y2="18" stroke="currentColor" stroke-width="1.2"/>
+  <line x1="17" y1="8" x2="17" y2="18" stroke="currentColor" stroke-width="1.2"/>
+  <rect x="9" y="4" width="6" height="4" rx="1" fill="none" stroke="currentColor" stroke-width="1.2"/>
+  <line x1="12" y1="18" x2="12" y2="22" stroke="currentColor" stroke-width="1.4"/>
+  <circle cx="12" cy="22" r="1.2" fill="currentColor"/>
+  <line x1="5" y1="18" x2="5" y2="21" stroke="currentColor" stroke-width="1.2"/>
+  <line x1="19" y1="18" x2="19" y2="21" stroke="currentColor" stroke-width="1.2"/>
+  <line x1="3" y1="13" x2="21" y2="13" stroke="currentColor" stroke-width="0.8" stroke-dasharray="2 2" opacity="0.5"/>
+</svg></span>T.B.</button>
   <button class="nav-btn" onclick="showPage('data')" id="nav-data"><span class="icon">🗄️</span>Update DB</button>
 </nav>
 
@@ -1031,25 +1042,39 @@ pre{
 <!-- ══════════════ PAGE: T.B PRODUCTION ══════════════ -->
 <div class="page" id="page-tb">
   <div class="page-hdr">
-    <h2>🏭 T.B. Production</h2>
+    <h2 style="display:flex;align-items:center;gap:8px;"><span style="display:inline-flex;"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;display:block;">
+  <rect x="2" y="8" width="20" height="10" rx="3" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <line x1="7" y1="8" x2="7" y2="18" stroke="currentColor" stroke-width="1.2"/>
+  <line x1="12" y1="8" x2="12" y2="18" stroke="currentColor" stroke-width="1.2"/>
+  <line x1="17" y1="8" x2="17" y2="18" stroke="currentColor" stroke-width="1.2"/>
+  <rect x="9" y="4" width="6" height="4" rx="1" fill="none" stroke="currentColor" stroke-width="1.2"/>
+  <line x1="12" y1="18" x2="12" y2="22" stroke="currentColor" stroke-width="1.4"/>
+  <circle cx="12" cy="22" r="1.2" fill="currentColor"/>
+  <line x1="5" y1="18" x2="5" y2="21" stroke="currentColor" stroke-width="1.2"/>
+  <line x1="19" y1="18" x2="19" y2="21" stroke="currentColor" stroke-width="1.2"/>
+  <line x1="3" y1="13" x2="21" y2="13" stroke="currentColor" stroke-width="0.8" stroke-dasharray="2 2" opacity="0.5"/>
+</svg></span> T.B. Production</h2>
     <p>Tank Battery manifold production — reported vs actual</p>
   </div>
   <div class="tb-header-bar">
     <div id="tb-date-display" class="tb-date-pill">📅 —</div>
     <div style="font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;">Updates with Excel upload</div>
   </div>
-  <div class="tb-total-strip">
+  <div class="tb-total-strip" style="grid-template-columns:1fr 1fr 1fr;">
     <div class="tb-total-cell">
-      <div class="tb-total-val rep" id="tb-grand-rep">—</div>
-      <div class="tb-total-lbl">Rep. Rate M3/D</div>
+      <div class="tb-total-val rep" id="tb-grand-rep-bbl">—</div>
+      <div id="tb-grand-rep" style="font-size:12px;color:var(--muted);font-family:'Space Mono',monospace;margin-top:2px;">— M³/D</div>
+      <div class="tb-total-lbl">Rep. Net</div>
     </div>
     <div class="tb-total-cell">
-      <div class="tb-total-val act" id="tb-grand-act">—</div>
-      <div class="tb-total-lbl">Act. Rate M3/D</div>
+      <div class="tb-total-val act" id="tb-grand-act-bbl">—</div>
+      <div id="tb-grand-act" style="font-size:12px;color:var(--muted);font-family:'Space Mono',monospace;margin-top:2px;">— M³/D</div>
+      <div class="tb-total-lbl">Act. Rate</div>
     </div>
     <div class="tb-total-cell">
-      <div class="tb-total-val net" id="tb-grand-net">—</div>
-      <div class="tb-total-lbl">Act. Net M3/D</div>
+      <div class="tb-total-val net" id="tb-grand-net-bbl">—</div>
+      <div id="tb-grand-net" style="font-size:12px;color:var(--muted);font-family:'Space Mono',monospace;margin-top:2px;">— M³/D</div>
+      <div class="tb-total-lbl">Act. Net</div>
     </div>
   </div>
   <div id="tb-batteries-container" style="padding-bottom:30px;"></div>
@@ -1404,7 +1429,7 @@ function selectWell(name, source='lookup'){
   searchInput.value = w ? (w['Well']||name) : name;
   document.getElementById('clearBtn').style.display='block';
   suggEl.classList.remove('show');
-  currentWellBackTarget = source === 'substation' ? 'substation' : (source === 'manifold' ? 'manifold' : (source === 'chemical' ? 'chemical' : 'lookup'));
+  currentWellBackTarget = source === 'substation' ? 'substation' : (source === 'manifold' ? 'manifold' : (source === 'chemical' ? 'chemical' : (source === 'overlay' ? 'overlay' : 'lookup')));
   if(w){
     showPage('lookup');
     renderWell(w, source);
@@ -1436,7 +1461,25 @@ let currentSubstationName = '';
 let currentWellBackTarget = 'lookup';
 let currentRenderedWellName = '';
 
+function showLookupEmptyState(){
+  document.getElementById('wellResult').innerHTML = `
+    <div class="empty-state"><div class="big"><svg viewBox="0 0 120 130" xmlns="http://www.w3.org/2000/svg" style="width:70px;height:76px;opacity:0.35;"><rect x="20" y="115" width="80" height="6" rx="3" fill="#00d4ff"/><line x1="35" y1="115" x2="25" y2="85" stroke="#00d4ff" stroke-width="4" stroke-linecap="round"/><line x1="85" y1="115" x2="95" y2="85" stroke="#00d4ff" stroke-width="4" stroke-linecap="round"/><line x1="45" y1="115" x2="40" y2="85" stroke="#00d4ff" stroke-width="3" stroke-linecap="round"/><line x1="75" y1="115" x2="80" y2="85" stroke="#00d4ff" stroke-width="3" stroke-linecap="round"/><line x1="25" y1="103" x2="95" y2="103" stroke="#00d4ff" stroke-width="2.5" opacity="0.7"/><line x1="27" y1="93" x2="93" y2="93" stroke="#00d4ff" stroke-width="2.5" opacity="0.7"/><line x1="40" y1="85" x2="52" y2="20" stroke="#00d4ff" stroke-width="4" stroke-linecap="round"/><line x1="80" y1="85" x2="68" y2="20" stroke="#00d4ff" stroke-width="4" stroke-linecap="round"/><line x1="40" y1="85" x2="68" y2="20" stroke="#00d4ff" stroke-width="1.5" opacity="0.5"/><line x1="80" y1="85" x2="52" y2="20" stroke="#00d4ff" stroke-width="1.5" opacity="0.5"/><line x1="42" y1="72" x2="78" y2="72" stroke="#00d4ff" stroke-width="2" opacity="0.6"/><line x1="45" y1="58" x2="75" y2="58" stroke="#00d4ff" stroke-width="2" opacity="0.6"/><line x1="48" y1="44" x2="72" y2="44" stroke="#00d4ff" stroke-width="2" opacity="0.6"/><rect x="48" y="12" width="24" height="10" rx="2" fill="#00d4ff" opacity="0.9"/><line x1="60" y1="22" x2="60" y2="115" stroke="#ffd740" stroke-width="2" stroke-dasharray="4 3" opacity="0.6"/><rect x="54" y="60" width="12" height="8" rx="2" fill="#ffd740" opacity="0.8"/><line x1="60" y1="12" x2="60" y2="2" stroke="#00d4ff" stroke-width="3" stroke-linecap="round"/><line x1="85" y1="100" x2="105" y2="88" stroke="#00d4ff" stroke-width="3.5" stroke-linecap="round"/><circle cx="105" cy="88" r="5" fill="none" stroke="#00d4ff" stroke-width="2.5"/><line x1="105" y1="88" x2="105" y2="115" stroke="#00d4ff" stroke-width="2.5" stroke-linecap="round"/></svg></div>
+    <p>Type a well name above to search,<br>or pick from the suggestions</p></div>`;
+  document.getElementById('headerStats').classList.remove('hidden');
+}
+
 function backFromWellCard(){
+  if(currentWellBackTarget === 'overlay'){
+    // Reshow the overlay
+    const overlay = document.getElementById('wellListOverlay');
+    if(overlay){
+      overlay.style.display = 'flex';
+      overlay.style.flexDirection = 'column';
+      return;
+    }
+    // Overlay was removed — reopen it
+    if(currentOverlayType) { showWellListOverlay(currentOverlayType); return; }
+  }
   document.getElementById('headerStats').classList.remove('hidden');
   if(currentWellBackTarget === 'substation'){
     showPage('substation');
@@ -1458,7 +1501,7 @@ function backFromWellCard(){
 function renderWell(well, source='lookup'){
   if(!well) return;
   currentRenderedWellName = String(well['Well'] || '');
-  currentWellBackTarget = source === 'substation' ? 'substation' : (source === 'manifold' ? 'manifold' : (source === 'chemical' ? 'chemical' : 'lookup'));
+  currentWellBackTarget = source === 'substation' ? 'substation' : (source === 'manifold' ? 'manifold' : (source === 'chemical' ? 'chemical' : (source === 'overlay' ? 'overlay' : 'lookup')));
 
   const statusClass = sc(well['Status']);
   const wc = currentWcForWell(well);
@@ -1672,7 +1715,7 @@ function renderSubstationResult(name){
       <div class="substation-meta">
         <div class="badge live">${wells.length} Wells</div>
         <div class="badge producer">${producerCount} Producer</div>
-        <div class="badge waiting">${waitingCount} Needs Workover</div>
+        <div class="badge waiting">${waitingCount} Waiting Work Over</div>
         <div class="badge rig">${rigCount} Rig On</div>
         <div class="badge tb">ACT ${fn(actRateTotal) || '0'} M3/D</div>
         <div class="badge rep">NET ${fn(actNetTotal) || '0'} M3/D • ${fn(actNetBblPerDay) || '0'} BBL/D</div>
@@ -1929,7 +1972,7 @@ function renderBatteryManifoldResult(batteryKey){
         <div class="badge tb">${battery.manifoldCount} Manifolds</div>
         <div class="badge live">${battery.wellCount} Wells</div>
         <div class="badge producer">${producerCount} Producing</div>
-        <div class="badge waiting">${waitingCount} Needs Workover</div>
+        <div class="badge waiting">${waitingCount} Waiting Work Over</div>
         <div class="badge rig">${rigCount} On Rig</div>
       </div>
     </div>
@@ -1992,7 +2035,7 @@ function renderManifoldResult(key){
         <div class="badge live">${wells.length} Wells</div>
         <div class="badge tb">${group.battery || 'No TK'}</div>
         <div class="badge producer">${producerCount} Producer</div>
-        <div class="badge waiting">${waitingCount} Needs Workover</div>
+        <div class="badge waiting">${waitingCount} Waiting Work Over</div>
         <div class="badge rig">${rigCount} Rig On</div>
         <div class="badge tb">ACT ${fn(actRateTotal) || '0'} M3/D</div>
         <div class="badge rep">NET ${fn(actNetTotal) || '0'} M3/D • ${fn(actNetBblPerDay) || '0'} BBL/D</div>
@@ -2720,7 +2763,9 @@ window.addEventListener('appinstalled',()=>{
 // ══════════════════════════════════════════
 //  WELL LIST OVERLAY
 // ══════════════════════════════════════════
+let currentOverlayType = null;
 function showWellListOverlay(type){
+  currentOverlayType = type;
   const statsEl = document.getElementById('headerStats');
   if(statsEl) statsEl.classList.add('hidden');
   const titles = {
@@ -2838,17 +2883,21 @@ function showWellListOverlay(type){
 function closeWellListOverlay(){
   const overlay = document.getElementById('wellListOverlay');
   if(overlay) overlay.remove();
+  currentOverlayType = null;
   // Restore header stats
   const statsEl = document.getElementById('headerStats');
   if(statsEl) statsEl.classList.remove('hidden');
 }
 
 function openWellFromOverlay(name){
-  closeWellListOverlay();
-  showPage('lookup');
-  selectWell(name, 'lookup');
-  // Hide stats since we're showing a well card
-  document.getElementById('headerStats').classList.add('hidden');
+  // Hide overlay but keep overlayType so back can restore it
+  const overlay = document.getElementById('wellListOverlay');
+  if(overlay) overlay.style.display = 'none';
+  // Mark well source as overlay so back returns to overlay
+  currentWellBackTarget = 'overlay';
+  showPage('lookup', false); // don't push state — overlay already pushed one
+  selectWell(name, 'overlay');
+  history.pushState({page:'well-from-overlay'}, '', '');
 }
 
 // ══════════════════════════════════════════
@@ -2857,121 +2906,99 @@ function openWellFromOverlay(name){
 //  T.B PRODUCTION
 // ══════════════════════════════════════════
 const TB_DATA = {
-  date: '2026-03-31',
   batteries: [
-    { name:'T.B 6/1', manifolds:[
-      {name:'6-1 A', repRate:1115,repWc:70.8,repNet:325.7,actRate:1450,actWc:76.2,actNet:344.4,diff:-18.7},
-      {name:'6-1 B', repRate:790,repWc:77.4,repNet:178.4,actRate:865,actWc:85.7,actNet:123.7,diff:54.6},
-      {name:'6-1 C', repRate:740,repWc:72.8,repNet:201.2,actRate:895,actWc:86.0,actNet:125.0,diff:76.2},
-      {name:'6-1 D', repRate:1575,repWc:87.2,repNet:202.1,actRate:1920,actWc:85.6,actNet:277.1,diff:-75.0},
-      {name:'6-1 E', repRate:410,repWc:81.3,repNet:76.7,actRate:455,actWc:91.4,actNet:39.0,diff:37.7},
-    ], sum:{repRate:4630,repWc:78.7,repNet:984.1,actRate:5585,actWc:83.7,actNet:909.2,diff:74.9}},
-    { name:'T.B 6/2', manifolds:[
-      {name:'6-2 A', repRate:790,repWc:66.9,repNet:261.6,actRate:820,actWc:78.9,actNet:172.8,diff:88.8},
-      {name:'6-2 B', repRate:570,repWc:69.5,repNet:173.8,actRate:775,actWc:88.5,actNet:89.2,diff:84.6},
-      {name:'6-2 C', repRate:940,repWc:84.0,repNet:150.4,actRate:1100,actWc:78.3,actNet:238.6,diff:-88.2},
-      {name:'6-2 D', repRate:735,repWc:89.0,repNet:131.8,actRate:865,actWc:63.0,actNet:104.7,diff:27.1},
-    ], sum:{repRate:3035,repWc:76.4,repNet:717.5,actRate:3560,actWc:83.0,actNet:605.2,diff:112.2}},
-    { name:'T.B 8/1', manifolds:[
-      {name:'8-1 A', repRate:1510,repWc:79.1,repNet:315.9,actRate:1845,actWc:85.5,actNet:266.6,diff:49.3},
-      {name:'8-1 B', repRate:1170,repWc:68.5,repNet:369.0,actRate:1260,actWc:76.2,actNet:300.1,diff:68.8},
-      {name:'8-1 C', repRate:785,repWc:64.5,repNet:278.7,actRate:1215,actWc:79.3,actNet:251.6,diff:27.1},
-    ], sum:{repRate:3465,repWc:72.2,repNet:963.6,actRate:4320,actWc:81.1,actNet:818.4,diff:145.3}},
-    { name:'T.B 8/2', manifolds:[
-      {name:'8-2 A', repRate:1170,repWc:75.7,repNet:284.5,actRate:1350,actWc:85.9,actNet:190.3,diff:94.2},
-      {name:'8-2 B', repRate:1120,repWc:78.9,repNet:236.7,actRate:1340,actWc:81.1,actNet:252.9,diff:-16.3},
-      {name:'8-2 C', repRate:425,repWc:58.2,repNet:177.6,actRate:560,actWc:82.6,actNet:97.3,diff:80.3},
-      {name:'8-2 D', repRate:725,repWc:76.4,repNet:171.4,actRate:770,actWc:85.8,actNet:109.6,diff:61.8},
-      {name:'8-2 E', repRate:565,repWc:71.7,repNet:159.7,actRate:715,actWc:87.7,actNet:87.8,diff:71.9},
-      {name:'8-2 F', repRate:720,repWc:75.2,repNet:178.8,actRate:925,actWc:75.2,actNet:229.8,diff:-51.0},
-      {name:'8-2 A.Island', repRate:210,repWc:63.2,repNet:77.2,actRate:320,actWc:67.7,actNet:103.4,diff:-26.2},
-      {name:'8-2 Sub Island', repRate:70,repWc:83.9,repNet:11.3,actRate:85,actWc:83.3,actNet:14.2,diff:-2.9},
-    ], sum:{repRate:5005,repWc:74.1,repNet:1297.2,actRate:6065,actWc:82.1,actNet:1085.4,diff:211.9}},
-    { name:'T.B 10/1', manifolds:[
-      {name:'10-1 C',    repRate:450,repWc:54.5,repNet:204.6,actRate:475,actWc:68.0,actNet:151.8,diff:52.8},
-      {name:'6" LINE',   repRate:0,  repWc:null, repNet:0,   actRate:0,  actWc:null, actNet:0,   diff:0},
-      {name:'8" LINE',   repRate:660,repWc:70.3,repNet:196.2,actRate:590,actWc:78.6,actNet:126.2,diff:70.0},
-      {name:'2020-LINE', repRate:285,repWc:41.0,repNet:168.1,actRate:380,actWc:33.9,actNet:251.1,diff:-83.0},
-      {name:'New SID',   repRate:370,repWc:19.3,repNet:298.7,actRate:400,actWc:43.6,actNet:225.7,diff:73.0},
-      {name:'C+',        repRate:365,repWc:37.4,repNet:228.7,actRate:360,actWc:48.5,actNet:185.5,diff:43.2},
-      {name:'10/1 B',    repRate:615,repWc:49.9,repNet:308.1,actRate:575,actWc:62.0,actNet:218.6,diff:89.5},
-      {name:'SID-2020',  repRate:285,repWc:41.0,repNet:168.1,actRate:380,actWc:33.9,actNet:251.1,diff:-83.0},
-      {name:'OLD SID',   repRate:0,  repWc:null, repNet:0,   actRate:120,actWc:87.5,actNet:15.0,diff:-15.0},
-    ], sum:{repRate:3030,repWc:48.1,repNet:1572.5,actRate:3280,actWc:56.6,actNet:1425.0,diff:147.5}},
+    { name:'T.B 6/1',  wells:94,  repRate:4680, repWc:71.8, repNet:1000.7, actRate:5655, actWc:77.2, actNet:927.7,  diff:-73.0  },
+    { name:'T.B 6/2',  wells:39,  repRate:3035, repWc:73.4, repNet:717.4,  actRate:3560, actWc:71.8, actNet:605.2,  diff:-112.2 },
+    { name:'T.B 8/1',  wells:87,  repRate:3465, repWc:67.4, repNet:963.6,  actRate:4320, actWc:76.8, actNet:818.4,  diff:-145.2 },
+    { name:'T.B 8/2',  wells:137, repRate:5005, repWc:70.2, repNet:1297.2, actRate:6065, actWc:73.5, actNet:1085.4, diff:-211.8 },
+    { name:'T.B 10/1', wells:68,  repRate:2555, repWc:59.3, repNet:1299.6, actRate:2605, actWc:63.7, actNet:986.3,  diff:-313.3 },
+    { name:'T.B 2020', wells:9,   repRate:285,  repWc:27.1, repNet:168.1,  actRate:380,  actWc:34.4, actNet:251.1,  diff:83.0   },
   ]
 };
-
 function renderTBPage(){
   const dateEl = document.getElementById('tb-date-display');
-  if(dateEl) dateEl.textContent = '📅 ' + TB_DATA.date;
-  const grandRep = TB_DATA.batteries.reduce((s,b)=>s+b.sum.repRate,0);
-  const grandAct = TB_DATA.batteries.reduce((s,b)=>s+b.sum.actRate,0);
-  const grandNet = TB_DATA.batteries.reduce((s,b)=>s+b.sum.actNet,0);
-  document.getElementById('tb-grand-rep').textContent = grandRep.toLocaleString();
-  document.getElementById('tb-grand-act').textContent = grandAct.toLocaleString();
-  document.getElementById('tb-grand-net').textContent = Math.round(grandNet).toLocaleString();
+  // Use the app's situation date — format as DD-MM-YYYY
+  const sitDate = loadSituationDate ? loadSituationDate() : '';
+  let displayDate = '—';
+  if(sitDate && sitDate !== '—'){
+    try {
+      const parts = sitDate.split('-'); // YYYY-MM-DD
+      if(parts.length === 3) displayDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
+      else displayDate = sitDate;
+    } catch(e){ displayDate = sitDate; }
+  }
+  if(dateEl) dateEl.textContent = '📅 ' + displayDate;
+
+  const M3_TO_BBL = 6.28981;
+  const grandRepNet  = TB_DATA.batteries.reduce((s,b)=>s+b.repNet,0);
+  const grandRepRate = TB_DATA.batteries.reduce((s,b)=>s+b.repRate,0);
+  const grandAct     = TB_DATA.batteries.reduce((s,b)=>s+b.actRate,0);
+  const grandNet     = TB_DATA.batteries.reduce((s,b)=>s+b.actNet,0);
+
+  // M3/D values
+  // BBL is the big coloured value; M3 is the small muted sub-value
+  document.getElementById('tb-grand-rep-bbl').textContent = Math.round(grandRepNet * M3_TO_BBL).toLocaleString() + ' BBL/D';
+  document.getElementById('tb-grand-act-bbl').textContent = Math.round(grandAct    * M3_TO_BBL).toLocaleString() + ' BBL/D';
+  document.getElementById('tb-grand-net-bbl').textContent = Math.round(grandNet    * M3_TO_BBL).toLocaleString() + ' BBL/D';
+  document.getElementById('tb-grand-rep').textContent = Math.round(grandRepNet).toLocaleString() + ' M³/D';
+  document.getElementById('tb-grand-act').textContent = Math.round(grandAct).toLocaleString() + ' M³/D';
+  document.getElementById('tb-grand-net').textContent = Math.round(grandNet).toLocaleString() + ' M³/D';
   const container = document.getElementById('tb-batteries-container');
   if(!container) return;
   container.innerHTML = TB_DATA.batteries.map((bat,bi)=>{
-    const diffSign = bat.sum.diff >= 0 ? '+' : '';
-    const diffCls  = bat.sum.diff >= 0 ? 'tb-col-diff-pos' : 'tb-col-diff-neg';
-    const rows = bat.manifolds.map(m=>{
-      if(m.actRate===0 && m.repRate===0) return '';
-      const ds = m.diff >= 0 ? '+' : '';
-      const dc = m.diff >= 0 ? 'tb-col-diff-pos' : 'tb-col-diff-neg';
-      return `<div class="tb-manifold-row">
-        <div class="tb-cell">${m.name}</div>
-        <div class="tb-cell tb-col-rep">${m.repRate||'—'}</div>
-        <div class="tb-cell tb-col-wc">${m.repWc!=null?m.repWc+'%':'—'}</div>
-        <div class="tb-cell tb-col-rep">${m.repNet||'—'}</div>
-        <div class="tb-cell tb-col-act">${m.actRate||'—'}</div>
-        <div class="tb-cell tb-col-wc">${m.actWc!=null?m.actWc+'%':'—'}</div>
-        <div class="tb-cell tb-col-net">${m.actNet||'—'}</div>
-        <div class="tb-cell ${dc}">${m.diff!==0?ds+m.diff:'—'}</div>
-      </div>`;
-    }).join('');
+    const diffSign = bat.diff >= 0 ? '+' : '';
+    const diffCls  = bat.diff >= 0 ? 'tb-col-diff-pos' : 'tb-col-diff-neg';
     return `<div class="tb-battery">
       <div class="tb-battery-hdr" onclick="toggleTB(${bi})">
-        <div>
-          <div class="tb-battery-name">${bat.name}</div>
+        <div style="flex:1;">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <div class="tb-battery-name">${bat.name}</div>
+            <div class="badge other" style="font-size:10px;">${bat.wells} Wells</div>
+          </div>
           <div class="tb-stat-boxes">
-            <div class="tb-stat-box act"><span>${bat.sum.actRate.toLocaleString()}</span><span class="tb-stat-lbl">Act M3/D</span></div>
-            <div class="tb-stat-box net"><span>${Math.round(bat.sum.actNet).toLocaleString()}</span><span class="tb-stat-lbl">Net M3/D</span></div>
-            <div class="tb-stat-box wc"><span>${bat.sum.actWc}%</span><span class="tb-stat-lbl">W.C %</span></div>
+            <div class="tb-stat-box act"><span>${bat.actRate.toLocaleString()}</span><span class="tb-stat-lbl">Act M³/D</span></div>
+            <div class="tb-stat-box wc"><span>${bat.actWc}%</span><span class="tb-stat-lbl">Act W.C %</span></div>
+            <div class="tb-stat-box net"><span>${Math.round(bat.actNet).toLocaleString()}</span><span class="tb-stat-lbl">Net M³/D</span></div>
           </div>
         </div>
         <div class="tb-battery-chevron" id="tb-chev-${bi}">▼</div>
       </div>
       <div class="tb-battery-body" id="tb-body-${bi}">
-        <div class="tb-badge-strip">
-          <div class="badge live">Rep ${bat.sum.repRate.toLocaleString()} m³/d</div>
-          <div class="badge other">Rep Net ${bat.sum.repNet} m³/d</div>
-          <div class="badge producer">Act ${bat.sum.actRate.toLocaleString()} m³/d</div>
-          <div class="badge producer">Net ${Math.round(bat.sum.actNet)} m³/d</div>
-        </div>
         <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
-          <div style="min-width:560px;">
-            <div class="tb-thead">
-              <div class="tb-cell">Manifold</div>
-              <div class="tb-cell">Rep M3</div>
+          <div style="min-width:420px;">
+            <div class="tb-thead" style="grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr 1fr;">
+              <div class="tb-cell" style="text-align:left;">Metric</div>
+              <div class="tb-cell">Rep Rate</div>
               <div class="tb-cell">Rep W.C</div>
               <div class="tb-cell">Rep Net</div>
-              <div class="tb-cell">Act M3</div>
+              <div class="tb-cell">Act Rate</div>
               <div class="tb-cell">Act W.C</div>
               <div class="tb-cell">Act Net</div>
-              <div class="tb-cell">Diff</div>
             </div>
-            ${rows}
-            <div class="tb-sum-row">
-              <div class="tb-cell">TOTAL</div>
-              <div class="tb-cell tb-col-rep">${bat.sum.repRate.toLocaleString()}</div>
-              <div class="tb-cell tb-col-wc">${bat.sum.repWc}%</div>
-              <div class="tb-cell tb-col-rep">${bat.sum.repNet}</div>
-              <div class="tb-cell tb-col-act">${bat.sum.actRate.toLocaleString()}</div>
-              <div class="tb-cell tb-col-wc">${bat.sum.actWc}%</div>
-              <div class="tb-cell tb-col-net">${Math.round(bat.sum.actNet)}</div>
-              <div class="tb-cell ${diffCls}">${diffSign}${bat.sum.diff}</div>
+            <div class="tb-manifold-row" style="grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr 1fr;">
+              <div class="tb-cell" style="text-align:left;color:var(--muted);font-size:10px;">M3/D</div>
+              <div class="tb-cell tb-col-rep">${bat.repRate.toLocaleString()}</div>
+              <div class="tb-cell tb-col-wc">${bat.repWc}%</div>
+              <div class="tb-cell tb-col-rep">${bat.repNet}</div>
+              <div class="tb-cell tb-col-act">${bat.actRate.toLocaleString()}</div>
+              <div class="tb-cell tb-col-wc">${bat.actWc}%</div>
+              <div class="tb-cell tb-col-net">${Math.round(bat.actNet)}</div>
             </div>
+            <div class="tb-manifold-row" style="grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr 1fr;border-bottom:none;">
+              <div class="tb-cell" style="text-align:left;color:var(--muted);font-size:10px;">Diff Net</div>
+              <div class="tb-cell" colspan="3">—</div>
+              <div class="tb-cell" colspan="3">—</div>
+              <div class="tb-cell ${diffCls}" style="grid-column:7">${diffSign}${bat.diff}</div>
+            </div>
+          </div>
+        </div>
+        <div style="padding:10px 14px 12px;">
+          <div class="tb-badge-strip" style="padding:0;border:none;">
+            <div class="badge live">Rep ${bat.repRate.toLocaleString()} m³/d</div>
+            <div class="badge other">Rep Net ${bat.repNet} m³/d</div>
+            <div class="badge producer">Act ${bat.actRate.toLocaleString()} m³/d</div>
+            <div class="badge producer">Net ${Math.round(bat.actNet)} m³/d</div>
+            <div class="badge ${bat.diff>=0?'producer':'waiting'}">${diffSign}${bat.diff} Diff</div>
           </div>
         </div>
       </div>
@@ -2998,22 +3025,61 @@ renderManifoldLanding();
 history.replaceState({page:'lookup'}, '', '');
 
 // Android physical back button handler
+// Navigation stack: lookup → [tab] → [well card]
+// Back presses: well card → tab → lookup (empty)
 window.addEventListener('popstate', e => {
   const state = e.state;
-  // Close overlay if open
+
+  // 1. Close overlay first if open
   const overlay = document.getElementById('wellListOverlay');
   if(overlay){ overlay.remove(); return; }
-  if(!state) return;
-  const page = state.page || 'lookup';
-  // If we're showing a well card, go back from it
-  const wellCard = document.getElementById('wellResult');
-  const hasWellCard = wellCard && wellCard.querySelector('.well-hero');
-  if(hasWellCard && page === 'lookup'){
-    backFromWellCard();
+
+  if(!state) {
+    // No state = went too far back, push initial state again
     history.replaceState({page:'lookup'}, '', '');
     return;
   }
-  showPage(page, false); // false = don't push another state
+
+  const page = state.page || 'lookup';
+
+  // 2. If a well card is currently showing, back goes to source page
+  const wellCard = document.getElementById('wellResult');
+  const hasWellCard = wellCard && wellCard.querySelector('.well-hero');
+  if(hasWellCard){
+    backFromWellCard();
+    // If came from overlay, replace state to overlay so next back closes it
+    if(currentWellBackTarget === 'overlay'){
+      history.replaceState({page:'overlay'}, '', '');
+    } else {
+      const target = currentWellBackTarget === 'lookup' ? 'lookup' : currentWellBackTarget;
+      history.replaceState({page:target}, '', '');
+    }
+    return;
+  }
+
+  // 2b. If overlay is visible (hidden but not removed), close it
+  const hiddenOverlay = document.getElementById('wellListOverlay');
+  if(hiddenOverlay && hiddenOverlay.style.display === 'none'){
+    hiddenOverlay.remove();
+    currentOverlayType = null;
+    const statsEl = document.getElementById('headerStats');
+    if(statsEl) statsEl.classList.remove('hidden');
+    history.replaceState({page:'lookup'}, '', '');
+    return;
+  }
+
+  // 3. If on a tab other than lookup, go to lookup with empty state
+  if(page !== 'lookup'){
+    showPage('lookup', false);
+    clearSearch();
+    showLookupEmptyState();
+    history.replaceState({page:'lookup'}, '', '');
+    return;
+  }
+
+  // 4. Already on lookup — clear any well result shown
+  clearSearch();
+  showLookupEmptyState();
 });
   // This makes the loading screen fade away — guaranteed removal
 function hideLoadingScreen() {
