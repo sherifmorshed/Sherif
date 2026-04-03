@@ -1,10 +1,11 @@
-const CACHE_NAME = 'well-lookup-cache-v43';
+const CACHE_NAME = 'well-lookup-cache-v44';
 
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.json',
   './icon.png',
+  './icon-192.png',
   './xlsx.full.min.js'
 ];
 

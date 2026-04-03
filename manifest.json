@@ -8,10 +8,10 @@
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#070c11",
-  "theme_color": "#00d4ff",
+  "theme_color": "#22d3ee",
   "icons": [
     {
-      "src": "icon.png",
+      "src": "icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
