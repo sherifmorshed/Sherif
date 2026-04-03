@@ -1083,7 +1083,7 @@ pre{
 <div class="footer">Powered by <span>Sherif Morshed</span></div>
 <div class="toast" id="toast"></div>
 
-<script src="./xlsx.full.min.js"></script>
+<script src="./xlsx.full.min.js" onerror="(function(){var s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';document.head.appendChild(s);})()"></script>
 <script>
 // ══════════════════════════════════════════
 //  BUILT-IN WELLS DATA
@@ -3117,22 +3117,21 @@ window.addEventListener('popstate', e => {
 
   // ── Case 5: already on lookup or sentinel → allow exit ──
   // Don't intercept — let Android exit the app naturally
+});
 
   // This makes the loading screen fade away — guaranteed removal
 function hideLoadingScreen() {
     var loader = document.getElementById('loading-screen');
     if(!loader || loader.dataset.hidden) return;
     loader.dataset.hidden = '1';
-    loader.style.transition = 'opacity 0.6s ease';
+    loader.style.transition = 'opacity 0.5s ease';
     loader.style.opacity = '0';
-    setTimeout(function() { loader.style.display = 'none'; }, 650);
+    setTimeout(function() { loader.style.display = 'none'; }, 550);
 }
-// Remove after load + short delay for rendering
-window.addEventListener('load', function() {
-    setTimeout(hideLoadingScreen, 1200);
-});
-// Fallback: force-remove after 5s no matter what
-setTimeout(hideLoadingScreen, 5000);
+// Multiple triggers to guarantee the loading screen always disappears
+document.addEventListener('DOMContentLoaded', function() { setTimeout(hideLoadingScreen, 800); });
+window.addEventListener('load', function() { setTimeout(hideLoadingScreen, 500); });
+setTimeout(hideLoadingScreen, 2500);  // Hard fallback — always fires after 2.5s no matter what
 </script>
       <!-- your existing scripts above -->
 
