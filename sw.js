@@ -1,4 +1,4 @@
-const CACHE_NAME = 'well-lookup-cache-v39';
+const CACHE_NAME = 'well-lookup-cache-v41';
 
 const APP_SHELL = [
   './',
@@ -66,7 +66,7 @@ self.addEventListener('fetch', event => {
       }
 
       // Final safety net — never return undefined
-      return cached || new Response('', { status: 504, statusText: 'Offline / Not Cached' });
+      return new Response('', { status: 504, statusText: 'Offline / Not Cached' });
     })
   );
 });
