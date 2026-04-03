@@ -2905,24 +2905,45 @@ function openWellFromOverlay(name){
 // ══════════════════════════════════════════
 //  T.B PRODUCTION
 // ══════════════════════════════════════════
-const TB_DATA = {
-  batteries: [
-    { name:'T.B 6/1',  wells:94,  repRate:4680, repWc:71.8, repNet:1000.7, actRate:5655, actWc:77.2, actNet:927.7,  diff:-73.0  },
-    { name:'T.B 6/2',  wells:39,  repRate:3035, repWc:73.4, repNet:717.4,  actRate:3560, actWc:71.8, actNet:605.2,  diff:-112.2 },
-    { name:'T.B 8/1',  wells:87,  repRate:3465, repWc:67.4, repNet:963.6,  actRate:4320, actWc:76.8, actNet:818.4,  diff:-145.2 },
-    { name:'T.B 8/2',  wells:137, repRate:5005, repWc:70.2, repNet:1297.2, actRate:6065, actWc:73.5, actNet:1085.4, diff:-211.8 },
-    { name:'T.B 10/1', wells:68,  repRate:2555, repWc:59.3, repNet:1299.6, actRate:2605, actWc:63.7, actNet:986.3,  diff:-313.3 },
-    { name:'T.B 2020', wells:9,   repRate:285,  repWc:27.1, repNet:168.1,  actRate:380,  actWc:34.4, actNet:251.1,  diff:83.0   },
-  ]
-};
+// T.B. Production — calculated live from WELLS (same as all other pages)
+const TB_KEYS = [
+  { key:' 6/1',  label:'T.B 6/1'  },
+  { key:' 6/2',  label:'T.B 6/2'  },
+  { key:' 8/1',  label:'T.B 8/1'  },
+  { key:' 8/2',  label:'T.B 8/2'  },
+  { key:' 10/1', label:'T.B 10/1' },
+  { key:'2020',  label:'T.B 2020' },
+];
+
+function calcTBData(){
+  const M3_TO_BBL = 6.28981;
+  function toNum(v){ const n=parseFloat(v); return isNaN(n)?0:n; }
+  return TB_KEYS.map(({key, label})=>{
+    const group = WELLS.filter(w=>String(w['TK Battery']||'').trim()===key.trim());
+    const n = group.length;
+    const repRate = group.reduce((s,w)=>s+toNum(w['RATE , M3/D']||w['RATE, M3/D']||0),0);
+    const repWcVals = group.map(w=>toNum(w['W.C %']||0)).filter(v=>v>0);
+    const repWc = repWcVals.length ? repWcVals.reduce((s,v)=>s+v,0)/repWcVals.length : 0;
+    const repNet = group.reduce((s,w)=>s+toNum(w['REP. NET ']||w['REP. NET']||w['REP NET']||0),0);
+    const actRate = group.reduce((s,w)=>s+toNum(w['ACT , M3/D']||w['ACT, M3/D']||0),0);
+    const actWcVals = group.map(w=>toNum(w['ACT.W.C %']||0)).filter(v=>v>0);
+    const actWc = actWcVals.length ? actWcVals.reduce((s,v)=>s+v,0)/actWcVals.length : 0;
+    const actNet = group.reduce((s,w)=>s+toNum(w['ACT NET ']||w['ACT NET']||w['ACT. NET']||0),0);
+    const diff = actNet - repNet;
+    return { name:label, wells:n, repRate:Math.round(repRate), repWc:Math.round(repWc*10)/10,
+             repNet:Math.round(repNet*10)/10, actRate:Math.round(actRate),
+             actWc:Math.round(actWc*10)/10, actNet:Math.round(actNet*10)/10,
+             diff:Math.round(diff*10)/10 };
+  }).filter(b=>b.wells>0);
+}
+
 function renderTBPage(){
   const dateEl = document.getElementById('tb-date-display');
-  // Use the app's situation date — format as DD-MM-YYYY
   const sitDate = loadSituationDate ? loadSituationDate() : '';
   let displayDate = '—';
   if(sitDate && sitDate !== '—'){
     try {
-      const parts = sitDate.split('-'); // YYYY-MM-DD
+      const parts = sitDate.split('-');
       if(parts.length === 3) displayDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
       else displayDate = sitDate;
     } catch(e){ displayDate = sitDate; }
@@ -2930,22 +2951,22 @@ function renderTBPage(){
   if(dateEl) dateEl.textContent = '📅 ' + displayDate;
 
   const M3_TO_BBL = 6.28981;
-  const grandRepNet  = TB_DATA.batteries.reduce((s,b)=>s+b.repNet,0);
-  const grandRepRate = TB_DATA.batteries.reduce((s,b)=>s+b.repRate,0);
-  const grandAct     = TB_DATA.batteries.reduce((s,b)=>s+b.actRate,0);
-  const grandNet     = TB_DATA.batteries.reduce((s,b)=>s+b.actNet,0);
+  const batteries = calcTBData();
 
-  // M3/D values
-  // BBL is the big coloured value; M3 is the small muted sub-value
+  const grandRepNet = batteries.reduce((s,b)=>s+b.repNet,0);
+  const grandAct    = batteries.reduce((s,b)=>s+b.actRate,0);
+  const grandNet    = batteries.reduce((s,b)=>s+b.actNet,0);
+
   document.getElementById('tb-grand-rep-bbl').textContent = Math.round(grandRepNet * M3_TO_BBL).toLocaleString() + ' BBL/D';
   document.getElementById('tb-grand-act-bbl').textContent = Math.round(grandAct    * M3_TO_BBL).toLocaleString() + ' BBL/D';
   document.getElementById('tb-grand-net-bbl').textContent = Math.round(grandNet    * M3_TO_BBL).toLocaleString() + ' BBL/D';
   document.getElementById('tb-grand-rep').textContent = Math.round(grandRepNet).toLocaleString() + ' M³/D';
   document.getElementById('tb-grand-act').textContent = Math.round(grandAct).toLocaleString() + ' M³/D';
   document.getElementById('tb-grand-net').textContent = Math.round(grandNet).toLocaleString() + ' M³/D';
+
   const container = document.getElementById('tb-batteries-container');
   if(!container) return;
-  container.innerHTML = TB_DATA.batteries.map((bat,bi)=>{
+  container.innerHTML = batteries.map((bat,bi)=>{
     const diffSign = bat.diff >= 0 ? '+' : '';
     const diffCls  = bat.diff >= 0 ? 'tb-col-diff-pos' : 'tb-col-diff-neg';
     return `<div class="tb-battery">
@@ -2976,7 +2997,7 @@ function renderTBPage(){
               <div class="tb-cell">Act Net</div>
             </div>
             <div class="tb-manifold-row" style="grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr 1fr;">
-              <div class="tb-cell" style="text-align:left;color:var(--muted);font-size:10px;">M3/D</div>
+              <div class="tb-cell" style="text-align:left;color:var(--muted);font-size:10px;">M³/D</div>
               <div class="tb-cell tb-col-rep">${bat.repRate.toLocaleString()}</div>
               <div class="tb-cell tb-col-wc">${bat.repWc}%</div>
               <div class="tb-cell tb-col-rep">${bat.repNet}</div>
@@ -2986,9 +3007,12 @@ function renderTBPage(){
             </div>
             <div class="tb-manifold-row" style="grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr 1fr;border-bottom:none;">
               <div class="tb-cell" style="text-align:left;color:var(--muted);font-size:10px;">Diff Net</div>
-              <div class="tb-cell" colspan="3">—</div>
-              <div class="tb-cell" colspan="3">—</div>
-              <div class="tb-cell ${diffCls}" style="grid-column:7">${diffSign}${bat.diff}</div>
+              <div class="tb-cell tb-col-rep">—</div>
+              <div class="tb-cell tb-col-wc">—</div>
+              <div class="tb-cell tb-col-rep">—</div>
+              <div class="tb-cell tb-col-act">—</div>
+              <div class="tb-cell tb-col-wc">—</div>
+              <div class="tb-cell ${diffCls}">${diffSign}${bat.diff}</div>
             </div>
           </div>
         </div>
@@ -3021,66 +3045,79 @@ updateSituationDateDisplay();
 renderSubstationLanding();
 renderManifoldLanding();
 
-// Push initial history state so Android back button works
-history.replaceState({page:'lookup'}, '', '');
 
-// Android physical back button handler
-// Navigation stack: lookup → [tab] → [well card]
-// Back presses: well card → tab → lookup (empty)
+// ── ANDROID BACK BUTTON ──
+// Rules:
+//   • Never exit the app
+//   • Any back always ends at lookup with stats visible
+//   • overlay → close overlay → lookup home
+//   • well card (from overlay) → reshow overlay
+//   • well card (from tab) → go to that tab
+//   • any tab → lookup home
+//   • lookup home → stay (don't exit)
+
+function goToLookupHome(){
+  // Always show lookup page in its clean home state
+  showPage('lookup', false);
+  clearSearch();
+  showLookupEmptyState();
+  const statsEl = document.getElementById('headerStats');
+  if(statsEl) statsEl.classList.remove('hidden');
+  // Replace current state with lookup — next back exits the app naturally
+  history.replaceState({page:'lookup'}, '', '');
+}
+
+// On load — seed one base state; back from lookup exits normally
+history.replaceState({page:'lookup'}, '', '');
+history.pushState({page:'lookup-sentinel'}, '', '');
+
 window.addEventListener('popstate', e => {
   const state = e.state;
+  const page = state ? state.page : null;
 
-  // 1. Close overlay first if open
+  // ── Case 1: overlay is fully open ──
   const overlay = document.getElementById('wellListOverlay');
-  if(overlay){ overlay.remove(); return; }
-
-  if(!state) {
-    // No state = went too far back, push initial state again
-    history.replaceState({page:'lookup'}, '', '');
+  if(overlay && overlay.style.display !== 'none'){
+    closeWellListOverlay();
+    goToLookupHome();
     return;
   }
 
-  const page = state.page || 'lookup';
+  // ── Case 2: overlay is hidden (well opened from it) ──
+  const hiddenOverlay = document.getElementById('wellListOverlay');
+  if(hiddenOverlay && hiddenOverlay.style.display === 'none'){
+    // Reshow the overlay
+    hiddenOverlay.style.display = 'flex';
+    hiddenOverlay.style.flexDirection = 'column';
+    const statsEl = document.getElementById('headerStats');
+    if(statsEl) statsEl.classList.add('hidden');
+    history.pushState({page:'overlay'}, '', '');
+    return;
+  }
 
-  // 2. If a well card is currently showing, back goes to source page
+  // ── Case 3: well card is showing ──
   const wellCard = document.getElementById('wellResult');
   const hasWellCard = wellCard && wellCard.querySelector('.well-hero');
   if(hasWellCard){
     backFromWellCard();
-    // If came from overlay, replace state to overlay so next back closes it
-    if(currentWellBackTarget === 'overlay'){
-      history.replaceState({page:'overlay'}, '', '');
+    // After backFromWellCard, push a new sentinel if we're on lookup
+    if(currentWellBackTarget === 'lookup' || currentWellBackTarget === 'overlay'){
+      history.pushState({page:'lookup-sentinel'}, '', '');
     } else {
-      const target = currentWellBackTarget === 'lookup' ? 'lookup' : currentWellBackTarget;
-      history.replaceState({page:target}, '', '');
+      history.pushState({page:currentWellBackTarget}, '', '');
     }
     return;
   }
 
-  // 2b. If overlay is visible (hidden but not removed), close it
-  const hiddenOverlay = document.getElementById('wellListOverlay');
-  if(hiddenOverlay && hiddenOverlay.style.display === 'none'){
-    hiddenOverlay.remove();
-    currentOverlayType = null;
-    const statsEl = document.getElementById('headerStats');
-    if(statsEl) statsEl.classList.remove('hidden');
-    history.replaceState({page:'lookup'}, '', '');
+  // ── Case 4: on any tab → go to lookup home (back from there exits) ──
+  if(page && page !== 'lookup' && page !== 'lookup-sentinel'){
+    goToLookupHome();
     return;
   }
 
-  // 3. If on a tab other than lookup, go to lookup with empty state
-  if(page !== 'lookup'){
-    showPage('lookup', false);
-    clearSearch();
-    showLookupEmptyState();
-    history.replaceState({page:'lookup'}, '', '');
-    return;
-  }
+  // ── Case 5: already on lookup or sentinel → allow exit ──
+  // Don't intercept — let Android exit the app naturally
 
-  // 4. Already on lookup — clear any well result shown
-  clearSearch();
-  showLookupEmptyState();
-});
   // This makes the loading screen fade away — guaranteed removal
 function hideLoadingScreen() {
     var loader = document.getElementById('loading-screen');
