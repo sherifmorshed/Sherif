@@ -638,12 +638,23 @@ pre{
 /* ── T.B PRODUCTION PAGE ── */
 .tb-header-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface);border-bottom:1px solid var(--border);}
 .tb-date-pill{font-family:'Space Mono',monospace;font-size:11px;color:var(--accent);background:rgba(0,200,240,.1);border:1px solid rgba(0,200,240,.2);border-radius:20px;padding:3px 12px;}
-.tb-total-strip{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;padding:10px 14px 0;}
-.tb-total-cell{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 6px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;}
-.tb-total-val{font-size:20px;font-weight:700;font-family:'Space Mono',monospace;line-height:1.1;}
-.tb-total-val.rep{color:#d8eaf8;}
-.tb-total-val.act{color:var(--accent2);}
-.tb-total-val.net{color:var(--green);}
+.tb-total-strip{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px 14px 0;}
+.tb-total-cell{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 10px;display:flex;flex-direction:column;gap:0;}
+.tb-total-cell.rep-box{border-color:rgba(216,234,248,.2);background:rgba(216,234,248,.04);}
+.tb-total-cell.act-box{border-color:rgba(0,200,240,.2);background:rgba(0,200,240,.04);}
+.tb-box-title{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.tb-box-title.rep{color:#d8eaf8;}
+.tb-box-title.act{color:var(--accent);}
+.tb-box-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;}
+.tb-box-lbl{font-size:11px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:.3px;}
+.tb-box-val{font-size:14px;font-weight:700;font-family:'Space Mono',monospace;}
+.tb-box-val.rate-rep{color:#d8eaf8;}
+.tb-box-val.wc-rep{color:#7ec8e3;}
+.tb-box-val.net-rep{color:#d8eaf8;}
+.tb-box-val.rate-act{color:var(--accent2);}
+.tb-box-val.wc-act{color:#7ec8e3;}
+.tb-box-val.net-act{color:var(--green);}
+.tb-box-sub{font-size:9px;color:var(--muted);font-family:'Space Mono',monospace;text-align:right;}
 .tb-total-lbl{font-size:15px;color:var(--muted);margin-top:3px;letter-spacing:.4px;text-transform:uppercase;}
 .tb-battery{margin:10px 14px 0;background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
 .tb-battery-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface);cursor:pointer;user-select:none;}
@@ -1060,21 +1071,36 @@ pre{
     <div id="tb-date-display" class="tb-date-pill">📅 —</div>
     <div style="font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;">Updates with Excel upload</div>
   </div>
-  <div class="tb-total-strip" style="grid-template-columns:1fr 1fr 1fr;">
-    <div class="tb-total-cell">
-      <div class="tb-total-val rep" id="tb-grand-rep-bbl">—</div>
-      <div id="tb-grand-rep" style="font-size:12px;color:var(--muted);font-family:'Space Mono',monospace;margin-top:2px;">— M³/D</div>
-      <div class="tb-total-lbl">Rep. Net</div>
+  <div class="tb-total-strip">
+    <div class="tb-total-cell rep-box">
+      <div class="tb-box-title rep">Reported Data</div>
+      <div class="tb-box-row">
+        <div class="tb-box-lbl">Rate</div>
+        <div style="text-align:right;"><div class="tb-box-val rate-rep" id="tb-grand-rep-rate-bbl">—</div><div class="tb-box-sub" id="tb-grand-rep-rate-m3">—</div></div>
+      </div>
+      <div class="tb-box-row">
+        <div class="tb-box-lbl">W.C %</div>
+        <div class="tb-box-val wc-rep" id="tb-grand-rep-wc">—</div>
+      </div>
+      <div class="tb-box-row">
+        <div class="tb-box-lbl">Net</div>
+        <div><div class="tb-box-val net-rep" id="tb-grand-rep-bbl">—</div><div class="tb-box-sub" id="tb-grand-rep">—</div></div>
+      </div>
     </div>
-    <div class="tb-total-cell">
-      <div class="tb-total-val act" id="tb-grand-act-bbl">—</div>
-      <div id="tb-grand-act" style="font-size:12px;color:var(--muted);font-family:'Space Mono',monospace;margin-top:2px;">— M³/D</div>
-      <div class="tb-total-lbl">Act. Rate</div>
-    </div>
-    <div class="tb-total-cell">
-      <div class="tb-total-val net" id="tb-grand-net-bbl">—</div>
-      <div id="tb-grand-net" style="font-size:12px;color:var(--muted);font-family:'Space Mono',monospace;margin-top:2px;">— M³/D</div>
-      <div class="tb-total-lbl">Act. Net</div>
+    <div class="tb-total-cell act-box">
+      <div class="tb-box-title act">Actual Data</div>
+      <div class="tb-box-row">
+        <div class="tb-box-lbl">Rate</div>
+        <div><div class="tb-box-val rate-act" id="tb-grand-act-bbl">—</div><div class="tb-box-sub" id="tb-grand-act">—</div></div>
+      </div>
+      <div class="tb-box-row">
+        <div class="tb-box-lbl">W.C %</div>
+        <div class="tb-box-val wc-act" id="tb-grand-act-wc">—</div>
+      </div>
+      <div class="tb-box-row">
+        <div class="tb-box-lbl">Net</div>
+        <div><div class="tb-box-val net-act" id="tb-grand-net-bbl">—</div><div class="tb-box-sub" id="tb-grand-net">—</div></div>
+      </div>
     </div>
   </div>
   <div id="tb-batteries-container" style="padding-bottom:30px;"></div>
@@ -2953,16 +2979,30 @@ function renderTBPage(){
   const M3_TO_BBL = 6.28981;
   const batteries = calcTBData();
 
+  const grandRepRate = batteries.reduce((s,b)=>s+b.repRate,0);
+  const grandRepWcVals = batteries.filter(b=>b.repWc>0);
+  const grandRepWc = grandRepWcVals.length ? Math.round(grandRepWcVals.reduce((s,b)=>s+b.repWc,0)/grandRepWcVals.length*10)/10 : 0;
   const grandRepNet = batteries.reduce((s,b)=>s+b.repNet,0);
-  const grandAct    = batteries.reduce((s,b)=>s+b.actRate,0);
-  const grandNet    = batteries.reduce((s,b)=>s+b.actNet,0);
+  const grandActRate = batteries.reduce((s,b)=>s+b.actRate,0);
+  const grandActWcVals = batteries.filter(b=>b.actWc>0);
+  const grandActWc = grandActWcVals.length ? Math.round(grandActWcVals.reduce((s,b)=>s+b.actWc,0)/grandActWcVals.length*10)/10 : 0;
+  const grandActNet = batteries.reduce((s,b)=>s+b.actNet,0);
 
-  document.getElementById('tb-grand-rep-bbl').textContent = Math.round(grandRepNet * M3_TO_BBL).toLocaleString() + ' BBL/D';
-  document.getElementById('tb-grand-act-bbl').textContent = Math.round(grandAct    * M3_TO_BBL).toLocaleString() + ' BBL/D';
-  document.getElementById('tb-grand-net-bbl').textContent = Math.round(grandNet    * M3_TO_BBL).toLocaleString() + ' BBL/D';
-  document.getElementById('tb-grand-rep').textContent = Math.round(grandRepNet).toLocaleString() + ' M³/D';
-  document.getElementById('tb-grand-act').textContent = Math.round(grandAct).toLocaleString() + ' M³/D';
-  document.getElementById('tb-grand-net').textContent = Math.round(grandNet).toLocaleString() + ' M³/D';
+  const set = (id, val) => { const el=document.getElementById(id); if(el) el.textContent=val; };
+
+  // Reported box
+  set('tb-grand-rep-rate-bbl', Math.round(grandRepRate * M3_TO_BBL).toLocaleString() + ' BBL/D');
+  set('tb-grand-rep-rate-m3',  Math.round(grandRepRate).toLocaleString() + ' M³/D');
+  set('tb-grand-rep-wc',       grandRepWc + '%');
+  set('tb-grand-rep-bbl',      Math.round(grandRepNet * M3_TO_BBL).toLocaleString() + ' BBL/D');
+  set('tb-grand-rep',          Math.round(grandRepNet).toLocaleString() + ' M³/D');
+
+  // Actual box
+  set('tb-grand-act-bbl',      Math.round(grandActRate * M3_TO_BBL).toLocaleString() + ' BBL/D');
+  set('tb-grand-act',          Math.round(grandActRate).toLocaleString() + ' M³/D');
+  set('tb-grand-act-wc',       grandActWc + '%');
+  set('tb-grand-net-bbl',      Math.round(grandActNet * M3_TO_BBL).toLocaleString() + ' BBL/D');
+  set('tb-grand-net',          Math.round(grandActNet).toLocaleString() + ' M³/D');
 
   const container = document.getElementById('tb-batteries-container');
   if(!container) return;
@@ -2972,57 +3012,67 @@ function renderTBPage(){
     return `<div class="tb-battery">
       <div class="tb-battery-hdr" onclick="toggleTB(${bi})">
         <div style="flex:1;">
-          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:8px;">
             <div class="tb-battery-name">${bat.name}</div>
             <div class="badge other" style="font-size:10px;">${bat.wells} Wells</div>
-          </div>
-          <div class="tb-stat-boxes">
-            <div class="tb-stat-box act"><span>${bat.actRate.toLocaleString()}</span><span class="tb-stat-lbl">Act M³/D</span></div>
-            <div class="tb-stat-box wc"><span>${bat.actWc}%</span><span class="tb-stat-lbl">Act W.C %</span></div>
-            <div class="tb-stat-box net"><span>${Math.round(bat.actNet).toLocaleString()}</span><span class="tb-stat-lbl">Net M³/D</span></div>
           </div>
         </div>
         <div class="tb-battery-chevron" id="tb-chev-${bi}">▼</div>
       </div>
       <div class="tb-battery-body" id="tb-body-${bi}">
-        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
-          <div style="min-width:420px;">
-            <div class="tb-thead" style="grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr 1fr;">
-              <div class="tb-cell" style="text-align:left;">Metric</div>
-              <div class="tb-cell">Rep Rate</div>
-              <div class="tb-cell">Rep W.C</div>
-              <div class="tb-cell">Rep Net</div>
-              <div class="tb-cell">Act Rate</div>
-              <div class="tb-cell">Act W.C</div>
-              <div class="tb-cell">Act Net</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px 14px;">
+
+          <!-- Reported Data box -->
+          <div class="tb-total-cell rep-box">
+            <div class="tb-box-title rep">Reported</div>
+            <div class="tb-box-row">
+              <div class="tb-box-lbl">Rate</div>
+              <div style="text-align:right;">
+                <div class="tb-box-val rate-rep">${Math.round(bat.repRate*M3_TO_BBL).toLocaleString()} BBL/D</div>
+                <div class="tb-box-sub">${bat.repRate.toLocaleString()} M³/D</div>
+              </div>
             </div>
-            <div class="tb-manifold-row" style="grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr 1fr;">
-              <div class="tb-cell" style="text-align:left;color:var(--muted);font-size:10px;">M³/D</div>
-              <div class="tb-cell tb-col-rep">${bat.repRate.toLocaleString()}</div>
-              <div class="tb-cell tb-col-wc">${bat.repWc}%</div>
-              <div class="tb-cell tb-col-rep">${bat.repNet}</div>
-              <div class="tb-cell tb-col-act">${bat.actRate.toLocaleString()}</div>
-              <div class="tb-cell tb-col-wc">${bat.actWc}%</div>
-              <div class="tb-cell tb-col-net">${Math.round(bat.actNet)}</div>
+            <div class="tb-box-row">
+              <div class="tb-box-lbl">W.C %</div>
+              <div class="tb-box-val wc-rep">${bat.repWc}%</div>
             </div>
-            <div class="tb-manifold-row" style="grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr 1fr;border-bottom:none;">
-              <div class="tb-cell" style="text-align:left;color:var(--muted);font-size:10px;">Diff Net</div>
-              <div class="tb-cell tb-col-rep">—</div>
-              <div class="tb-cell tb-col-wc">—</div>
-              <div class="tb-cell tb-col-rep">—</div>
-              <div class="tb-cell tb-col-act">—</div>
-              <div class="tb-cell tb-col-wc">—</div>
-              <div class="tb-cell ${diffCls}">${diffSign}${bat.diff}</div>
+            <div class="tb-box-row">
+              <div class="tb-box-lbl">Net</div>
+              <div style="text-align:right;">
+                <div class="tb-box-val net-rep">${Math.round(bat.repNet*M3_TO_BBL).toLocaleString()} BBL/D</div>
+                <div class="tb-box-sub">${bat.repNet} M³/D</div>
+              </div>
             </div>
           </div>
+
+          <!-- Actual Data box -->
+          <div class="tb-total-cell act-box">
+            <div class="tb-box-title act">Actual</div>
+            <div class="tb-box-row">
+              <div class="tb-box-lbl">Rate</div>
+              <div style="text-align:right;">
+                <div class="tb-box-val rate-act">${Math.round(bat.actRate*M3_TO_BBL).toLocaleString()} BBL/D</div>
+                <div class="tb-box-sub">${bat.actRate.toLocaleString()} M³/D</div>
+              </div>
+            </div>
+            <div class="tb-box-row">
+              <div class="tb-box-lbl">W.C %</div>
+              <div class="tb-box-val wc-act">${bat.actWc}%</div>
+            </div>
+            <div class="tb-box-row">
+              <div class="tb-box-lbl">Net</div>
+              <div style="text-align:right;">
+                <div class="tb-box-val net-act">${Math.round(bat.actNet*M3_TO_BBL).toLocaleString()} BBL/D</div>
+                <div class="tb-box-sub">${Math.round(bat.actNet)} M³/D</div>
+              </div>
+            </div>
+          </div>
+
         </div>
-        <div style="padding:10px 14px 12px;">
-          <div class="tb-badge-strip" style="padding:0;border:none;">
-            <div class="badge live">Rep ${bat.repRate.toLocaleString()} m³/d</div>
-            <div class="badge other">Rep Net ${bat.repNet} m³/d</div>
-            <div class="badge producer">Act ${bat.actRate.toLocaleString()} m³/d</div>
-            <div class="badge producer">Net ${Math.round(bat.actNet)} m³/d</div>
-            <div class="badge ${bat.diff>=0?'producer':'waiting'}">${diffSign}${bat.diff} Diff</div>
+        <!-- Diff badge -->
+        <div style="padding:0 14px 12px;">
+          <div class="badge ${bat.diff>=0?'producer':'waiting'}" style="font-family:'Space Mono',monospace;font-size:11px;">
+            Net Diff: ${diffSign}${bat.diff} M³/D &nbsp;(${diffSign}${Math.round(bat.diff*M3_TO_BBL)} BBL/D)
           </div>
         </div>
       </div>
