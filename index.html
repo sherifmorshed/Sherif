@@ -15,6 +15,9 @@
 <title>Land Wells — PETROBEL</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700&family=Space+Mono:wght@400;700&display=swap');
+/* Offline font fallback — if Google Fonts fails, system fonts load seamlessly */
+@font-face { font-family: 'Barlow Condensed'; src: local('Barlow Condensed'); font-display: swap; }
+@font-face { font-family: 'Space Mono'; src: local('Space Mono'); font-display: swap; }
 :root{
   --bg:#070c11;--surface:#0d1520;--card:#111c28;--border:#1a2d42;
   --accent:#00c8f0;--accent2:#f5a623;--green:#00e676;--yellow:#f5c842;
@@ -636,53 +639,68 @@ pre{
 
 
 /* ── T.B PRODUCTION PAGE ── */
+/* ── T.B. PRODUCTION — redesigned ── */
 .tb-header-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface);border-bottom:1px solid var(--border);}
-.tb-date-pill{font-family:'Space Mono',monospace;font-size:11px;color:var(--accent);background:rgba(0,200,240,.1);border:1px solid rgba(0,200,240,.2);border-radius:20px;padding:3px 12px;}
-.tb-total-strip{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px 14px 0;}
-.tb-total-cell{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 10px;display:flex;flex-direction:column;gap:0;}
-.tb-total-cell.rep-box{border-color:rgba(216,234,248,.2);background:rgba(216,234,248,.04);}
-.tb-total-cell.act-box{border-color:rgba(0,200,240,.2);background:rgba(0,200,240,.04);}
-.tb-box-title{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border);}
-.tb-box-title.rep{color:#d8eaf8;}
+.tb-date-pill{font-family:'Space Mono',monospace;font-size:11px;color:var(--accent);background:rgba(0,200,240,.12);border:1px solid rgba(0,200,240,.25);border-radius:20px;padding:4px 14px;}
+
+/* Grand total strip */
+.tb-total-strip{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px 14px 0;}
+.tb-total-cell{border-radius:12px;padding:14px 12px 12px;display:flex;flex-direction:column;gap:0;position:relative;overflow:hidden;}
+.tb-total-cell::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.tb-total-cell.rep-box{background:var(--surface);border:1px solid var(--border);}
+.tb-total-cell.rep-box::before{background:var(--muted);}
+.tb-total-cell.act-box{background:rgba(0,200,240,.04);border:1px solid rgba(0,200,240,.18);}
+.tb-total-cell.act-box::before{background:var(--accent);}
+
+/* Box header title */
+.tb-box-title{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.08);text-align:center;}
+.tb-box-title.rep{color:var(--muted);}
 .tb-box-title.act{color:var(--accent);}
-.tb-box-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;}
-.tb-box-lbl{font-size:11px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:.3px;}
-.tb-box-val{font-size:14px;font-weight:700;font-family:'Space Mono',monospace;}
-.tb-box-val.rate-rep{color:#d8eaf8;}
-.tb-box-val.wc-rep{color:#7ec8e3;}
-.tb-box-val.net-rep{color:#d8eaf8;}
-.tb-box-val.rate-act{color:var(--accent2);}
-.tb-box-val.wc-act{color:#7ec8e3;}
-.tb-box-val.net-act{color:var(--green);}
-.tb-box-sub{font-size:9px;color:var(--muted);font-family:'Space Mono',monospace;text-align:right;}
-.tb-total-lbl{font-size:15px;color:var(--muted);margin-top:3px;letter-spacing:.4px;text-transform:uppercase;}
-.tb-battery{margin:10px 14px 0;background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
-.tb-battery-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface);cursor:pointer;user-select:none;}
-.tb-battery-hdr:active{background:rgba(0,200,240,.06);}
-.tb-battery-name{font-size:15px;font-weight:700;color:var(--accent);font-family:'Space Mono',monospace;letter-spacing:1px;}
-.tb-battery-sum{font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;margin-top:2px;}
-.tb-battery-chevron{font-size:12px;color:var(--muted);transition:transform .2s;}
-.tb-battery-chevron.open{transform:rotate(180deg);}
-.tb-stat-boxes{display:flex;gap:6px;margin-top:6px;}
-.tb-stat-box{display:flex;flex-direction:column;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:4px 10px;min-width:60px;}
-.tb-stat-box span:first-child{font-size:13px;font-weight:700;font-family:'Space Mono',monospace;}
-.tb-stat-box.act span:first-child{color:var(--accent2);}
-.tb-stat-box.net span:first-child{color:var(--green);}
-.tb-stat-box.wc span:first-child{color:#7ec8e3;}
-.tb-stat-lbl{font-size:8px;color:var(--muted);letter-spacing:.3px;text-transform:uppercase;margin-top:1px;}
+
+/* Each metric row: label on top, value centered below */
+.tb-metric{display:flex;flex-direction:column;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05);}
+.tb-metric:last-child{border-bottom:none;padding-bottom:2px;}
+.tb-metric-lbl{font-size:10px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px;}
+.tb-metric-val{font-size:20px;font-weight:700;font-family:'Space Mono',monospace;line-height:1.1;text-align:center;}
+.tb-metric-sub{font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;margin-top:3px;text-align:center;}
+
+/* Color assignments */
+.tb-metric-val.rate-rep{color:var(--text);}
+.tb-metric-val.wc-rep{color:var(--muted);}
+.tb-metric-val.net-rep{color:var(--text);}
+.tb-metric-val.rate-act{color:var(--accent);}
+.tb-metric-val.wc-act{color:var(--yellow);}
+.tb-metric-val.net-act{color:var(--green);}
+
+/* Battery cards */
+.tb-battery{margin:10px 14px 0;background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.tb-battery:last-child{margin-bottom:10px;}
+.tb-battery-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--surface);cursor:pointer;user-select:none;border-bottom:1px solid transparent;transition:background .15s;}
+.tb-battery-hdr:active,.tb-battery-hdr.open{background:rgba(0,200,240,.05);border-bottom-color:var(--border);}
+.tb-battery-name{font-size:16px;font-weight:700;color:var(--accent);font-family:'Space Mono',monospace;letter-spacing:.5px;}
+.tb-battery-wells{font-size:10px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px;margin-top:2px;}
+.tb-battery-chevron{font-size:13px;color:var(--muted);transition:transform .25s;}
+.tb-battery-chevron.open{transform:rotate(180deg);color:var(--accent);}
 .tb-battery-body{display:none;}
 .tb-battery-body.open{display:block;}
-.tb-sum-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;gap:0;border-bottom:2px solid var(--border);}
-.tb-manifold-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;gap:0;border-bottom:1px solid rgba(26,45,66,.7);}
-.tb-manifold-row:last-child{border-bottom:none;}
-.tb-manifold-row:hover{background:rgba(0,200,240,.03);}
-.tb-cell{padding:7px 5px;font-size:11px;font-family:'Space Mono',monospace;text-align:right;}
-.tb-cell:first-child{text-align:left;padding-left:12px;font-weight:600;color:var(--text);font-size:10px;}
-.tb-sum-row .tb-cell{background:rgba(0,200,240,.05);font-weight:700;}
-.tb-sum-row .tb-cell:first-child{color:var(--accent);}
-.tb-col-rep{color:#d8eaf8;}
-.tb-col-act{color:var(--accent2);}
-.tb-col-wc{color:#7ec8e3;}
+
+/* Per-battery two-box layout */
+.tb-bat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px 14px 8px;}
+
+/* Diff row */
+.tb-diff-row{display:flex;align-items:center;justify-content:center;gap:8px;padding:0 14px 12px;}
+.tb-diff-lbl{font-size:10px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;text-transform:uppercase;}
+.tb-diff-val{font-size:13px;font-weight:700;font-family:'Space Mono',monospace;}
+.tb-diff-val.pos{color:var(--green);}
+.tb-diff-val.neg{color:var(--red);}
+.tb-diff-sub{font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;}
+
+/* Keep old classes for any remaining table usage */
+.tb-battery-body{display:none;}
+.tb-battery-body.open{display:block;}
+.tb-col-rep{color:var(--text);}
+.tb-col-act{color:var(--accent);}
+.tb-col-wc{color:var(--yellow);}
 .tb-col-net{color:var(--green);}
 .tb-col-diff-pos{color:var(--yellow);}
 .tb-col-diff-neg{color:var(--red);}
@@ -716,7 +734,7 @@ pre{
 <nav class="nav" id="mainNav">
   <button class="nav-btn active" onclick="showPage('lookup')" id="nav-lookup"><span class="icon">🔍</span>Lookup</button>
   <button class="nav-btn" onclick="showPage('substation')" id="nav-substation"><span class="icon">⚡</span>Substation</button>
-  <button class="nav-btn" onclick="showPage('manifold')" id="nav-manifold"><span class="icon"><svg viewBox="0 0 120 100" xmlns="http://www.w3.org/2000/svg" class="manifold-svg" aria-hidden="true" style="width:19px;height:19px;">
+  <button class="nav-btn" onclick="showPage('manifold')" id="nav-manifold"><span class="icon"><svg viewBox="0 0 120 100" xmlns="http://www.w3.org/2000/svg" class="manifold-svg" aria-hidden="true" style="width:20px;height:20px;">
   <rect x="10" y="38" width="100" height="12" rx="6" class="rig-fill" opacity="0.9"/>
   <rect x="24" y="50" width="10" height="28" rx="5" class="rig-fill" opacity="0.75"/>
   <rect x="55" y="50" width="10" height="28" rx="5" class="rig-fill" opacity="0.75"/>
@@ -1073,33 +1091,37 @@ pre{
   </div>
   <div class="tb-total-strip">
     <div class="tb-total-cell rep-box">
-      <div class="tb-box-title rep">Reported Data</div>
-      <div class="tb-box-row">
-        <div class="tb-box-lbl">Rate</div>
-        <div style="text-align:right;"><div class="tb-box-val rate-rep" id="tb-grand-rep-rate-bbl">—</div><div class="tb-box-sub" id="tb-grand-rep-rate-m3">—</div></div>
+      <div class="tb-box-title rep">Reported</div>
+      <div class="tb-metric">
+        <div class="tb-metric-lbl">Rate</div>
+        <div class="tb-metric-val rate-rep" id="tb-grand-rep-rate-bbl">—</div>
+        <div class="tb-metric-sub" id="tb-grand-rep-rate-m3">—</div>
       </div>
-      <div class="tb-box-row">
-        <div class="tb-box-lbl">W.C %</div>
-        <div class="tb-box-val wc-rep" id="tb-grand-rep-wc">—</div>
+      <div class="tb-metric">
+        <div class="tb-metric-lbl">W.C %</div>
+        <div class="tb-metric-val wc-rep" id="tb-grand-rep-wc">—</div>
       </div>
-      <div class="tb-box-row">
-        <div class="tb-box-lbl">Net</div>
-        <div><div class="tb-box-val net-rep" id="tb-grand-rep-bbl">—</div><div class="tb-box-sub" id="tb-grand-rep">—</div></div>
+      <div class="tb-metric">
+        <div class="tb-metric-lbl">Net</div>
+        <div class="tb-metric-val net-rep" id="tb-grand-rep-bbl">—</div>
+        <div class="tb-metric-sub" id="tb-grand-rep">—</div>
       </div>
     </div>
     <div class="tb-total-cell act-box">
-      <div class="tb-box-title act">Actual Data</div>
-      <div class="tb-box-row">
-        <div class="tb-box-lbl">Rate</div>
-        <div><div class="tb-box-val rate-act" id="tb-grand-act-bbl">—</div><div class="tb-box-sub" id="tb-grand-act">—</div></div>
+      <div class="tb-box-title act">Actual</div>
+      <div class="tb-metric">
+        <div class="tb-metric-lbl">Rate</div>
+        <div class="tb-metric-val rate-act" id="tb-grand-act-bbl">—</div>
+        <div class="tb-metric-sub" id="tb-grand-act">—</div>
       </div>
-      <div class="tb-box-row">
-        <div class="tb-box-lbl">W.C %</div>
-        <div class="tb-box-val wc-act" id="tb-grand-act-wc">—</div>
+      <div class="tb-metric">
+        <div class="tb-metric-lbl">W.C %</div>
+        <div class="tb-metric-val wc-act" id="tb-grand-act-wc">—</div>
       </div>
-      <div class="tb-box-row">
-        <div class="tb-box-lbl">Net</div>
-        <div><div class="tb-box-val net-act" id="tb-grand-net-bbl">—</div><div class="tb-box-sub" id="tb-grand-net">—</div></div>
+      <div class="tb-metric">
+        <div class="tb-metric-lbl">Net</div>
+        <div class="tb-metric-val net-act" id="tb-grand-net-bbl">—</div>
+        <div class="tb-metric-sub" id="tb-grand-net">—</div>
       </div>
     </div>
   </div>
@@ -1452,7 +1474,7 @@ function goSearch(){
   suggEl.classList.remove('show');
   document.getElementById('wellResult').innerHTML=`
     <div class="empty-state"><div class="big">🔎</div>
-    <p>No well found for <strong style="color:var(--accent)">"${q}"</strong></p></div>`;
+    <p>No well found for <strong style="color:var(--accent)">"${escHtml(q)}"</strong></p></div>`;
 }
 
 function selectWell(name, source='lookup'){
@@ -3016,68 +3038,52 @@ function renderTBPage(){
     return `<div class="tb-battery">
       <div class="tb-battery-hdr" onclick="toggleTB(${bi})">
         <div style="flex:1;">
-          <div style="display:flex;align-items:center;gap:8px;">
-            <div class="tb-battery-name">${bat.name}</div>
-            <div class="badge other" style="font-size:10px;">${bat.wells} Wells</div>
-          </div>
+          <div class="tb-battery-name">${bat.name}</div>
+          <div class="tb-battery-wells">${bat.wells} wells</div>
         </div>
         <div class="tb-battery-chevron" id="tb-chev-${bi}">▼</div>
       </div>
       <div class="tb-battery-body" id="tb-body-${bi}">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px 14px;">
-
-          <!-- Reported Data box -->
+        <div class="tb-bat-grid">
           <div class="tb-total-cell rep-box">
             <div class="tb-box-title rep">Reported</div>
-            <div class="tb-box-row">
-              <div class="tb-box-lbl">Rate</div>
-              <div style="text-align:right;">
-                <div class="tb-box-val rate-rep">${Math.round(bat.repRate*M3_TO_BBL).toLocaleString()} BBL/D</div>
-                <div class="tb-box-sub">${bat.repRate.toLocaleString()} M³/D</div>
-              </div>
+            <div class="tb-metric">
+              <div class="tb-metric-lbl">Rate</div>
+              <div class="tb-metric-val rate-rep">${Math.round(bat.repRate*M3_TO_BBL).toLocaleString()} BBL/D</div>
+              <div class="tb-metric-sub">${bat.repRate.toLocaleString()} M³/D</div>
             </div>
-            <div class="tb-box-row">
-              <div class="tb-box-lbl">W.C %</div>
-              <div class="tb-box-val wc-rep">${bat.repWc}%</div>
+            <div class="tb-metric">
+              <div class="tb-metric-lbl">W.C %</div>
+              <div class="tb-metric-val wc-rep">${bat.repWc}%</div>
             </div>
-            <div class="tb-box-row">
-              <div class="tb-box-lbl">Net</div>
-              <div style="text-align:right;">
-                <div class="tb-box-val net-rep">${Math.round(bat.repNet*M3_TO_BBL).toLocaleString()} BBL/D</div>
-                <div class="tb-box-sub">${bat.repNet} M³/D</div>
-              </div>
+            <div class="tb-metric">
+              <div class="tb-metric-lbl">Net</div>
+              <div class="tb-metric-val net-rep">${Math.round(bat.repNet*M3_TO_BBL).toLocaleString()} BBL/D</div>
+              <div class="tb-metric-sub">${bat.repNet} M³/D</div>
             </div>
           </div>
-
-          <!-- Actual Data box -->
           <div class="tb-total-cell act-box">
             <div class="tb-box-title act">Actual</div>
-            <div class="tb-box-row">
-              <div class="tb-box-lbl">Rate</div>
-              <div style="text-align:right;">
-                <div class="tb-box-val rate-act">${Math.round(bat.actRate*M3_TO_BBL).toLocaleString()} BBL/D</div>
-                <div class="tb-box-sub">${bat.actRate.toLocaleString()} M³/D</div>
-              </div>
+            <div class="tb-metric">
+              <div class="tb-metric-lbl">Rate</div>
+              <div class="tb-metric-val rate-act">${Math.round(bat.actRate*M3_TO_BBL).toLocaleString()} BBL/D</div>
+              <div class="tb-metric-sub">${bat.actRate.toLocaleString()} M³/D</div>
             </div>
-            <div class="tb-box-row">
-              <div class="tb-box-lbl">W.C %</div>
-              <div class="tb-box-val wc-act">${bat.actWc}%</div>
+            <div class="tb-metric">
+              <div class="tb-metric-lbl">W.C %</div>
+              <div class="tb-metric-val wc-act">${bat.actWc}%</div>
             </div>
-            <div class="tb-box-row">
-              <div class="tb-box-lbl">Net</div>
-              <div style="text-align:right;">
-                <div class="tb-box-val net-act">${Math.round(bat.actNet*M3_TO_BBL).toLocaleString()} BBL/D</div>
-                <div class="tb-box-sub">${Math.round(bat.actNet)} M³/D</div>
-              </div>
+            <div class="tb-metric">
+              <div class="tb-metric-lbl">Net</div>
+              <div class="tb-metric-val net-act">${Math.round(bat.actNet*M3_TO_BBL).toLocaleString()} BBL/D</div>
+              <div class="tb-metric-sub">${Math.round(bat.actNet)} M³/D</div>
             </div>
           </div>
-
         </div>
-        <!-- Diff badge -->
-        <div style="padding:0 14px 12px;">
-          <div class="badge ${bat.diff>=0?'producer':'waiting'}" style="font-family:'Space Mono',monospace;font-size:11px;">
-            Net Diff: ${diffSign}${bat.diff} M³/D &nbsp;(${diffSign}${Math.round(bat.diff*M3_TO_BBL)} BBL/D)
-          </div>
+        <div class="tb-diff-row">
+          <div class="tb-diff-lbl">Net Diff</div>
+          <div class="tb-diff-val ${bat.diff>=0?'pos':'neg'}">${diffSign}${bat.diff} M³/D</div>
+          <div class="tb-diff-sub">(${diffSign}${Math.round(bat.diff*M3_TO_BBL)} BBL/D)</div>
         </div>
       </div>
     </div>`;
@@ -3098,6 +3104,8 @@ updateDBStats();
 updateSituationDateDisplay();
 renderSubstationLanding();
 renderManifoldLanding();
+renderChemicalLanding();
+renderTBPage();
 
 
 // ── ANDROID BACK BUTTON ──

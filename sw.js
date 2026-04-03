@@ -1,4 +1,4 @@
-const CACHE_NAME = 'well-lookup-cache-v41';
+const CACHE_NAME = 'well-lookup-cache-v42';
 
 const APP_SHELL = [
   './',
