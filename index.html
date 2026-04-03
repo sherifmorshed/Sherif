@@ -1142,12 +1142,16 @@ pre{
 <div class="toast" id="toast"></div>
 <div id="swUpdateBanner"><span>🔄 </span><span>App update available — </span><strong>Tap to refresh</strong></div>
 
-<script src="./xlsx.full.min.js" onerror="(function(){var s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';document.head.appendChild(s);})()"></script>
+<script src="./xlsx.full.min.js"></script>
 <script>
 // ══════════════════════════════════════════
 //  UTILITY — HTML ESCAPE
 // ══════════════════════════════════════════
-function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;');}
+function escAttr(s){ return escHtml(s).replace(/'/g,'&#39;'); }
+function lsGet(key){ try{ return localStorage.getItem(key); }catch(e){ return null; } }
+function lsSet(key,val){ try{ localStorage.setItem(key,val); return true; }catch(e){ showToast('⚠️ Storage unavailable — data may not be saved',true); return false; } }
+function lsRemove(key){ try{ localStorage.removeItem(key); return true; }catch(e){ return false; } }
 
 // ══════════════════════════════════════════
 //  BUILT-IN WELLS DATA
@@ -1158,7 +1162,7 @@ const BUILT_IN_WELLS = [{"No.": "1", "Well": "112-07", "Type": "ESP", "Status": 
 //  STATE — load from localStorage
 // ══════════════════════════════════════════
 let WELLS = loadWells();
-let wcOverrides = JSON.parse(localStorage.getItem('sm_wcOvr') || '{}');
+let wcOverrides = (()=>{ try{ return JSON.parse(lsGet('sm_wcOvr')||'{}'); }catch(e){ return {}; } })();
 
 let pendingDataRows = [];
 
@@ -1171,19 +1175,19 @@ const DOT = {producer:'#10b981',waiting:'#fbbf24',rig:'#22d3ee',other:'#3d6080'}
 // ══════════════════════════════════════════
 function loadWells() {
   try {
-    const saved = localStorage.getItem('sm_wells');
+    const saved = lsGet('sm_wells');
     if (saved) return normalizeWellDataset(JSON.parse(saved));
   } catch(e){}
   return normalizeWellDataset(BUILT_IN_WELLS);
 }
 function saveWells(arr) {
-  try { localStorage.setItem('sm_wells', JSON.stringify(arr)); } catch(e){
+  if(!lsSet('sm_wells', JSON.stringify(arr))){
     showToast('Storage full — data not saved', true);
   }
 }
 function resetToBuiltIn() {
   if (!confirm('Reset to built-in data? Custom uploads will be lost.')) return;
-  localStorage.removeItem('sm_wells');
+  lsRemove('sm_wells');
   WELLS = normalizeWellDataset(BUILT_IN_WELLS);
   updateDBStats();
   refreshSubstationView();
@@ -1346,7 +1350,7 @@ function updateDBStats() {
   document.getElementById('esp-producer-count').textContent = espProducerCount;
   document.getElementById('sr-producer-count').textContent = srProducerCount;
 
-  const src=localStorage.getItem('sm_wells') ? 'Custom Upload' : 'Built-in';
+  const src=lsGet('sm_wells') ? 'Custom Upload' : 'Built-in';
   document.getElementById('db-date').textContent=src;
 
   // Update situation date displays
@@ -1357,10 +1361,10 @@ function updateDBStats() {
 //  SITUATION DATE
 // ══════════════════════════════════════════
 function loadSituationDate() {
-  return localStorage.getItem('sm_situation_date') || '2026-03-27';
+  return lsGet('sm_situation_date') || '2026-03-27';
 }
 function saveSituationDate(dateStr) {
-  localStorage.setItem('sm_situation_date', dateStr);
+  lsSet('sm_situation_date', dateStr);
 }
 function formatSituationDate(dateStr) {
   if (!dateStr) return '—';
@@ -1442,11 +1446,11 @@ function renderSugg(matches, q, el, pickFn) {
   }
   el.innerHTML=matches.map(w=>{
     const s=sc(w['Status']);
-    const safe=w['Well'].replace(/'/g,"\\'");
+    const safe=escAttr(w['Well']);
     return `<div class="sug-item" onclick="${pickFn}('${safe}')">
       <span class="sug-dot" style="background:${DOT[s]}"></span>
-      <span class="sug-name">${w['Well']}</span>
-      <span class="sug-info">${w['Type']||''}<br><span style="color:${DOT[s]}">${w['Status']||''}</span></span>
+      <span class="sug-name">${escHtml(w['Well'])}</span>
+      <span class="sug-info">${escHtml(w['Type']||'')}<br><span style="color:${DOT[s]}">${escHtml(w['Status']||'')}</span></span>
     </div>`;
   }).join('');
   el.classList.add('show');
@@ -1720,7 +1724,7 @@ function renderSubstationSuggestions(matches,q){
     const count = getWellsBySubstation(name).length;
     const safe = substationSafe(name);
     return `<div class="sug-item" onclick="selectSubstation('${safe}')">
-      <span class="sug-name">${name}</span>
+      <span class="sug-name">${escHtml(name)}</span>
       <span class="sug-info">${count} wells</span>
     </div>`;
   }).join('');
@@ -1810,7 +1814,7 @@ function renderSubstationResult(name){
             const actRate = getWellValue(w, ['ACT , M3/D', 'ACT, M3/D', 'ACT M3/D']);
             const actNet = getWellValue(w, ['ACT NET', 'ACT NET ', 'ACT. NET', 'ACT NET M3/D']);
             return `<tr onclick="openWellFromSubstation('${safeWell}')" style="cursor:pointer;" onmouseover="this.style.background='rgba(0,200,240,.06)'" onmouseout="this.style.background=''">
-              <td class="well-link" style="color:var(--accent);font-weight:700;">${w['Well']||'—'} <span style="font-size:9px;color:var(--muted);">↗</span></td>
+              <td class="well-link" style="color:var(--accent);font-weight:700;">${escHtml(w['Well']||'—')} <span style="font-size:9px;color:var(--muted);">↗</span></td>
               <td>${tkBattery||'—'}</td>
               <td class="status-cell" style="color:${DOT[statusClass]}">${w['Status']||'—'}</td>
               <td>${fn(actRate)||'—'}</td>
@@ -1969,7 +1973,7 @@ function renderManifoldSuggestions(matches,q){
   manifoldSuggEl.innerHTML = matches.map(group=>{
     const safe = substationSafe(group.key);
     return `<div class="sug-item" onclick="selectManifoldBattery('${safe}')">
-      <span class="sug-name">${group.battery}</span>
+      <span class="sug-name">${escHtml(group.battery)}</span>
       <span class="sug-info">${group.manifoldCount} manifolds • ${group.wellCount} wells</span>
     </div>`;
   }).join('');
@@ -2129,7 +2133,7 @@ function renderManifoldResult(key){
             const actRate = getWellValue(w, ['ACT , M3/D', 'ACT, M3/D', 'ACT M3/D']);
             const actNet = getWellValue(w, ['ACT NET', 'ACT NET ', 'ACT. NET', 'ACT NET M3/D']);
             return `<tr onclick="openWellFromManifold('${safeWell}')" style="cursor:pointer;" onmouseover="this.style.background='rgba(0,200,240,.06)'" onmouseout="this.style.background=''">
-              <td class="well-link" style="color:var(--accent);font-weight:700;">${w['Well']||'—'} <span style="font-size:9px;color:var(--muted);">↗</span></td>
+              <td class="well-link" style="color:var(--accent);font-weight:700;">${escHtml(w['Well']||'—')} <span style="font-size:9px;color:var(--muted);">↗</span></td>
               <td>${substation||'—'}</td>
               <td class="status-cell" style="color:${DOT[statusClass]}">${w['Status']||'—'}</td>
               <td>${fn(actRate)||'—'}</td>
@@ -2366,8 +2370,8 @@ function renderChemicalSuggestions(matches,q){
     const safe = chemicalSafe(rec.well['Well']);
     const chemText = rec.chemicals.join(' & ');
     return `<div class="sug-item" onclick="selectChemicalWell('${safe}')">
-      <span class="sug-name">${rec.well['Well']}</span>
-      <span class="sug-info">Injected with: ${chemText}<br>${getBatteryValue(rec.well)||'No TK'} • ${getManifoldValue(rec.well)||'No Manifold'}</span>
+      <span class="sug-name">${escHtml(rec.well['Well'])}</span>
+      <span class="sug-info">Injected with: ${escHtml(chemText)}<br>${escHtml(getBatteryValue(rec.well)||'No TK')} • ${escHtml(getManifoldValue(rec.well)||'No Manifold')}</span>
     </div>`;
   }).join('');
   chemicalSuggEl.classList.add('show');
@@ -2838,8 +2842,8 @@ function mkTable(rows,preferred){
     .map(pc=>allCols.find(c=>c.toLowerCase().trim()===pc.toLowerCase()))
     .filter(Boolean);
   const show=cols.length?cols:allCols.slice(0,6);
-  const th='<thead><tr>'+show.map(c=>`<th>${c}</th>`).join('')+'</tr></thead>';
-  const td='<tbody>'+rows.slice(0,8).map(r=>'<tr>'+show.map(c=>`<td>${r[c]||''}</td>`).join('')+'</tr>').join('')
+  const th='<thead><tr>'+show.map(c=>`<th>${escHtml(c)}</th>`).join('')+'</tr></thead>';
+  const td='<tbody>'+rows.slice(0,8).map(r=>'<tr>'+show.map(c=>`<td>${escHtml(r[c]||'')}</td>`).join('')+'</tr>').join('')
     +(rows.length>8?`<tr><td colspan="${show.length}" style="color:var(--muted);text-align:center">...+${rows.length-8} more</td></tr>`:'')+
     '</tbody>';
   return th+td;
@@ -3332,7 +3336,7 @@ setTimeout(hideLoadingScreen, 2500);  // Hard fallback — always fires after 2.
     <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').then(registration => {
+        navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).then(registration => {
 
           // Helper: show update banner pointing at a waiting worker
           function showUpdateBanner(worker) {

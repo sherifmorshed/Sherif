@@ -1,21 +1,36 @@
 const CACHE_NAME = 'well-lookup-cache-v44';
 
-const APP_SHELL = [
-  './',
+// Critical — SW install fails if any of these can't be cached
+const CORE_SHELL = [
   './index.html',
-  './manifest.json',
-  './icon.png',
-  './icon-192.png',
   './xlsx.full.min.js'
 ];
 
-// Install — cache app shell, but do NOT skipWaiting automatically.
-// The new SW waits until the app explicitly approves activation.
+// Non-critical — cached best-effort; failure won't abort install
+const OPTIONAL_SHELL = [
+  './',
+  './manifest.json',
+  './icon.png',
+  './icon-192.png'
+];
+
+// Install — cache core files (must succeed) + optional files (best-effort)
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL))
+    caches.open(CACHE_NAME).then(async cache => {
+      // Core files must all cache — if any fail, install fails
+      await cache.addAll(CORE_SHELL);
+      // Optional files cached individually — failures are tolerated
+      await Promise.allSettled(
+        OPTIONAL_SHELL.map(url =>
+          cache.add(url).catch(err =>
+            console.warn('[SW] Optional asset not cached:', url, err)
+          )
+        )
+      );
+    })
   );
-  // No self.skipWaiting() here — user controls when to activate.
+  // No self.skipWaiting() — controlled via message
 });
 
 // Activate — clean old caches and claim clients.
