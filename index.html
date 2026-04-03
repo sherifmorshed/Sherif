@@ -1212,6 +1212,13 @@ function fn(v) {
   if (isNaN(n)) return String(v).trim()||null;
   return Number.isInteger(n)?String(n):n.toFixed(2);
 }
+function safeNum(v, fallback=null){
+  if(v===''||v==null) return fallback;
+  // Strip common formatting: commas, spaces, units like m³/d, %, BBL/D
+  const cleaned = String(v).replace(/,/g,'').replace(/[^\d.\-]/g,'').trim();
+  const n = parseFloat(cleaned);
+  return isNaN(n) ? fallback : n;
+}
 function calcRunningDays(dateStr) {
   if (!dateStr) return null;
   const s = String(dateStr).trim();
@@ -1615,7 +1622,7 @@ function renderWell(well, source='lookup'){
           <div class="lm-lbl">ACT W.C %</div>
         </div>
         <div class="live-metric">
-          <div class="lm-val">${actNet!==null&&actNet!==''?Math.round(Number(actNet)):'—'}</div>
+          <div class="lm-val">${safeNum(actNet)!==null?Math.round(safeNum(actNet)):'—'}</div>
           <div class="lm-lbl">ACT NET (m³/d)</div>
         </div>
       </div>
@@ -1816,7 +1823,7 @@ function renderSubstationResult(name){
             return `<tr onclick="openWellFromSubstation('${safeWell}')" style="cursor:pointer;" onmouseover="this.style.background='rgba(0,200,240,.06)'" onmouseout="this.style.background=''">
               <td class="well-link" style="color:var(--accent);font-weight:700;">${escHtml(w['Well']||'—')} <span style="font-size:9px;color:var(--muted);">↗</span></td>
               <td>${tkBattery||'—'}</td>
-              <td class="status-cell" style="color:${DOT[statusClass]}">${w['Status']||'—'}</td>
+              <td class="status-cell" style="color:${DOT[statusClass]}">${escHtml(w['Status']||'—')}</td>
               <td>${fn(actRate)||'—'}</td>
               <td>${fn(wc)||'—'}</td>
               <td>${roundToNearestWholeDisplay(actNet)||'—'}</td>
@@ -2135,7 +2142,7 @@ function renderManifoldResult(key){
             return `<tr onclick="openWellFromManifold('${safeWell}')" style="cursor:pointer;" onmouseover="this.style.background='rgba(0,200,240,.06)'" onmouseout="this.style.background=''">
               <td class="well-link" style="color:var(--accent);font-weight:700;">${escHtml(w['Well']||'—')} <span style="font-size:9px;color:var(--muted);">↗</span></td>
               <td>${substation||'—'}</td>
-              <td class="status-cell" style="color:${DOT[statusClass]}">${w['Status']||'—'}</td>
+              <td class="status-cell" style="color:${DOT[statusClass]}">${escHtml(w['Status']||'—')}</td>
               <td>${fn(actRate)||'—'}</td>
               <td>${fn(wc)||'—'}</td>
               <td>${roundToNearestWholeDisplay(actNet)||'—'}</td>
@@ -2400,7 +2407,7 @@ function renderChemicalLanding(){
           ${groups.map(group=>{
             const safe = chemicalSafe(group.key);
             return `<div class="chem-card" onclick="selectChemical('${safe}')">
-              <div class="chem-name">${group.name}</div>
+              <div class="chem-name">${escHtml(group.name)}</div>
               <div class="chem-count">${group.records.length} wells</div>
               <div class="chem-sub">${group.mixedCount ? `${group.mixedCount} mixed with another chemical` : `Single-chemical injection only`}</div>
               <div style="margin-top:8px;font-size:11px;color:var(--accent);font-family:'JetBrains Mono',monospace;letter-spacing:.5px;">View wells →</div>
@@ -2427,18 +2434,18 @@ function renderChemicalWellFocus(wellName){
     <div class="substation-summary">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
         <div>
-          <div class="substation-name">${w['Well']||'—'}</div>
-          <div class="substation-note" style="margin-top:4px;">Active injected chemical profile for this well.</div><div style="margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;line-height:1.35;color:var(--accent2);">${rec.chemicals.join(" & ")}</div>
+          <div class="substation-name">${escHtml(w['Well']||'—')}</div>
+          <div class="substation-note" style="margin-top:4px;">Active injected chemical profile for this well.</div><div style="margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;line-height:1.35;color:var(--accent2);">${escHtml(rec.chemicals.join(' & '))}</div>
         </div>
         <div style="display:flex;justify-content:flex-end;"><button class="nav-back-btn" onclick="backToChemicalLanding()">← Back</button></div>
       </div>
       <div class="substation-meta">
         <div class="badge live">${rec.chemicals.length} Chemical${rec.chemicals.length>1?'s':''}</div>
         <div class="badge ${isMixed ? 'waiting' : 'producer'}">${isMixed ? 'Mixed Chemical' : 'Single Chemical'}</div>
-        <div class="badge other">TK ${getBatteryValue(w)||'—'}</div>
-        <div class="badge tb">${getSubstationValue(w)||'No Substation'}</div>
+        <div class="badge other">TK ${escHtml(getBatteryValue(w)||'—')}</div>
+        <div class="badge tb">${escHtml(getSubstationValue(w)||'No Substation')}</div>
       </div>
-      <div class="substation-note" style="margin-top:8px;">Manifold: <strong style="color:var(--text)">${getManifoldValue(w)||'—'}</strong> • Status: <strong style="color:${DOT[sc(w['Status'])]}">${w['Status']||'—'}</strong></div>
+      <div class="substation-note" style="margin-top:8px;">Manifold: <strong style="color:var(--text)">${escHtml(getManifoldValue(w)||'—')}</strong> • Status: <strong style="color:${DOT[sc(w['Status'])]}">${escHtml(w['Status']||'—')}</strong></div>
     </div>
     <div class="section">
       <div class="sec-title">Injected Chemicals</div>
@@ -2473,7 +2480,7 @@ function renderChemicalResult(key){
   resultEl.innerHTML = `
     <div class="substation-summary">
       <div>
-          <div class="substation-name">${group.name}</div>
+          <div class="substation-name">${escHtml(group.name)}</div>
           <div class="substation-note" style="margin-top:4px;">Open wells below to review which ones are injected with only this chemical and which ones are injected with multiple chemicals.</div>
         </div>
         <div style="display:flex;justify-content:flex-end;margin-top:8px;"><button class="nav-back-btn" onclick="backToChemicalLanding()">← Back</button></div>
@@ -2485,16 +2492,16 @@ function renderChemicalResult(key){
         <div class="badge tb">${group.batteryCount} TK Batteries</div>
         ${filter ? `<div class="badge other">Filtered: ${filteredRecords.length}</div>` : ``}
       </div>
-      ${pairText ? `<div class="substation-note" style="margin-top:8px;">Common pairings with <strong style="color:var(--text)">${group.name}</strong>: ${pairText}</div>` : `<div class="substation-note" style="margin-top:8px;">All listed wells currently show this chemical as the only active injected type.</div>`}
+      ${pairText ? `<div class="substation-note" style="margin-top:8px;">Common pairings with <strong style="color:var(--text)">${escHtml(group.name)}</strong>: ${escHtml(pairText)}</div>` : `<div class="substation-note" style="margin-top:8px;">All listed wells currently show this chemical as the only active injected type.</div>`}
     </div>
 
     <div class="section">
-      <div class="sec-title">${group.name} — Injected Wells</div>
+      <div class="sec-title">${escHtml(group.name)} — Injected Wells</div>
       <div style="padding:12px 14px;">
         <div class="chem-search-row">
           <div class="chem-search-wrap">
             <span class="s-icon">🔎</span>
-            <input class="chem-search-input" id="chemicalWellSearchInput" type="text" placeholder="Search well inside ${group.name}..." value="${String(currentChemicalWellFilter||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}" autocomplete="off" spellcheck="false">
+            <input class="chem-search-input" id="chemicalWellSearchInput" type="text" placeholder="Search well inside ${escAttr(group.name)}..." value="${escAttr(currentChemicalWellFilter||'')}" autocomplete="off" spellcheck="false">
             <button class="chem-search-clear" id="chemicalWellSearchClear" onclick="clearChemicalWellSearch()">✕</button>
           </div>
         </div>
@@ -2509,17 +2516,17 @@ function renderChemicalResult(key){
           return `<div class="chem-well" onclick="goToWellFromChem('${(w['Well']||'').replace(/'/g,"\\'")}');return false;" style="cursor:pointer;">
             <div class="chem-well-top">
               <div>
-                <div class="chem-well-name">${w['Well']||'—'} <span style="font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;">↗ Open</span></div>
-                <div class="chem-well-meta">TK ${getBatteryValue(w)||'—'} • Manifold ${getManifoldValue(w)||'—'} • <span style="color:${DOT[statusClass]}">${w['Status']||'—'}</span></div>
+                <div class="chem-well-name">${escHtml(w['Well']||'—')} <span style="font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;">↗ Open</span></div>
+                <div class="chem-well-meta">TK ${escHtml(getBatteryValue(w)||'—')} • Manifold ${escHtml(getManifoldValue(w)||'—')} • <span style="color:${DOT[statusClass]}">${escHtml(w['Status']||'—')}</span></div>
               </div>
               <div class="badges" style="margin-top:0;">
                 <div class="badge ${isMixed ? 'waiting' : 'producer'}">${isMixed ? rec.chemicals.length + ' Chemicals' : 'Single Chemical'}</div>
-                <div class="badge other">${getSubstationValue(w)||'No Substation'}</div>
+                <div class="badge other">${escHtml(getSubstationValue(w)||'No Substation')}</div>
               </div>
             </div>
             <div class="chem-pill-row">${pills}</div>
           </div>`;
-        }).join('') : `<div class="chem-search-empty">No wells matched this search inside ${group.name}.</div>`}
+        }).join('') : `<div class="chem-search-empty">No wells matched this search inside ${escHtml(group.name)}.</div>`}
       </div>
     </div>
   `;
@@ -2862,7 +2869,8 @@ function installApp(){
   if(!deferredInstall)return;
   deferredInstall.prompt();
   deferredInstall.userChoice.then(r=>{
-    if(r.outcome==='accepted') document.getElementById('installBanner').style.display='none';
+    document.getElementById('installBanner').style.display='none';
+    if(r.outcome==='dismissed') showToast('Install dismissed — you can install later from your browser menu');
     deferredInstall=null;
   });
 }
@@ -2909,19 +2917,19 @@ function showWellListOverlay(type){
       const battery  = getBatteryValue(w) || '—';
       const manifold = getManifoldValue(w) || '—';
       const actNet   = getWellValue(w, ['ACT NET','ACT NET ','ACT. NET','ACT NET M3/D']);
-      const netDisplay = actNet!==null && actNet!=='' ? Math.round(Number(actNet))+' m³/d' : '—';
+      const netDisplay = safeNum(actNet)!==null ? Math.round(safeNum(actNet))+' m³/d' : '—';
       const safeWell = String(w['Well']||'').replace(/'/g,"\\'");
       let rightTop = '';
       if(isProducing){
         const wc = currentWcForWell(w);
-        const wcDisplay = wc!==''&&wc!==null ? Number(wc).toFixed(1)+'%' : '—';
+        const wcDisplay = safeNum(wc)!==null ? safeNum(wc).toFixed(1)+'%' : '—';
         rightTop = `<div style="color:var(--accent);font-size:11px;font-weight:600;text-align:right">${wcDisplay} W.C</div>`;
       } else {
-        rightTop = `<div class="well-list-row-status" style="color:${DOT[statusClass]}">${w['Status']||'—'}</div>`;
+        rightTop = `<div class="well-list-row-status" style="color:${DOT[statusClass]}">${escHtml(w['Status']||'—')}</div>`;
       }
       return `<div class="well-list-row" onclick="openWellFromOverlay('${safeWell}')">
         <div>
-          <div class="well-list-row-name">${w['Well']||'—'}</div>
+          <div class="well-list-row-name">${escHtml(w['Well']||'—')}</div>
           <div class="well-list-row-meta">TK ${battery} • Manifold ${manifold}</div>
         </div>
         <div class="well-list-row-right">
@@ -3095,7 +3103,7 @@ function renderTBPage(){
     return `<div class="tb-battery">
       <div class="tb-battery-hdr" onclick="toggleTB(${bi})">
         <div style="flex:1;">
-          <div class="tb-battery-name">${bat.name}</div>
+          <div class="tb-battery-name">${escHtml(bat.name)}</div>
           <div class="tb-battery-wells">${bat.wells} wells</div>
         </div>
         <div class="tb-battery-chevron" id="tb-chev-${bi}">▼</div>
