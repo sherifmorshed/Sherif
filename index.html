@@ -1023,7 +1023,7 @@ pre{
   </div>
   <div style="padding:14px 14px 30px;">
 
-    <div class="db-stat-grid" style="grid-template-columns:1fr 1fr 1fr;">
+    <div class="db-stat-grid" style="grid-template-columns:1fr 1fr 1fr 1fr;">
       <div class="db-stat">
         <div class="ds-val" id="db-count">434</div>
         <div class="ds-lbl">Wells in Database</div>
@@ -1035,6 +1035,10 @@ pre{
       <div class="db-stat">
         <div class="ds-val" id="db-date" style="font-size:14px;">Built-in</div>
         <div class="ds-lbl">Data Source</div>
+      </div>
+      <div class="db-stat">
+        <div class="ds-val" id="db-persist-status" style="font-size:13px;color:var(--green);">✓ Saved</div>
+        <div class="ds-lbl">Storage Status</div>
       </div>
     </div>
 
@@ -1250,8 +1254,62 @@ function loadWells() {
   return normalizeWellDataset(BUILT_IN_WELLS);
 }
 function saveWells(arr) {
-  if(!lsSet(STORAGE_KEYS.wells, JSON.stringify(arr))){
-    showToast('Storage full — data not saved', true);
+  const json = JSON.stringify(arr);
+  const ok = lsSet(STORAGE_KEYS.wells, json);
+
+  // Post-save verification — read back and confirm length matches
+  let verified = false;
+  if(ok){
+    try {
+      const readBack = JSON.parse(lsGet(STORAGE_KEYS.wells) || '[]');
+      verified = Array.isArray(readBack) && readBack.length === arr.length;
+    } catch(e){ verified = false; }
+  }
+
+  // Update storage status indicator
+  const statusEl = document.getElementById('db-persist-status');
+  if(statusEl){
+    statusEl.textContent = verified ? '✓ Saved' : '⚠ Not Saved';
+    statusEl.style.color = verified ? 'var(--green)' : 'var(--red)';
+  }
+
+  if(!ok || !verified){
+    showToast('⚠️ Storage full — data not saved to device', true);
+    // Offer backup download so user doesn't lose their data
+    offerBackupDownload(arr);
+  }
+}
+
+function offerBackupDownload(arr){
+  // Show a one-time download button so user can save a JSON backup
+  const existing = document.getElementById('backupDownloadBanner');
+  if(existing) existing.remove();
+  const banner = document.createElement('div');
+  banner.id = 'backupDownloadBanner';
+  banner.style.cssText = 'position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--red);border-radius:10px;padding:12px 16px;z-index:8001;display:flex;align-items:center;gap:12px;box-shadow:0 4px 20px rgba(0,0,0,.5);max-width:320px;';
+  banner.innerHTML = `<div style="font-size:12px;color:var(--text);flex:1;line-height:1.5;">Data couldn't be saved to device.<br><strong style="color:var(--yellow)">Download a backup?</strong></div>
+    <button onclick="downloadWellsBackup()" style="background:var(--yellow);color:#000;border:none;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">Download</button>
+    <button onclick="this.closest('#backupDownloadBanner').remove()" style="background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;padding:4px;">✕</button>`;
+  document.body.appendChild(banner);
+  // Auto-dismiss after 15s
+  setTimeout(()=>{ if(banner.parentNode) banner.remove(); }, 15000);
+}
+
+function downloadWellsBackup(){
+  try {
+    const json = JSON.stringify(WELLS, null, 2);
+    const blob = new Blob([json], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `wells_backup_${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('✅ Backup downloaded');
+    const banner = document.getElementById('backupDownloadBanner');
+    if(banner) banner.remove();
+  } catch(e){
+    showToast('⚠️ Could not create backup file', true);
   }
 }
 function resetToBuiltIn() {
@@ -1413,6 +1471,13 @@ function normalizeWellDataset(rows){
 function updateDBStats() {
   document.getElementById('db-count').textContent=WELLS.length;
   document.getElementById('total-count').textContent=WELLS.length;
+  // Refresh storage status indicator
+  const statusEl = document.getElementById('db-persist-status');
+  if(statusEl){
+    const isSaved = lsGet(STORAGE_KEYS.wells) !== null;
+    statusEl.textContent = isSaved ? '✓ Saved' : '⚠ Not Saved';
+    statusEl.style.color = isSaved ? 'var(--green)' : 'var(--yellow)';
+  }
   const builtinEl = document.getElementById('builtin-count');
   if(builtinEl) builtinEl.textContent=WELLS.length;
 
@@ -1495,7 +1560,11 @@ function showPage(page, pushState=true) {
   if(page==='data') updateDBStats();
   if(page==='tb') renderTBPage();
   // Push history state for Android back button
-  if(pushState) history.pushState({page}, '', '');
+  // Use replaceState (not pushState) — the Android back handler owns the
+  // history stack via its own pushState calls. showPage() only needs to
+  // keep the current entry accurate without adding extra entries that
+  // would inflate the stack and confuse the exit/app loop.
+  if(pushState) history.replaceState({page}, '', '');
 }
 
 function switchTab(page, tab) {
@@ -2942,7 +3011,8 @@ function importDataFile(){
   document.getElementById('dataPreviewArea').style.display='none';
   document.getElementById('dataUploadOk').style.display='block';
   const sitDateStr = formatSituationDate(loadSituationDate());
-  document.getElementById('dataUploadOk').innerHTML=`✅ Database updated!<br>${WELLS.length} wells loaded · Situation: ${sitDateStr}<br><span style="font-size:11px;color:var(--muted)">Go to Lookup to search wells</span>`;
+  const savedOk = lsGet(STORAGE_KEYS.wells) !== null;
+  document.getElementById('dataUploadOk').innerHTML=`${savedOk?'✅':'⚠️'} Database ${savedOk?'updated and saved':'updated (not saved to device)'}!<br>${WELLS.length} wells loaded · Situation: ${sitDateStr}<br><span style="font-size:11px;color:var(--muted)">Go to Lookup to search wells</span>`;
   pendingDataRows=[];
   updateDBStats(); updateCounters();
   refreshSubstationView();
@@ -3481,14 +3551,19 @@ window.addEventListener('popstate', () => {
   const ovHidden = overlay && overlay.style.display === 'none';
   const activePg = document.querySelector('.page.active');
   const pgId     = activePg ? activePg.id.replace('page-', '') : '';
+  const onLookup = (pgId === 'lookup');
   const wellCard = document.getElementById('wellResult');
-  const hasCard  = wellCard && wellCard.querySelector('.well-hero');
+  // Gate hasCard to lookup page only — #wellResult DOM persists when
+  // switching tabs, so stale .well-hero would cause wrong back behavior
+  // on Substation / Manifold / Chemical pages.
+  const hasCard  = onLookup && wellCard && wellCard.querySelector('.well-hero');
   const statsEl  = document.getElementById('headerStats');
 
   // ── 1. Well opened from overlay (overlay hidden behind well card) ──
-  // This must come before the generic "has card" check
-  if (ovHidden && hasCard) {
+  // Only possible when on lookup page
+  if (onLookup && ovHidden && hasCard) {
     history.pushState({page:'app'}, '', '');
+    if (wellCard) wellCard.innerHTML = ''; // clear stale well card
     overlay.style.display = 'flex';
     overlay.style.flexDirection = 'column';
     showPage('lookup', false);
@@ -3507,26 +3582,31 @@ window.addEventListener('popstate', () => {
     return;
   }
 
-  // ── 3. Well card showing (not from overlay) ──
+  // ── 3. Well card showing on lookup page (not from overlay) ──
   if (hasCard) {
-    history.pushState({page:'app'}, '', '');
+    // Clear the well card first so stale .well-hero doesn't linger
+    if (wellCard) wellCard.innerHTML = '';
     const t = currentWellBackTarget;
     if (t === 'substation') {
+      history.pushState({page:'app'}, '', '');
       showPage('substation', false);
       if (statsEl) statsEl.classList.remove('hidden');
       return;
     }
     if (t === 'manifold') {
+      history.pushState({page:'app'}, '', '');
       showPage('manifold', false);
       if (statsEl) statsEl.classList.remove('hidden');
       return;
     }
     if (t === 'chemical') {
+      history.pushState({page:'app'}, '', '');
       showPage('chemical', false);
       if (statsEl) statsEl.classList.remove('hidden');
       return;
     }
     // From lookup or anything else → lookup home
+    history.pushState({page:'app'}, '', '');
     showPage('lookup', false);
     clearSearch();
     showLookupEmptyState();
@@ -3575,15 +3655,19 @@ window.addEventListener('popstate', () => {
     return;
   }
 
-  // ── 9. Lookup home clean → exit confirmation ──
+  // ── 9. Lookup home clean → standard "double back to exit" ──
+  // Stack is always [exit, app] when we reach here.
+  // Press 1: show toast, replaceState keeps stack at [exit, app] — no inflation
+  // Press 2 within 2s: return without pushing → popstate fires on [exit] → OS exits
+  // This gives a true 2-press exit, not 3.
   const now = Date.now();
   if (now - _exitHintAt < 2000) {
-    // Second press within 2 s — leave stack at [exit], next Android back exits
+    // Second press within 2s — let the OS handle it (exits the app)
     return;
   }
   _exitHintAt = now;
   showToast('\u2B05 Press back again to exit');
-  history.pushState({page:'app'}, '', '');
+  history.replaceState({page:'app'}, '', '');
 });
 
   // This makes the loading screen fade away — guaranteed removal
