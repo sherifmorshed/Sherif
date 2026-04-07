@@ -1512,6 +1512,13 @@ function attachDelegatedClicks(container){
       case 'openFromTB':          openWellFromTB(key); break;
       case 'openFromChemical':    openWellFromChemical(key); break;
       case 'goToWellFromChem':    goToWellFromChem(key); break;
+      case 'pickSugg': {
+        const fn = el.dataset.pickfn || '';
+        if(fn === 'selectWell') selectWell(key);
+        else if(fn === 'selectSubstation') selectSubstation(key);
+        else if(fn === 'selectManifold') selectManifold(key);
+        break;
+      }
     }
   }, true);
 }
