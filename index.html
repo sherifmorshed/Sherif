@@ -1414,7 +1414,7 @@ function stopFirestoreListener() {
 function startFirestoreListener() {
   // Always stop existing listener first to avoid duplicates
   stopFirestoreListener();
-  console.log('[Firestore] Starting listener…');
+  console.log('[Firestore] Starting listener');
   updateCloudStatus('syncing', 'Connecting…');
   _firestoreUnsub = db.collection('wells').doc('landWells')
     .onSnapshot(function(doc) {
@@ -1423,40 +1423,53 @@ function startFirestoreListener() {
         const data = doc.data();
         const remoteWells = data.wells || [];
         const remoteSitDate = data.situationDate || '';
+        const remoteUpdatedAt = data.updatedAt ? data.updatedAt.toMillis() : 0;
 
-        // Only update if the remote data is different (avoid loops)
-        if (remoteWells.length > 0 && JSON.stringify(remoteWells) !== JSON.stringify(WELLS)) {
+        // Lightweight change detection — avoids serializing 434 wells on every snapshot
+        const changed = remoteWells.length > 0 && (
+          remoteWells.length !== WELLS.length ||
+          remoteSitDate !== (lsGet(STORAGE_KEYS.situationDate) || '') ||
+          remoteUpdatedAt !== _lastFirestoreTimestamp
+        );
+
+        if (changed) {
+          _lastFirestoreTimestamp = remoteUpdatedAt;
           WELLS = normalizeWellDataset(remoteWells);
-          // Cache locally for offline use
           lsSet(STORAGE_KEYS.wells, JSON.stringify(WELLS));
           if (remoteSitDate) {
             lsSet(STORAGE_KEYS.situationDate, remoteSitDate);
           }
-          // Refresh the entire UI
-          updateDBStats();
+          // Only refresh the active page — mark others as stale
+          _stalePages = { substation:true, manifold:true, chemical:true, tb:true, data:true, lookup:true };
+          var activePage = document.querySelector('.page.active');
+          var activeId = activePage ? activePage.id.replace('page-','') : 'lookup';
+          _refreshPage(activeId);
+          delete _stalePages[activeId];
           updateCounters();
-          refreshSubstationView();
-          refreshManifoldView();
-          refreshChemicalView();
-          renderTBPage();
           showToast('🔄 Data synced from cloud');
         }
-        console.log('[Firestore] Snapshot received — ' + remoteWells.length + ' wells');
         updateCloudStatus('synced', 'Cloud ✓');
       } else {
-        // No data in Firestore yet — upload built-in wells
         _firestoreReady = true;
-        console.log('[Firestore] No document yet');
         updateCloudStatus('synced', 'Cloud ✓');
       }
     }, function(err) {
-      console.error('[Firestore] Listener error:', err.code, err.message);
+      console.error('[Firestore] Listener error:', err.code);
       if (err.code === 'permission-denied') {
         updateCloudStatus('offline', 'Not authorized');
       } else {
         updateCloudStatus('offline', 'Offline');
       }
     });
+}
+var _lastFirestoreTimestamp = 0;
+var _stalePages = {};
+function _refreshPage(page) {
+  if(page==='substation') refreshSubstationView();
+  else if(page==='manifold') refreshManifoldView();
+  else if(page==='chemical') refreshChemicalView();
+  else if(page==='tb') renderTBPage();
+  else if(page==='data') updateDBStats();
 }
 
 // ── Online/Offline detection ──
@@ -1964,11 +1977,13 @@ function showPage(page, pushState=true) {
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
   document.getElementById('nav-'+page).classList.add('active');
-  if(page==='substation') refreshSubstationView();
-  if(page==='manifold') refreshManifoldView();
-  if(page==='chemical') refreshChemicalView();
-  if(page==='data') updateDBStats();
-  if(page==='tb') renderTBPage();
+  // Refresh stale pages (marked by Firestore sync) or always refresh on tab switch
+  if(_stalePages[page]) { _refreshPage(page); delete _stalePages[page]; }
+  else if(page==='substation') refreshSubstationView();
+  else if(page==='manifold') refreshManifoldView();
+  else if(page==='chemical') refreshChemicalView();
+  else if(page==='data') updateDBStats();
+  else if(page==='tb') renderTBPage();
   // When returning to lookup — always show clean home state
   if(page==='lookup'){
     const statsEl = document.getElementById('headerStats');
