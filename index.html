@@ -1292,6 +1292,7 @@ function handleLogout() {
 function showApp(user) {
   currentUser = { email: user.email, uid: user.uid, name: user.email.split('@')[0] };
   isAdmin = ADMIN_EMAILS.includes(user.email.toLowerCase());
+  console.log('[Auth] Logged in:', user.email, isAdmin ? '(ADMIN)' : '(READER)');
 
   // Hide login, show app
   document.getElementById('login-page').classList.add('hidden');
@@ -1309,11 +1310,22 @@ function showApp(user) {
   if (navData) navData.style.display = isAdmin ? '' : 'none';
   if (pageData && !isAdmin) pageData.style.display = 'none';
 
+  // Start Firestore listener (restarts cleanly if already running)
+  startFirestoreListener();
+
+  // Update online/offline status
+  handleOnlineStatus();
+
   // Hide loading screen
   hideLoadingScreen();
 }
 
 function showLogin() {
+  console.log('[Auth] Showing login screen');
+  // Stop Firestore listener (cleans up dead connection)
+  stopFirestoreListener();
+  updateCloudStatus('offline', 'Not connected');
+
   document.getElementById('login-page').classList.remove('hidden');
   document.getElementById('userBar').classList.add('hidden');
   document.getElementById('mainNav').style.display = 'none';
@@ -1332,6 +1344,7 @@ function showLogin() {
 let _authResolved = false;
 auth.onAuthStateChanged(function(user) {
   _authResolved = true;
+  console.log('[Auth] State changed:', user ? user.email : 'signed out');
   if (user) {
     showApp(user);
   } else {
@@ -1381,15 +1394,30 @@ function saveToFirestore(wellsArr, sitDate) {
     updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
     updatedBy: (typeof currentUser !== 'undefined' && currentUser) ? currentUser.name : 'unknown'
   }).then(function() {
+    console.log('[Firestore] Save successful');
     updateCloudStatus('synced', 'Cloud ✓');
   }).catch(function(err) {
-    console.error('Firestore save error:', err);
+    console.error('[Firestore] Save error:', err);
     updateCloudStatus('error', 'Upload failed');
   });
 }
 
+// Stop real-time listener (cleanup for logout / before restart)
+function stopFirestoreListener() {
+  if (_firestoreUnsub) {
+    _firestoreUnsub();
+    _firestoreUnsub = null;
+    console.log('[Firestore] Listener stopped');
+  }
+  _firestoreReady = false;
+}
+
 // Start real-time listener — all 50 readers auto-update
 function startFirestoreListener() {
+  // Always stop existing listener first to avoid duplicates
+  stopFirestoreListener();
+  console.log('[Firestore] Starting listener…');
+  updateCloudStatus('syncing', 'Connecting…');
   _firestoreUnsub = db.collection('wells').doc('landWells')
     .onSnapshot(function(doc) {
       if (doc.exists) {
@@ -1415,20 +1443,43 @@ function startFirestoreListener() {
           renderTBPage();
           showToast('🔄 Data synced from cloud');
         }
+        console.log('[Firestore] Snapshot received — ' + remoteWells.length + ' wells');
         updateCloudStatus('synced', 'Cloud ✓');
       } else {
         // No data in Firestore yet — upload built-in wells
         _firestoreReady = true;
+        console.log('[Firestore] No document yet');
         updateCloudStatus('synced', 'Cloud ✓');
       }
     }, function(err) {
-      console.error('Firestore listener error:', err);
-      updateCloudStatus('offline', 'Offline');
+      console.error('[Firestore] Listener error:', err.code, err.message);
+      if (err.code === 'permission-denied') {
+        updateCloudStatus('offline', 'Not authorized');
+      } else {
+        updateCloudStatus('offline', 'Offline');
+      }
     });
 }
 
-// Start listener on page load
-startFirestoreListener();
+// ── Online/Offline detection ──
+function handleOnlineStatus() {
+  if (navigator.onLine) {
+    console.log('[Network] Online');
+    // If listener died, restart it (only if user is logged in)
+    if (!_firestoreUnsub && currentUser) {
+      startFirestoreListener();
+    } else if (_firestoreReady) {
+      updateCloudStatus('synced', 'Cloud ✓');
+    }
+  } else {
+    console.log('[Network] Offline');
+    updateCloudStatus('offline', 'Offline');
+  }
+}
+window.addEventListener('online', handleOnlineStatus);
+window.addEventListener('offline', handleOnlineStatus);
+
+// Do NOT auto-start listener here — auth.onAuthStateChanged will start it after login
 </script>
 
 <script src="./xlsx.full.min.js"></script>
