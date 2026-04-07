@@ -1,85 +1,96 @@
-const CACHE_NAME = 'well-lookup-cache-v44';
+// ══════════════════════════════════════════
+//  SERVICE WORKER — Land Wells PWA
+//  Caches static assets ONLY. Firebase/Firestore
+//  requests are NEVER cached to prevent stale data.
+// ══════════════════════════════════════════
 
-// Critical — SW install fails if any of these can't be cached
-const CORE_SHELL = [
+const CACHE_NAME = 'land-wells-v2';
+
+// Only cache static files that don't change between sessions
+const STATIC_ASSETS = [
+  './',
   './index.html',
+  './manifest.json',
+  './icon.png',
+  './icon-192.png',
   './xlsx.full.min.js'
 ];
 
-// Non-critical — cached best-effort; failure won't abort install
-const OPTIONAL_SHELL = [
-  './',
-  './manifest.json',
-  './icon.png',
-  './icon-192.png'
+// Domains that must NEVER be cached (Firebase services)
+const NO_CACHE_DOMAINS = [
+  'firestore.googleapis.com',
+  'www.googleapis.com',
+  'securetoken.googleapis.com',
+  'identitytoolkit.googleapis.com',
+  'firebase.googleapis.com',
+  'firebaseinstallations.googleapis.com',
+  'www.gstatic.com'
 ];
 
-// Install — cache core files (must succeed) + optional files (best-effort)
-self.addEventListener('install', event => {
+// Install — pre-cache static assets
+self.addEventListener('install', function(event) {
+  console.log('[SW] Installing, cache:', CACHE_NAME);
   event.waitUntil(
-    caches.open(CACHE_NAME).then(async cache => {
-      // Core files must all cache — if any fail, install fails
-      await cache.addAll(CORE_SHELL);
-      // Optional files cached individually — failures are tolerated
-      await Promise.allSettled(
-        OPTIONAL_SHELL.map(url =>
-          cache.add(url).catch(err =>
-            console.warn('[SW] Optional asset not cached:', url, err)
-          )
-        )
-      );
+    caches.open(CACHE_NAME).then(function(cache) {
+      return cache.addAll(STATIC_ASSETS).catch(function(err) {
+        console.warn('[SW] Some assets failed to cache:', err);
+      });
     })
   );
-  // No self.skipWaiting() — controlled via message
 });
 
-// Activate — clean old caches and claim clients.
-self.addEventListener('activate', event => {
+// Activate — clean up old caches
+self.addEventListener('activate', function(event) {
+  console.log('[SW] Activating');
   event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
-    ).then(() => self.clients.claim())
+    caches.keys().then(function(keys) {
+      return Promise.all(
+        keys.filter(function(k) { return k !== CACHE_NAME; })
+            .map(function(k) { 
+              console.log('[SW] Deleting old cache:', k);
+              return caches.delete(k); 
+            })
+      );
+    }).then(function() {
+      return self.clients.claim();
+    })
   );
 });
 
-// Message listener — app sends {type:'SKIP_WAITING'} when user taps the banner.
-self.addEventListener('message', event => {
+// Fetch — network-first for everything, cache fallback for static assets only
+self.addEventListener('fetch', function(event) {
+  var url = new URL(event.request.url);
+
+  // NEVER intercept Firebase API requests — let them go straight to network
+  var isFirebase = NO_CACHE_DOMAINS.some(function(domain) {
+    return url.hostname.includes(domain);
+  });
+  if (isFirebase) return; // Don't call respondWith — browser handles it normally
+
+  // NEVER cache POST/PUT/DELETE requests
+  if (event.request.method !== 'GET') return;
+
+  // For static assets: network-first, fall back to cache for offline support
+  event.respondWith(
+    fetch(event.request).then(function(response) {
+      // Cache successful responses for offline use
+      if (response && response.status === 200) {
+        var responseClone = response.clone();
+        caches.open(CACHE_NAME).then(function(cache) {
+          cache.put(event.request, responseClone);
+        });
+      }
+      return response;
+    }).catch(function() {
+      // Network failed — serve from cache if available (offline mode)
+      return caches.match(event.request);
+    })
+  );
+});
+
+// Listen for SKIP_WAITING message from the app
+self.addEventListener('message', function(event) {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
-});
-
-// Fetch — stale-while-revalidate
-self.addEventListener('fetch', event => {
-  if (event.request.method !== 'GET') return;
-
-  const url = new URL(event.request.url);
-  if (url.origin !== self.location.origin) return;
-
-  event.respondWith(
-    caches.open(CACHE_NAME).then(async cache => {
-      const cached = await cache.match(event.request);
-
-      const networkFetch = fetch(event.request).then(networkResponse => {
-        if (networkResponse && networkResponse.status === 200) {
-          cache.put(event.request, networkResponse.clone());
-        }
-        return networkResponse;
-      }).catch(() => null);
-
-      if (cached) {
-        event.waitUntil(networkFetch);
-        return cached;
-      }
-
-      const response = await networkFetch;
-      if (response) return response;
-
-      if (event.request.destination === 'document') {
-        return cache.match('./index.html');
-      }
-
-      return new Response('', { status: 504, statusText: 'Offline / Not Cached' });
-    })
-  );
 });
