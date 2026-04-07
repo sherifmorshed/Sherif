@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-title" content="Wells">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="description" content="PETROBEL Land Wells Situation — Well Data Lookup System">
-<!-- PWA icons inline via canvas — no external files needed -->
+<!-- PWA icons: icon.png (512×512) and icon-192.png (192×192) — must be in same folder as index.html -->
 <title>Land Wells — PETROBEL</title>
 <style>
 /* Fonts: local-first, no external dependency — works fully offline.
@@ -720,6 +720,34 @@ pre{
 .tb-badge-strip{display:flex;gap:6px;padding:8px 14px;flex-wrap:wrap;border-bottom:1px solid var(--border);}
 ::-webkit-scrollbar{width:4px;}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+
+/* ── LOGIN PAGE ── */
+#login-page{position:fixed;top:0;left:0;width:100%;height:100%;background:var(--bg);z-index:9998;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:24px;
+  background-image:radial-gradient(ellipse at 20% 0%,rgba(0,80,120,.12) 0%,transparent 60%),radial-gradient(ellipse at 80% 100%,rgba(0,40,80,.10) 0%,transparent 60%);}
+#login-page.hidden{display:none;}
+.login-card{width:100%;max-width:360px;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:32px 24px;box-shadow:0 8px 32px rgba(0,0,0,.4);}
+.login-logo{text-align:center;margin-bottom:24px;}
+.login-logo img{width:72px;height:72px;border-radius:16px;margin-bottom:12px;object-fit:cover;background:var(--surface);box-shadow:0 4px 16px rgba(34,211,238,.12);}
+.login-logo h1{font-size:18px;font-weight:700;letter-spacing:2px;color:var(--accent);text-transform:uppercase;margin-bottom:2px;}
+.login-logo p{font-size:11px;color:var(--muted);letter-spacing:1px;font-family:'JetBrains Mono',monospace;}
+.login-field{margin-bottom:16px;}
+.login-field label{display:block;font-size:11px;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px;font-family:'JetBrains Mono',monospace;}
+.login-field input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;color:var(--text);font-size:15px;font-family:'Inter',sans-serif;outline:none;transition:border-color .2s;}
+.login-field input:focus{border-color:var(--accent);}
+.login-field input::placeholder{color:var(--muted);opacity:.6;}
+.login-btn{width:100%;padding:14px;background:var(--accent);color:var(--bg);border:none;border-radius:10px;font-size:15px;font-weight:700;letter-spacing:1px;cursor:pointer;font-family:'Inter',sans-serif;transition:opacity .2s;margin-top:8px;}
+.login-btn:active{opacity:.8;}
+.login-btn:disabled{opacity:.5;cursor:not-allowed;}
+.login-error{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:13px;color:var(--red);display:none;line-height:1.5;}
+.login-error.show{display:block;}
+.login-spinner{display:inline-block;width:18px;height:18px;border:2.5px solid rgba(6,11,18,.2);border-top-color:var(--bg);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:8px;}
+/* ── LOGGED-IN USER BAR ── */
+.user-bar{display:flex;align-items:center;justify-content:space-between;padding:6px 16px;background:var(--surface);border-bottom:1px solid var(--border);font-size:11px;font-family:'JetBrains Mono',monospace;}
+.user-bar.hidden{display:none;}
+.user-bar .ub-email{color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0;}
+.user-bar .ub-role{color:var(--accent);font-weight:700;letter-spacing:.5px;margin-left:8px;flex-shrink:0;}
+.user-bar .ub-logout{background:none;border:1px solid var(--border);border-radius:6px;color:var(--muted);font-size:10px;padding:4px 10px;cursor:pointer;font-family:'JetBrains Mono',monospace;margin-left:8px;flex-shrink:0;letter-spacing:.5px;}
+.user-bar .ub-logout:active{background:rgba(248,113,113,.1);border-color:var(--red);color:var(--red);}
 </style>
 </head>
 <body>
@@ -741,8 +769,37 @@ pre{
 }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 </style>
+
+<!-- ══════════════ LOGIN PAGE ══════════════ -->
+<div id="login-page">
+  <div class="login-card">
+    <div class="login-logo">
+      <img src="icon.png" alt="PETROBEL">
+      <h1>PETROBEL WELLS</h1>
+      <p>Land Wells Situation</p>
+    </div>
+    <div class="login-error" id="loginError"></div>
+    <div class="login-field">
+      <label>Email</label>
+      <input type="email" id="loginEmail" placeholder="your@email.com" autocomplete="email" inputmode="email">
+    </div>
+    <div class="login-field">
+      <label>Password</label>
+      <input type="password" id="loginPassword" placeholder="Enter password" autocomplete="current-password">
+    </div>
+    <button class="login-btn" id="loginBtn" onclick="handleLogin()">Sign In</button>
+  </div>
+</div>
+
+<!-- ══════════════ USER BAR (shown after login) ══════════════ -->
+<div class="user-bar hidden" id="userBar">
+  <span class="ub-email" id="ubEmail"></span>
+  <span class="ub-role" id="ubRole"></span>
+  <button class="ub-logout" onclick="handleLogout()">LOGOUT</button>
+</div>
+
 <!-- NAV -->
-<nav class="nav" id="mainNav">
+<nav class="nav" id="mainNav" style="display:none;">
   <button class="nav-btn active" onclick="showPage('lookup')" id="nav-lookup"><span class="icon">🔍</span>Lookup</button>
   <button class="nav-btn" onclick="showPage('substation')" id="nav-substation"><span class="icon">⚡</span>Substation</button>
   <button class="nav-btn" onclick="showPage('manifold')" id="nav-manifold"><span class="icon"><svg viewBox="0 0 120 100" xmlns="http://www.w3.org/2000/svg" class="manifold-svg" aria-hidden="true" style="width:20px;height:20px;">
@@ -776,7 +833,7 @@ pre{
 </nav>
 
 <!-- ══════════════ PAGE 1: LOOKUP ══════════════ -->
-<div class="page active" id="page-lookup">
+<div class="page active" id="page-lookup" style="display:none;">
   <div class="app-header">
     <h1><svg viewBox="0 0 120 130" xmlns="http://www.w3.org/2000/svg" style="width:28px;height:30px;vertical-align:middle;margin-right:6px;margin-bottom:2px;">
   <rect x="20" y="115" width="80" height="6" rx="3" fill="#22d3ee"/>
@@ -899,7 +956,7 @@ pre{
 
 
 <!-- ══════════════ PAGE 1B: SUBSTATION ══════════════ -->
-<div class="page" id="page-substation">
+<div class="page" id="page-substation" style="display:none;">
   <div class="page-hdr">
     <h2>⚡ Substation Lookup</h2>
     <p>Pick a substation to see all its wells in one table</p>
@@ -927,7 +984,7 @@ pre{
 </div>
 
 <!-- ══════════════ PAGE 1C: MANIFOLD ══════════════ -->
-<div class="page" id="page-manifold">
+<div class="page" id="page-manifold" style="display:none;">
   <div class="page-hdr has-icon">
     <div class="manifold-icon-wrap"><svg viewBox="0 0 120 100" xmlns="http://www.w3.org/2000/svg" class="manifold-svg" aria-hidden="true">
   <!-- Main horizontal header pipe -->
@@ -989,7 +1046,7 @@ pre{
 </div>
 
 <!-- ══════════════ PAGE 1D: CHEMICAL ══════════════ -->
-<div class="page" id="page-chemical">
+<div class="page" id="page-chemical" style="display:none;">
   <div class="page-hdr">
     <h2>🧪 Chemical Injection</h2>
     <p>Search active wells under chemical injection service and review chemical coverage by type</p>
@@ -1017,7 +1074,7 @@ pre{
 </div>
 
 <!-- ══════════════ PAGE 4: UPDATE DATA ══════════════ -->
-<div class="page" id="page-data">
+<div class="page" id="page-data" style="display:none;">
   <div class="page-hdr">
     <h2>🗄️ Update Well Database</h2>
     <p>Upload a new Excel file to replace all well data</p>
@@ -1040,6 +1097,10 @@ pre{
       <div class="db-stat">
         <div class="ds-val" id="db-persist-status" style="font-size:13px;color:var(--green);">✓ Saved</div>
         <div class="ds-lbl">Storage Status</div>
+      </div>
+      <div class="db-stat">
+        <div class="ds-val" id="cloud-sync-status" style="font-size:13px;color:#94a3b8;">☁️ Connecting…</div>
+        <div class="ds-lbl">Cloud Sync</div>
       </div>
     </div>
 
@@ -1084,7 +1145,7 @@ pre{
 </div>
 
 <!-- ══════════════ PAGE: T.B PRODUCTION ══════════════ -->
-<div class="page" id="page-tb">
+<div class="page" id="page-tb" style="display:none;">
   <div class="page-hdr">
     <h2 style="display:flex;align-items:center;gap:8px;"><span style="display:inline-flex;"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;display:block;">
   <rect x="2" y="8" width="20" height="10" rx="3" fill="none" stroke="currentColor" stroke-width="1.4"/>
@@ -1146,6 +1207,229 @@ pre{
 <div class="footer">Powered by <span>Sherif Morshed</span></div>
 <div class="toast" id="toast"></div>
 <div id="swUpdateBanner"><span>🔄 </span><span>App update available — </span><strong>Tap to refresh</strong></div>
+
+<!-- Firebase SDK (CDN — no npm needed) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script>
+// ══════════════════════════════════════════
+//  FIREBASE INITIALIZATION
+// ══════════════════════════════════════════
+const firebaseConfig = {
+  apiKey: "AIzaSyBbnSINE_Dep3vyrBdW5A_79HSubZ1zVlA",
+  authDomain: "land-wells-petrobel.firebaseapp.com",
+  projectId: "land-wells-petrobel",
+  storageBucket: "land-wells-petrobel.firebasestorage.app",
+  messagingSenderId: "1035624175697",
+  appId: "1:1035624175697:web:4b6e0a0f26ca0da2290070"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// Enable offline persistence so app works without internet
+db.enablePersistence({ synchronizeTabs: true }).catch(function(err) {
+  if (err.code === 'failed-precondition') {
+    console.warn('Firestore persistence failed: multiple tabs open');
+  } else if (err.code === 'unimplemented') {
+    console.warn('Firestore persistence not available in this browser');
+  }
+});
+
+// ══════════════════════════════════════════
+//  FIREBASE AUTHENTICATION
+// ══════════════════════════════════════════
+const auth = firebase.auth();
+const ADMIN_EMAILS = ['sherifmorshed@gmail.com'];
+let currentUser = null;
+let isAdmin = false;
+
+// Session persistence — keep user logged in across browser restarts
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+
+function handleLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass  = document.getElementById('loginPassword').value;
+  const btn   = document.getElementById('loginBtn');
+  const errEl = document.getElementById('loginError');
+
+  // Validation
+  if (!email || !pass) {
+    errEl.textContent = 'Please enter both email and password.';
+    errEl.classList.add('show');
+    return;
+  }
+  // Show loading state
+  btn.disabled = true;
+  btn.innerHTML = '<span class="login-spinner"></span>Signing in…';
+  errEl.classList.remove('show');
+
+  auth.signInWithEmailAndPassword(email, pass)
+    .then(function() { /* onAuthStateChanged handles the rest */ })
+    .catch(function(err) {
+      btn.disabled = false;
+      btn.innerHTML = 'Sign In';
+      let msg = 'Login failed. Please try again.';
+      switch (err.code) {
+        case 'auth/invalid-email':       msg = 'Invalid email address.'; break;
+        case 'auth/user-disabled':       msg = 'This account has been disabled.'; break;
+        case 'auth/user-not-found':      msg = 'No account found with this email.'; break;
+        case 'auth/wrong-password':      msg = 'Incorrect password.'; break;
+        case 'auth/invalid-credential':  msg = 'Incorrect email or password.'; break;
+        case 'auth/too-many-requests':   msg = 'Too many attempts. Try again later.'; break;
+        case 'auth/network-request-failed': msg = 'Network error. Check your connection.'; break;
+      }
+      errEl.textContent = msg;
+      errEl.classList.add('show');
+    });
+}
+
+function handleLogout() {
+  if (!confirm('Sign out?')) return;
+  auth.signOut();
+}
+
+function showApp(user) {
+  currentUser = { email: user.email, uid: user.uid, name: user.email.split('@')[0] };
+  isAdmin = ADMIN_EMAILS.includes(user.email.toLowerCase());
+
+  // Hide login, show app
+  document.getElementById('login-page').classList.add('hidden');
+  document.getElementById('userBar').classList.remove('hidden');
+  document.getElementById('mainNav').style.display = '';
+  document.querySelectorAll('.page').forEach(function(p) { p.style.display = ''; });
+
+  // Populate user bar
+  document.getElementById('ubEmail').textContent = user.email;
+  document.getElementById('ubRole').textContent = isAdmin ? 'ADMIN' : 'READER';
+
+  // Show/hide Update DB tab + page based on admin role
+  var navData = document.getElementById('nav-data');
+  var pageData = document.getElementById('page-data');
+  if (navData) navData.style.display = isAdmin ? '' : 'none';
+  if (pageData && !isAdmin) pageData.style.display = 'none';
+
+  // Hide loading screen
+  hideLoadingScreen();
+}
+
+function showLogin() {
+  document.getElementById('login-page').classList.remove('hidden');
+  document.getElementById('userBar').classList.add('hidden');
+  document.getElementById('mainNav').style.display = 'none';
+  document.querySelectorAll('.page').forEach(function(p) { p.style.display = 'none'; });
+  // Clear form
+  document.getElementById('loginEmail').value = '';
+  document.getElementById('loginPassword').value = '';
+  document.getElementById('loginError').classList.remove('show');
+  document.getElementById('loginBtn').disabled = false;
+  document.getElementById('loginBtn').innerHTML = 'Sign In';
+  // Hide loading screen (in case it's still showing)
+  hideLoadingScreen();
+}
+
+// Main auth listener — fires on page load + login/logout
+let _authResolved = false;
+auth.onAuthStateChanged(function(user) {
+  _authResolved = true;
+  if (user) {
+    showApp(user);
+  } else {
+    currentUser = null;
+    isAdmin = false;
+    showLogin();
+  }
+});
+// Safety fallback — if auth takes too long (offline, no session), show login
+setTimeout(function() { if (!_authResolved) showLogin(); }, 5000);
+
+// Enter key on login fields
+document.addEventListener('DOMContentLoaded', function() {
+  var passInput = document.getElementById('loginPassword');
+  var emailInput = document.getElementById('loginEmail');
+  if (passInput) passInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') handleLogin();
+  });
+  if (emailInput) emailInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') document.getElementById('loginPassword').focus();
+  });
+});
+
+// ══════════════════════════════════════════
+//  FIRESTORE SYNC LAYER
+//  Single document: wells/landWells → { wells: [...], situationDate: "..." }
+// ══════════════════════════════════════════
+let _firestoreReady = false;
+let _firestoreUnsub = null;
+
+// Update the cloud sync status indicator in the UI
+function updateCloudStatus(status, text) {
+  const el = document.getElementById('cloud-sync-status');
+  if (!el) return;
+  const colors = { synced: '#10b981', syncing: '#fbbf24', offline: '#ef4444', error: '#ef4444' };
+  const icons  = { synced: '☁️', syncing: '🔄', offline: '📡', error: '⚠️' };
+  el.innerHTML = (icons[status]||'') + ' ' + text;
+  el.style.color = colors[status] || '#94a3b8';
+}
+
+// Save wells + situationDate to Firestore
+function saveToFirestore(wellsArr, sitDate) {
+  updateCloudStatus('syncing', 'Uploading…');
+  return db.collection('wells').doc('landWells').set({
+    wells: wellsArr,
+    situationDate: sitDate || '',
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    updatedBy: (typeof currentUser !== 'undefined' && currentUser) ? currentUser.name : 'unknown'
+  }).then(function() {
+    updateCloudStatus('synced', 'Cloud ✓');
+  }).catch(function(err) {
+    console.error('Firestore save error:', err);
+    updateCloudStatus('error', 'Upload failed');
+  });
+}
+
+// Start real-time listener — all 50 readers auto-update
+function startFirestoreListener() {
+  _firestoreUnsub = db.collection('wells').doc('landWells')
+    .onSnapshot(function(doc) {
+      if (doc.exists) {
+        _firestoreReady = true;
+        const data = doc.data();
+        const remoteWells = data.wells || [];
+        const remoteSitDate = data.situationDate || '';
+
+        // Only update if the remote data is different (avoid loops)
+        if (remoteWells.length > 0 && JSON.stringify(remoteWells) !== JSON.stringify(WELLS)) {
+          WELLS = normalizeWellDataset(remoteWells);
+          // Cache locally for offline use
+          lsSet(STORAGE_KEYS.wells, JSON.stringify(WELLS));
+          if (remoteSitDate) {
+            lsSet(STORAGE_KEYS.situationDate, remoteSitDate);
+          }
+          // Refresh the entire UI
+          updateDBStats();
+          updateCounters();
+          refreshSubstationView();
+          refreshManifoldView();
+          refreshChemicalView();
+          renderTBPage();
+          showToast('🔄 Data synced from cloud');
+        }
+        updateCloudStatus('synced', 'Cloud ✓');
+      } else {
+        // No data in Firestore yet — upload built-in wells
+        _firestoreReady = true;
+        updateCloudStatus('synced', 'Cloud ✓');
+      }
+    }, function(err) {
+      console.error('Firestore listener error:', err);
+      updateCloudStatus('offline', 'Offline');
+    });
+}
+
+// Start listener on page load
+startFirestoreListener();
+</script>
 
 <script src="./xlsx.full.min.js"></script>
 <script>
@@ -1307,6 +1591,12 @@ function saveWells(arr) {
     showToast('⚠️ Storage full — data not saved to device', true);
     // Offer backup download so user doesn't lose their data
     offerBackupDownload(arr);
+  }
+
+  // ── Push to Firestore (cloud sync) ──
+  if (typeof saveToFirestore === 'function') {
+    const sitDate = lsGet(STORAGE_KEYS.situationDate) || '';
+    saveToFirestore(arr, sitDate);
   }
 }
 
@@ -1591,11 +1881,29 @@ function updateSituationDateDisplay() {
 //  showPage() is the single entry point for all page switches.
 // ══════════════════════════════════════════
 function showPage(page, pushState=true) {
-  // Close any open overlays so they don't survive tab switches
+  // Block non-admin access to Update DB page
+  if (page === 'data' && !isAdmin) { showToast('⚠️ Admin access required'); return; }
+  // Only remove VISIBLE overlays on tab switch — hidden overlays are preserved
+  // for back navigation (e.g. opening a well from the stats overlay hides it temporarily)
   ['wellListOverlay','tbWellsOverlay'].forEach(id=>{
     const ov = document.getElementById(id);
-    if(ov) ov.remove();
+    if(ov && ov.style.display !== 'none') ov.remove();
   });
+  // When leaving lookup — clear well card so it doesn't show stale data on return
+  const activePage = document.querySelector('.page.active');
+  const leavingLookup = activePage && activePage.id === 'page-lookup';
+  if(leavingLookup && page !== 'lookup'){
+    clearSearch();
+    showLookupEmptyState();
+    const statsEl = document.getElementById('headerStats');
+    if(statsEl) statsEl.classList.remove('hidden');
+    // Also clean up any hidden overlays (e.g. overlay preserved for back nav)
+    ['wellListOverlay','tbWellsOverlay'].forEach(id=>{
+      const ov = document.getElementById(id);
+      if(ov) ov.remove();
+    });
+    currentOverlayType = null;
+  }
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
@@ -1605,6 +1913,11 @@ function showPage(page, pushState=true) {
   if(page==='chemical') refreshChemicalView();
   if(page==='data') updateDBStats();
   if(page==='tb') renderTBPage();
+  // When returning to lookup — always show clean home state
+  if(page==='lookup'){
+    const statsEl = document.getElementById('headerStats');
+    if(statsEl) statsEl.classList.remove('hidden');
+  }
   if(pushState) history.replaceState({page}, '', '');
 }
 
@@ -1638,8 +1951,7 @@ function renderSugg(matches, q, el, pickFn) {
   }
   el.innerHTML=matches.map(w=>{
     const s=sc(w['Status']);
-    const safe=escAttr(w['Well']);
-    return `<div class="sug-item" onclick="${pickFn}('${safe}')">
+    return `<div class="sug-item" data-action="pickSugg" data-pickfn="${escAttr(pickFn)}" data-key="${escAttr(w['Well']||'')}">
       <span class="sug-dot" style="background:${DOT[s]}"></span>
       <span class="sug-name">${escHtml(w['Well'])}</span>
       <span class="sug-info">${escHtml(w['Type']||'')}<br><span style="color:${DOT[s]}">${escHtml(w['Status']||'')}</span></span>
@@ -1693,6 +2005,9 @@ function selectWell(name, source='lookup'){
   if(w){
     showPage('lookup');
     renderWell(w, source);
+  } else {
+    showToast('⚠️ Well "' + String(name||'').slice(0,30) + '" not found in current dataset', true);
+    showLookupEmptyState();
   }
 }
 
@@ -1957,7 +2272,7 @@ function renderSubstationResult(name){
   const wells = getWellsBySubstation(name);
   const resultEl = document.getElementById('substationResult');
   if(!wells.length){
-    resultEl.innerHTML = `<div class="empty-state"><div class="big">⚡</div><p>No wells found for <strong style="color:var(--accent)">"${name}"</strong></p></div>`;
+    resultEl.innerHTML = `<div class="empty-state"><div class="big">⚡</div><p>No wells found for <strong style="color:var(--accent)">"${escHtml(name)}"</strong></p></div>`;
     return;
   }
   currentSubstationName = name;
@@ -2864,7 +3179,7 @@ function renderChemicalResult(key){
         <div class="badge tb">${group.batteryCount} TK Batteries</div>
         ${filter ? `<div class="badge other">Filtered: ${filteredRecords.length}</div>` : ``}
       </div>
-      ${pairText ? `<div class="substation-note" style="margin-top:8px;">Common pairings with <strong style="color:var(--text)">${escHtml(group.name)}</strong>: ${escHtml(pairText)}</div>` : `<div class="substation-note" style="margin-top:8px;">All listed wells currently show this chemical as the only active injected type.</div>`}
+      ${pairText ? `<div class="substation-note" style="margin-top:8px;">Common pairings with <strong style="color:var(--text)">${escHtml(group.name)}</strong>: ${pairText}</div>` : `<div class="substation-note" style="margin-top:8px;">All listed wells currently show this chemical as the only active injected type.</div>`}
     </div>
 
     <div class="section">
@@ -3102,13 +3417,13 @@ function extractSituationDateFromWorkbook(wb) {
   }
 
   // ── Strategy 1: label-based search (primary) ──
-  // Scan first 15 rows for a cell containing "situation" or "date" as a label,
-  // then read the adjacent cell (right or below). Most reliable.
+  // Only match specific labels to avoid picking up random date cells
+  const DATE_LABELS = ['situation date', 'situation', 'report date', 'as of date', 'as of', 'date of report', 'reporting date'];
   for (let r = 0; r < Math.min(15, data.length); r++) {
     const row = data[r];
     for (let c = 0; c < row.length; c++) {
       const cell = String(row[c] || '').toLowerCase().trim();
-      if (cell.includes('situation') || cell === 'date' || cell === 'report date' || cell === 'as of') {
+      if (DATE_LABELS.includes(cell)) {
         // Try cell to the right
         if (row[c + 1]) {
           const d = parseRawDate(row[c + 1]);
@@ -3184,8 +3499,25 @@ function parseFile(file, cb, isData=false){
           sheetName = wb.SheetNames[0];
         }
         const ws=wb.Sheets[sheetName || wb.SheetNames[0]];
+        // Auto-detect header row: find the first row containing a "Well" column
+        // instead of hard-coding range:1 which breaks if the header moves
+        let headerRange = 1; // default: skip row 0 (title), use row 1 as header
+        if(isData){
+          try {
+            // Scan first 5 rows for a cell containing "Well" or "WELL"
+            const rawRows = XLSX.utils.sheet_to_json(ws, {header:1, defval:'', raw:false});
+            for(let r = 0; r < Math.min(5, rawRows.length); r++){
+              const row = rawRows[r];
+              if(row.some(cell => String(cell||'').trim().toLowerCase() === 'well' ||
+                                  String(cell||'').trim().toLowerCase() === 'well name')){
+                headerRange = r;
+                break;
+              }
+            }
+          } catch(e){ headerRange = 1; }
+        }
         const data = XLSX.utils.sheet_to_json(ws, isData ? {
-          range: 1,
+          range: headerRange,
           defval: '',
           raw: false
         } : {
@@ -3760,7 +4092,8 @@ window.addEventListener('popstate', () => {
   // ── 0. T.B. wells overlay open → close it, stay on T.B. page ──
   if (tbOverlay) {
     closeTBWellsOverlay();
-    history.pushState({page:'app'}, '', '');
+    // replaceState instead of pushState — we stay on TB page, no net stack growth
+    history.replaceState({page:'app'}, '', '');
     return;
   }
 
@@ -3778,12 +4111,13 @@ window.addEventListener('popstate', () => {
 
   // ── 2. Overlay visible → close it, land on lookup home ──
   if (ovOpen) {
-    history.pushState({page:'app'}, '', '');
     closeWellListOverlay();
     showPage('lookup', false);
     clearSearch();
     showLookupEmptyState();
     if (statsEl) statsEl.classList.remove('hidden');
+    // replaceState — closing overlay doesn't add a new history entry
+    history.replaceState({page:'app'}, '', '');
     return;
   }
 
@@ -3886,7 +4220,7 @@ function hideLoadingScreen() {
 }
 // Multiple triggers to guarantee the loading screen always disappears
 document.addEventListener('DOMContentLoaded', function() {
-  setTimeout(hideLoadingScreen, 800);
+  // Auth onAuthStateChanged now controls hideLoadingScreen
   // Attach delegated click listeners once on all static container elements
   // Handles data-action clicks for wells, substations, manifolds, chemicals
   [
@@ -3914,11 +4248,18 @@ document.addEventListener('DOMContentLoaded', function() {
       case 'openFromTB':          openWellFromTB(key); break;
       case 'openFromChemical':    openWellFromChemical(key); break;
       case 'goToWellFromChem':    goToWellFromChem(key); break;
+      case 'pickSugg': {
+        // Generic suggestion picker — pickfn is the function name to call
+        const fn = el.dataset.pickfn || '';
+        if(fn === 'selectWell') selectWell(key);
+        else if(fn === 'selectSubstation') selectSubstation(key);
+        else if(fn === 'selectManifold') selectManifold(key);
+        break;
+      }
     }
   });
 });
-window.addEventListener('load', function() { setTimeout(hideLoadingScreen, 500); });
-setTimeout(hideLoadingScreen, 2500);  // Hard fallback — always fires after 2.5s no matter what
+// Auth onAuthStateChanged now controls hideLoadingScreen — no auto-hide fallbacks
 </script>
       <!-- your existing scripts above -->
 
