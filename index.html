@@ -1314,8 +1314,13 @@ function showApp(user) {
   // Update online/offline status
   handleOnlineStatus();
 
-  // Hide loading screen
-  hideLoadingScreen();
+  // Smart loading screen timeout:
+  // - Returning users (have cached wells in localStorage): show quickly (1s) — their data is fresh,
+  //   Firestore will sync in the background and update if anything changed.
+  // - First-time users (no cache, only built-in data): wait up to 4s for Firestore so they
+  //   never see the built-in placeholder data flash before real cloud data arrives.
+  var _hasCachedWells = lsGet(STORAGE_KEYS.wells) !== null;
+  _loadingScreenTimeout = setTimeout(hideLoadingScreen, _hasCachedWells ? 1000 : 4000);
 }
 
 function showLogin() {
@@ -1373,6 +1378,7 @@ document.addEventListener('DOMContentLoaded', function() {
 let _firestoreReady = false;
 let _firestoreUnsub = null;
 let _firstSnapshot = true;  // Forces first snapshot after login to always apply cloud data
+let _loadingScreenTimeout = null;  // Timeout that hides loading screen if Firestore is slow
 
 // Update the cloud sync status indicator in the UI
 function updateCloudStatus(status, text) {
@@ -1408,6 +1414,7 @@ function stopFirestoreListener() {
     _firestoreUnsub = null;
     console.log('[Firestore] Listener stopped');
   }
+  if (_loadingScreenTimeout) { clearTimeout(_loadingScreenTimeout); _loadingScreenTimeout = null; }
   _firestoreReady = false;
   _firstSnapshot = true;  // Reset so next login always applies cloud data
 }
@@ -1455,9 +1462,14 @@ function startFirestoreListener() {
           showToast(isFirst ? '☁️ Data loaded from cloud' : '🔄 Data synced from cloud');
         }
         updateCloudStatus('synced', 'Cloud ✓');
+        // Hide loading screen once cloud data is ready (clears the timeout fallback too)
+        if (_loadingScreenTimeout) { clearTimeout(_loadingScreenTimeout); _loadingScreenTimeout = null; }
+        hideLoadingScreen();
       } else {
         _firestoreReady = true;
         updateCloudStatus('synced', 'Cloud ✓');
+        if (_loadingScreenTimeout) { clearTimeout(_loadingScreenTimeout); _loadingScreenTimeout = null; }
+        hideLoadingScreen();
       }
     }, function(err) {
       console.error('[Firestore] Listener error:', err.code);
@@ -1466,12 +1478,16 @@ function startFirestoreListener() {
       } else {
         updateCloudStatus('offline', 'Offline');
       }
+      // On error, still hide the loading screen so the user can use cached/built-in data
+      if (_loadingScreenTimeout) { clearTimeout(_loadingScreenTimeout); _loadingScreenTimeout = null; }
+      hideLoadingScreen();
     });
 }
 var _lastFirestoreTimestamp = 0;
 var _stalePages = {};
 function _refreshPage(page) {
-  if(page==='substation') refreshSubstationView();
+  if(page==='lookup') updateDBStats();
+  else if(page==='substation') refreshSubstationView();
   else if(page==='manifold') refreshManifoldView();
   else if(page==='chemical') refreshChemicalView();
   else if(page==='tb') renderTBPage();
@@ -1806,7 +1822,13 @@ function showToast(msg, err=false) {
   t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),2500);
 }
-function updateCounters() {}
+function updateCounters() {
+  // Only refresh the always-visible date bar.
+  // Full stat recalculation (updateDBStats) is already handled by _refreshPage() for the
+  // active page, and by _stalePages for other pages when the user navigates to them.
+  // Calling updateDBStats() here as well would run 4x WELLS.filter() loops twice on every sync.
+  updateSituationDateDisplay();
+}
 
 function normalizeHeaderName(name){
   return String(name||'').replace(/\s+/g,' ').trim().toLowerCase();
@@ -2038,7 +2060,12 @@ function renderSugg(matches, q, el, pickFn) {
 }
 
 searchInput.addEventListener('focus',()=>{
-  document.getElementById('headerStats').classList.add('hidden');
+  // Defer layout change so mobile browsers can open the keyboard without interruption.
+  // Hiding headerStats synchronously during focus causes a reflow mid-tap which suppresses
+  // the keyboard on the first click — deferring one frame prevents that.
+  requestAnimationFrame(()=>{
+    document.getElementById('headerStats').classList.add('hidden');
+  });
 });
 
 searchInput.addEventListener('input',()=>{
@@ -3439,12 +3466,12 @@ document.getElementById('dataFileInput').addEventListener('change',function(){
 function importDataFile(){
   if(!pendingDataRows.length)return;
   WELLS = normalizeWellDataset(pendingDataRows);
-  saveWells(WELLS);
-  // Save situation date if extracted
+  // Save situation date BEFORE saveWells() so Firestore receives the new date, not the old one
   if(pendingSituationDate) {
     saveSituationDate(pendingSituationDate);
     pendingSituationDate = null;
   }
+  saveWells(WELLS);
   document.getElementById('dataPreviewArea').style.display='none';
   document.getElementById('dataUploadOk').style.display='block';
   const sitDateStr = formatSituationDate(loadSituationDate());
@@ -3484,11 +3511,30 @@ function extractSituationDateFromWorkbook(wb) {
     if (!s) return null;
     // ISO format: "2026-03-27" or "2026-03-27 00:00:00"
     if (s.match(/^\d{4}-\d{2}-\d{2}/)) return s.slice(0, 10);
-    // Excel date serial
-    const num = parseFloat(s);
-    if (!isNaN(num) && num > 40000) {
-      const d = new Date((num - 25569) * 86400 * 1000);
-      return d.toISOString().slice(0, 10);
+    // Excel date serial (no slashes/dashes — pure number)
+    if (!s.includes('/') && !s.includes('-')) {
+      const num = parseFloat(s);
+      if (!isNaN(num) && num > 40000) {
+        const d = new Date((num - 25569) * 86400 * 1000);
+        return d.toISOString().slice(0, 10);
+      }
+    }
+    // DD/MM/YYYY or D/M/YYYY (common in Egypt/Arabic contexts)
+    const dmySlash = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (dmySlash) {
+      const d = new Date(+dmySlash[3], +dmySlash[2] - 1, +dmySlash[1]);
+      if (!isNaN(d.getTime())) return d.toISOString().slice(0, 10);
+    }
+    // DD-MM-YYYY or D-M-YYYY
+    const dmyDash = s.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+    if (dmyDash) {
+      const d = new Date(+dmyDash[3], +dmyDash[2] - 1, +dmyDash[1]);
+      if (!isNaN(d.getTime())) return d.toISOString().slice(0, 10);
+    }
+    // Last resort: native Date parsing (handles "8 Apr 2026", "April 8 2026", etc.)
+    const parsed = new Date(s);
+    if (!isNaN(parsed.getTime()) && parsed.getFullYear() > 2000) {
+      return parsed.toISOString().slice(0, 10);
     }
     return null;
   }
@@ -3540,9 +3586,9 @@ function parseFile(file, cb, isData=false){
         // Extract situation date if this is a data upload
         if (isData) {
           const sitDate = extractSituationDateFromWorkbook(wb);
-          if (sitDate === 'NOT_FOUND') {
+          if (!sitDate || sitDate === 'NOT_FOUND') {
             showToast('⚠️ Situation date not found in file — date will not update', true);
-          } else if (sitDate) {
+          } else {
             pendingSituationDate = sitDate;
             showToast(`📅 Situation date: ${formatSituationDate(sitDate)}`);
           }
