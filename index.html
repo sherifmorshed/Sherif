@@ -1372,6 +1372,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // ══════════════════════════════════════════
 let _firestoreReady = false;
 let _firestoreUnsub = null;
+let _firstSnapshot = true;  // Forces first snapshot after login to always apply cloud data
 
 // Update the cloud sync status indicator in the UI
 function updateCloudStatus(status, text) {
@@ -1408,6 +1409,7 @@ function stopFirestoreListener() {
     console.log('[Firestore] Listener stopped');
   }
   _firestoreReady = false;
+  _firstSnapshot = true;  // Reset so next login always applies cloud data
 }
 
 // Start real-time listener — all 50 readers auto-update
@@ -1426,13 +1428,17 @@ function startFirestoreListener() {
         const remoteUpdatedAt = data.updatedAt ? data.updatedAt.toMillis() : 0;
 
         // Lightweight change detection — avoids serializing 434 wells on every snapshot
+        // _firstSnapshot forces cloud data to always apply on first login (fixes reader-first-login bug)
+        const isFirst = _firstSnapshot;
         const changed = remoteWells.length > 0 && (
+          isFirst ||
           remoteWells.length !== WELLS.length ||
           remoteSitDate !== (lsGet(STORAGE_KEYS.situationDate) || '') ||
           remoteUpdatedAt !== _lastFirestoreTimestamp
         );
 
         if (changed) {
+          _firstSnapshot = false;
           _lastFirestoreTimestamp = remoteUpdatedAt;
           WELLS = normalizeWellDataset(remoteWells);
           lsSet(STORAGE_KEYS.wells, JSON.stringify(WELLS));
@@ -1446,7 +1452,7 @@ function startFirestoreListener() {
           _refreshPage(activeId);
           delete _stalePages[activeId];
           updateCounters();
-          showToast('🔄 Data synced from cloud');
+          showToast(isFirst ? '☁️ Data loaded from cloud' : '🔄 Data synced from cloud');
         }
         updateCloudStatus('synced', 'Cloud ✓');
       } else {
