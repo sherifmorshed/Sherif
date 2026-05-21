@@ -1716,6 +1716,7 @@ window.addEventListener('offline', handleOnlineStatus);
 </script>
 
 <script src="./xlsx.full.min.js"></script>
+<script src="./html2canvas.min.js"></script>
 <script>
 // ══════════════════════════════════════════
 //  UTILITY — HTML ESCAPE / STORAGE / NUMBERS
@@ -1789,6 +1790,7 @@ const COLUMNS = {
   manifold:         ['Loc. Manifold', 'Loc. Manifold '],
   battery:          ['TK Battery', 'TK Battery ', 'TK BATTERY'],
   substation:       ['SUBSTATION'],
+  distFromManifold: ['Distance from Manifold (MT)', 'Distance from Manifold', 'DISTANCE FROM MANIFOLD (MT)', 'DISTANCE FROM MANIFOLD'],
 
   // Reported production
   repRate:          ['RATE , M3/D', 'RATE, M3/D', 'RATE M3/D'],
@@ -1815,6 +1817,8 @@ const COLUMNS = {
   lastWo:           ['LAST W.O', 'LAST WO'],
   chemical:         ['CHEMICAL', 'CHEMICAL ', 'Chemical', 'Chemical '],
   h2s:              ['H2S WELL', 'H2S'],
+  h2sPpm:           ['H2S (PPM)', 'H2S PPM'],
+  h2sBlank:         ['H2S Blank', 'H2S BLANK', 'H2S blank', 'H2S Blank (PPM)', 'H2S BLANK (PPM)'],
 };
 
 // Convenience: get a well value using the COLUMNS map key
@@ -1883,20 +1887,26 @@ function getSubstationLocation(name) { return getAnyLocation(SUBSTATION_LOCATION
 
 const MAPS_ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="#22d3ee" style="display:block;flex-shrink:0;" aria-hidden="true"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>';
 
+// Opens a Google Maps URL safely from within a PWA.
+// Using window.open() instead of target="_blank" on <a> tags prevents the
+// standalone PWA from crashing on iOS/Android when navigating to external URLs.
+function openMapsUrl(lat, lng) {
+  var url = 'https://www.google.com/maps?q=' + lat + ',' + lng;
+  window.open(url, '_blank', 'noopener,noreferrer');
+}
+
 // Generic map-link builder. Pass a {lat,lng} coord object and a label string.
 // Returns '' safely if loc is null/undefined — no coordinates = no link shown.
 function mapsLinkHTMLFor(loc, label) {
   if (!loc) return '';
-  const url = 'https://www.google.com/maps?q=' + loc.lat + ',' + loc.lng;
-  return '<a href="' + url + '" target="_blank" rel="noopener noreferrer" title="Open in Google Maps" onclick="event.stopPropagation()" class="well-map-link">' + (label || 'Location') + ' ' + MAPS_ICON_SVG + '</a>';
+  return '<a href="#" onclick="event.stopPropagation();event.preventDefault();openMapsUrl(' + loc.lat + ',' + loc.lng + ')" title="Open in Google Maps" class="well-map-link">' + (label || 'Location') + ' ' + MAPS_ICON_SVG + '</a>';
 }
 
 // Convenience wrappers — keep existing call sites unchanged
 function mapsIconHTML(wellName) {
-  const loc = getWellLocation(wellName);
+  var loc = getWellLocation(wellName);
   if (!loc) return '';
-  const url = 'https://www.google.com/maps?q=' + loc.lat + ',' + loc.lng;
-  return '<a href="' + url + '" target="_blank" rel="noopener noreferrer" title="Open in Google Maps" onclick="event.stopPropagation()" class="well-map-pin">' + MAPS_ICON_SVG + '</a>';
+  return '<a href="#" onclick="event.stopPropagation();event.preventDefault();openMapsUrl(' + loc.lat + ',' + loc.lng + ')" title="Open in Google Maps" class="well-map-pin">' + MAPS_ICON_SVG + '</a>';
 }
 function mapsLinkHTML(wellName) {
   return mapsLinkHTMLFor(getWellLocation(wellName), 'Well Location');
@@ -2075,7 +2085,8 @@ function fld(label, val, opts={}) {
     const n = parseFloat(raw);
     cls += (!isNaN(n) && n >= 0) ? ' pos' : ' neg';
   }
-  return `<div class="field"><span class="f-label">${label}</span><span class="${cls}">${escHtml(display)}</span></div>`;
+  const styleAttr = opts.rawStyle ? ` style="${opts.rawStyle}"` : '';
+  return `<div class="field"><span class="f-label">${label}</span><span class="${cls}"${styleAttr}>${escHtml(display)}</span></div>`;
 }
 function showToast(msg, err=false) {
   const t=document.getElementById('toast');
@@ -2408,6 +2419,120 @@ function showLookupEmptyState(){
   document.getElementById('headerStats').classList.remove('hidden');
 }
 
+// ══════════════════════════════════════════
+//  WELL SCREENSHOT — capture the well detail view as a PNG.
+//  Adds a temporary header (PETROBEL — Land Wells Situation) and
+//  footer (Powered by Sherif Morshed) around a clone of #wellResult,
+//  renders it off-screen with html2canvas, and downloads the image.
+//  The original DOM is never mutated, so no app features are affected.
+// ══════════════════════════════════════════
+function takeWellScreenshot(btn){
+  if(typeof html2canvas === 'undefined'){
+    alert('Screenshot library not loaded yet. Please retry in a moment.');
+    return;
+  }
+  const wellRes = document.getElementById('wellResult');
+  if(!wellRes){ return; }
+
+  // Find the well name from the well-big-name element (strip the maps link)
+  const nameEl = wellRes.querySelector('.well-big-name');
+  let wellName = 'well';
+  if(nameEl){
+    wellName = (nameEl.textContent || 'well').replace(/[↗\s]+/g,' ').trim() || 'well';
+  }
+
+  const origLabel = btn ? btn.innerHTML : '';
+  if(btn){ btn.disabled = true; btn.innerHTML = '⏳ Capturing…'; }
+
+  // Build off-screen capture container (does not touch the live DOM)
+  const stage = document.createElement('div');
+  // 1.5x larger font + wider stage to fill the screenshot with bigger text
+  stage.style.cssText = 'position:fixed;left:-10000px;top:0;width:920px;padding:32px;background:#0a0e1a;color:#e2e8f0;font-family:Inter,system-ui,sans-serif;font-size:22px;line-height:1.5;z-index:-1;';
+
+  const header = document.createElement('div');
+  header.style.cssText = 'text-align:center;padding:16px 0 22px;border-bottom:1px solid rgba(34,211,238,.25);margin-bottom:22px;';
+  header.innerHTML = '<div style="font-size:60px;font-weight:800;letter-spacing:3px;color:#fff;">PETROBEL</div>' +
+                    '<div style="font-size:22px;letter-spacing:4px;color:#22d3ee;margin-top:8px;text-transform:uppercase;">Land Wells Situation</div>';
+
+  // Clone the well content but strip the buttons row + Production Data + Pump Data sections
+  const body = document.createElement('div');
+  body.innerHTML = wellRes.innerHTML;
+  body.querySelectorAll('[data-screenshot-hide="1"]').forEach(el => el.remove());
+  body.querySelectorAll('.section').forEach(sec => {
+    const title = (sec.querySelector('.sec-title')?.textContent || '').trim().toLowerCase();
+    if(title === 'production data' || title === 'pump data' || title === 'main details'){
+      sec.remove();
+    }
+  });
+  // Rename "Current Production Snapshot" -> "Current Production" in the screenshot only
+  body.querySelectorAll('.live-title').forEach(el => { el.textContent = 'Current Production'; });
+  // Remove the Google Maps location icon/link next to the well name
+  body.querySelectorAll('.well-big-name a, .well-big-name .maps-link, .well-big-name .maps-icon, .well-big-name [onclick*="openMapsUrl"]').forEach(el => el.remove());
+  // Absolute font sizes for the screenshot (per user spec)
+  body.style.lineHeight = '1.55';
+  // Well name — fully centered, size 70
+  body.querySelectorAll('.well-big-name').forEach(el => {
+    el.style.fontSize = '70px';
+    el.style.fontWeight = '800';
+    el.style.display = 'block';
+    el.style.textAlign = 'center';
+    el.style.width = '100%';
+  });
+  // Center the badges row too so everything in the hero is centered
+  body.querySelectorAll('.well-hero .badges, .well-hero').forEach(el => {
+    el.style.justifyContent = 'center';
+    el.style.textAlign = 'center';
+  });
+  // Status badges under the well name (Producer / ESP / Reported / H2S / Chemical) — 35
+  body.querySelectorAll('.badge').forEach(el => { el.style.fontSize = '35px'; el.style.padding = '8px 16px'; });
+  // Current Production box: title 45, numbers 40, units 30
+  body.querySelectorAll('.live-title').forEach(el => { el.style.fontSize = '45px'; el.style.fontWeight = '800'; });
+  body.querySelectorAll('.lm-val').forEach(el => { el.style.fontSize = '40px'; el.style.fontWeight = '800'; });
+  body.querySelectorAll('.lm-lbl').forEach(el => { el.style.fontSize = '30px'; });
+  // Location section: header 35, fields 30
+  body.querySelectorAll('.sec-title').forEach(el => { el.style.fontSize = '35px'; el.style.letterSpacing = '1.2px'; el.style.fontWeight = '800'; });
+  body.querySelectorAll('.f-label').forEach(el => { el.style.fontSize = '30px'; });
+  body.querySelectorAll('.f-val').forEach(el => { el.style.fontSize = '30px'; el.style.fontWeight = '800'; });
+  body.querySelectorAll('.field').forEach(el => { el.style.padding = '6px 0'; });
+
+  const footer = document.createElement('div');
+  footer.style.cssText = 'text-align:center;margin-top:24px;padding-top:18px;border-top:1px solid rgba(34,211,238,.25);font-size:13px;color:#94a3b8;font-family:"JetBrains Mono",monospace;letter-spacing:.5px;';
+  footer.innerHTML = 'Powered by <span style="color:#22d3ee;">Sherif Morshed</span>';
+
+  stage.appendChild(header);
+  stage.appendChild(body);
+  stage.appendChild(footer);
+  document.body.appendChild(stage);
+
+  html2canvas(stage, {
+    backgroundColor: '#0a0e1a',
+    scale: 2,
+    useCORS: true,
+    logging: false
+  }).then(function(canvas){
+    canvas.toBlob(function(blob){
+      if(!blob){ throw new Error('Blob creation failed'); }
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const stamp = new Date().toISOString().slice(0,10);
+      a.href = url;
+      a.download = 'Well_' + wellName.replace(/[^A-Za-z0-9_-]+/g,'_') + '_' + stamp + '.png';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function(){
+        URL.revokeObjectURL(url);
+        a.remove();
+      }, 1000);
+    }, 'image/png');
+  }).catch(function(err){
+    console.error('Screenshot failed:', err);
+    alert('Screenshot failed: ' + (err && err.message ? err.message : 'unknown error'));
+  }).finally(function(){
+    stage.remove();
+    if(btn){ btn.disabled = false; btn.innerHTML = origLabel; }
+  });
+}
+
 function backFromWellCard(){
   if(currentWellBackTarget === 'overlay'){
     // Reshow the overlay
@@ -2463,9 +2588,16 @@ function renderWell(well, source='lookup'){
   const chem = getWellValue(well, ['CHEMICAL', 'CHEMICAL ']);
   const runningDays = calcRunningDays(getWellValue(well, ['LAST W.O', 'LAST WO']));
   const chemicalBadge = chem ? `<span class="badge other">${escHtml(chem)}</span>` : '';
+  const h2sPpmRaw = safeNum(getWellValue(well, COLUMNS.h2sPpm));
+  const h2sBadge = (h2sPpmRaw !== null && h2sPpmRaw > 0)
+    ? (h2sPpmRaw > 100
+        ? `<span class="badge" style="background:rgba(248,113,113,.18);color:var(--red);border-color:rgba(248,113,113,.55);font-weight:700;">⚠ H2S Blank ${h2sPpmRaw} PPM</span>`
+        : `<span class="badge" style="background:rgba(34,211,238,.1);color:var(--accent);border-color:rgba(34,211,238,.3);">H2S Blank ${h2sPpmRaw} PPM</span>`)
+    : '';
 
   document.getElementById('wellResult').innerHTML = `
-    <div style="display:flex;justify-content:flex-end;margin-bottom:10px;">
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:10px;" data-screenshot-hide="1">
+      <button class="nav-back-btn" onclick="takeWellScreenshot(this)" title="Save well snapshot as PNG" aria-label="Screenshot">📸</button>
       <button class="nav-back-btn" onclick="backFromWellCard()">← Back</button>
     </div>
 
@@ -2475,6 +2607,7 @@ function renderWell(well, source='lookup'){
         <span class="badge ${statusClass}">${escHtml(well['Status']||'—')}</span>
         <span class="badge tb">${escHtml(well['Type']||'—')}</span>
         ${(()=>{const rep=getWellValue(well,['Reporting Status']);if(!rep)return'';return rep.toLowerCase().includes('not')?'<span class="badge other" style="background:rgba(255,68,68,.15);color:var(--red);border-color:rgba(255,68,68,.3);">Not Reported</span>':'<span class="badge other" style="background:rgba(0,230,118,.12);color:var(--green);border-color:rgba(0,230,118,.3);">Reported</span>';})()}
+        ${h2sBadge}
         ${chemicalBadge}
       </div>
     </div>
@@ -2504,6 +2637,23 @@ function renderWell(well, source='lookup'){
       ${fld('Reporting', getWellValue(well, ['Reporting Status']))}
       ${fld('Reason', getWellValue(well, ['Shut Down Reason']))}
       ${fld('Chemical', chem, {hi:true})}
+      ${(()=>{
+        if(h2sPpmRaw===null||h2sPpmRaw===0) return '';
+        const hi = h2sPpmRaw > 100;
+        const style = hi
+          ? 'color:var(--red);font-weight:700;'
+          : 'color:var(--accent);';
+        return fld('H2S Blank (PPM)', `${hi?'⚠ ':''}${h2sPpmRaw}`, {rawStyle:style});
+      })()}
+      ${(()=>{
+        const h2sBlankRaw = safeNum(getWellValue(well, COLUMNS.h2sBlank));
+        if(h2sBlankRaw===null||h2sBlankRaw===0) return '';
+        const hi = h2sBlankRaw > 100;
+        const style = hi
+          ? 'color:var(--red);font-weight:700;'
+          : 'color:var(--accent);';
+        return fld('H2S Blank', `${hi?'⚠ ':''}${h2sBlankRaw} PPM`, {rawStyle:style});
+      })()}
     </div>
 
     <div class="section">
@@ -2511,6 +2661,7 @@ function renderWell(well, source='lookup'){
       ${fld('Manifold', manifold)}
       ${fld('Field Area', battery)}
       ${fld('Substation', substation)}
+      ${fld('Distance from Manifold (m)', getWellValue(well, COLUMNS.distFromManifold))}
     </div>
 
     <div class="section actual-section">
@@ -2664,8 +2815,9 @@ function renderSubstationResult(name){
       const tkBattery = getWellValue(w, ['TK Battery', 'TK Battery ', 'TK BATTERY']);
       const actRate = getWellValue(w, ['ACT , M3/D', 'ACT, M3/D', 'ACT M3/D']);
       const actNet = getWellValue(w, ['ACT NET', 'ACT NET ', 'ACT. NET', 'ACT NET M3/D']);
+      const h2sTagSub = '';
       return `<tr data-action="openFromSubstation" data-key="${escAttr(w['Well']||'')}" style="cursor:pointer;" onmouseover="this.style.background='rgba(0,200,240,.06)'" onmouseout="this.style.background=''">
-        <td class="well-link" style="color:var(--accent);font-weight:700;">${escHtml(w['Well']||'—')} <span style="font-size:9px;color:var(--muted);">↗</span></td>
+        <td class="well-link" style="color:var(--accent);font-weight:700;">${escHtml(w['Well']||'—')}${h2sTagSub} <span style="font-size:9px;color:var(--muted);">↗</span></td>
         <td>${escHtml(tkBattery||'—')}</td>
         <td class="status-cell" style="color:${DOT[statusClass]}">${escHtml(w['Status']||'—')}</td>
         <td>${fn(actRate)||'—'}</td>
@@ -3039,8 +3191,9 @@ function renderManifoldResult(key){
       const substation = getSubstationValue(w);
       const actRate = getWellValue(w, ['ACT , M3/D', 'ACT, M3/D', 'ACT M3/D']);
       const actNet = getWellValue(w, ['ACT NET', 'ACT NET ', 'ACT. NET', 'ACT NET M3/D']);
+      const h2sTagMan = '';
       return `<tr data-action="openFromManifold" data-key="${escAttr(w['Well']||'')}" style="cursor:pointer;" onmouseover="this.style.background='rgba(0,200,240,.06)'" onmouseout="this.style.background=''">
-        <td class="well-link" style="color:var(--accent);font-weight:700;">${escHtml(w['Well']||'—')} <span style="font-size:9px;color:var(--muted);">↗</span></td>
+        <td class="well-link" style="color:var(--accent);font-weight:700;">${escHtml(w['Well']||'—')}${h2sTagMan} <span style="font-size:9px;color:var(--muted);">↗</span></td>
         <td>${escHtml(substation||'—')}</td>
         <td class="status-cell" style="color:${DOT[statusClass]}">${escHtml(w['Status']||'—')}</td>
         <td>${fn(actRate)||'—'}</td>

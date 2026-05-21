@@ -4,7 +4,7 @@
 //  requests are NEVER cached to prevent stale data.
 // ══════════════════════════════════════════
 
-const CACHE_NAME = 'land-wells-v4';
+const CACHE_NAME = 'land-wells-v6';
 
 // Only cache static files that don't change between sessions
 const STATIC_ASSETS = [
@@ -14,6 +14,7 @@ const STATIC_ASSETS = [
   './icon.png',
   './icon-192.png',
   './xlsx.full.min.js',
+  './html2canvas.min.js',
   './well_locations.json',
   './manifold_substation_locations.json'
 ];
