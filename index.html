@@ -5296,6 +5296,10 @@ function startHistoryListener(){
           const realName = data.well || _histNameFromDocId(d.id);
           obj[realName] = { tests: data.tests || [], comments: data.comments || [] };
         });
+        // Apply day↔month swap to any future dates that arrived from cloud.
+        // Cloud data can still be wrong if it was pushed by an older app
+        // version, so we normalize defensively on every snapshot.
+        try { _normalizeFutureDatesWell(obj); } catch(e){}
         WELL_HISTORY = obj;
         _saveHistory();
         const activePage = document.querySelector('.page.active');
@@ -5660,54 +5664,67 @@ function _saveWCHistory(){
   }, 250);
 }
 
-// One-time cleanup: walk every record already in storage and swap day↔month
-// on any date that is in the future. Fixes wells that were parsed under the
-// old logic (before v36) and stored with US-locale MM/DD dates from Excel.
-// Runs once per browser; flag lives in localStorage so it doesn't repeat.
+// Swap day↔month on any ISO date string that is in the future and ambiguous
+// (both day and month ≤ 12). Returns the corrected string, or the original.
+function _swapIsoIfFuture(iso){
+  if(!iso || typeof iso !== 'string') return iso;
+  const m = iso.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if(!m) return iso;
+  const yr = +m[1], mon = +m[2], day = +m[3];
+  const today = new Date(); today.setHours(23,59,59,999);
+  const d = new Date(yr, mon - 1, day);
+  if(isNaN(d) || d <= today) return iso;
+  if(day > 12 || mon > 12) return iso;
+  const s = new Date(yr, day - 1, mon);
+  if(isNaN(s) || s > today) return iso;
+  return `${yr}-${String(day).padStart(2,'0')}-${String(mon).padStart(2,'0')}`;
+}
+
+// Walk WELL_HISTORY in place and fix any future-dated test or comment.
+// Returns the number of records corrected. Cheap to call repeatedly because
+// past dates pass through untouched (single regex + compare).
+function _normalizeFutureDatesWell(obj){
+  let fixed = 0;
+  if(!obj || typeof obj !== 'object') return 0;
+  Object.values(obj).forEach(w => {
+    if(w && Array.isArray(w.tests)){
+      w.tests.forEach(t => { const n = _swapIsoIfFuture(t.d); if(n !== t.d){ t.d = n; fixed++; } });
+      w.tests.sort((a,b)=> (a.d||'').localeCompare(b.d||''));
+    }
+    if(w && Array.isArray(w.comments)){
+      w.comments.forEach(c => { const n = _swapIsoIfFuture(c.d); if(n !== c.d){ c.d = n; fixed++; } });
+      w.comments.sort((a,b)=> (a.d||'').localeCompare(b.d||''));
+    }
+  });
+  return fixed;
+}
+
+// Same, for WC_HISTORY shape (Object<well, Array<{d,wc,sal,rem}>>).
+function _normalizeFutureDatesWC(obj){
+  let fixed = 0;
+  if(!obj || typeof obj !== 'object') return 0;
+  Object.values(obj).forEach(arr => {
+    if(Array.isArray(arr)){
+      arr.forEach(r => { const n = _swapIsoIfFuture(r.d); if(n !== r.d){ r.d = n; fixed++; } });
+      arr.sort((a,b)=> (a.d||'').localeCompare(b.d||''));
+    }
+  });
+  return fixed;
+}
+
+// One-time cleanup of data already in storage from earlier app versions.
 // Deferred to after first paint so it never blocks app startup.
 setTimeout(function _fixFutureDatesOnce(){
   try {
-    if(localStorage.getItem('sm_date_fix_v36') === '1') return;
-    const today = new Date(); today.setHours(23,59,59,999);
-    const swapIso = iso => {
-      if(!iso || typeof iso !== 'string') return iso;
-      const m = iso.match(/^(\d{4})-(\d{2})-(\d{2})/);
-      if(!m) return iso;
-      const yr = +m[1], mon = +m[2], day = +m[3];
-      const d = new Date(yr, mon - 1, day);
-      if(isNaN(d) || d <= today) return iso;
-      if(day > 12 || mon > 12) return iso;        // unambiguous → can't swap
-      const s = new Date(yr, day - 1, mon);
-      if(isNaN(s) || s > today) return iso;
-      return `${yr}-${String(day).padStart(2,'0')}-${String(mon).padStart(2,'0')}`;
-    };
-    let fixed = 0;
-    if(WELL_HISTORY && typeof WELL_HISTORY === 'object'){
-      Object.values(WELL_HISTORY).forEach(w => {
-        if(w && Array.isArray(w.tests)){
-          w.tests.forEach(t => { const n = swapIso(t.d); if(n !== t.d){ t.d = n; fixed++; } });
-          w.tests.sort((a,b)=> (a.d||'').localeCompare(b.d||''));
-        }
-        if(w && Array.isArray(w.comments)){
-          w.comments.forEach(c => { const n = swapIso(c.d); if(n !== c.d){ c.d = n; fixed++; } });
-          w.comments.sort((a,b)=> (a.d||'').localeCompare(b.d||''));
-        }
-      });
-    }
-    if(WC_HISTORY && typeof WC_HISTORY === 'object'){
-      Object.values(WC_HISTORY).forEach(arr => {
-        if(Array.isArray(arr)){
-          arr.forEach(r => { const n = swapIso(r.d); if(n !== r.d){ r.d = n; fixed++; } });
-          arr.sort((a,b)=> (a.d||'').localeCompare(b.d||''));
-        }
-      });
-    }
+    const fixed =
+      _normalizeFutureDatesWell(WELL_HISTORY) +
+      _normalizeFutureDatesWC(WC_HISTORY);
     if(fixed > 0){
       try { localStorage.setItem(HIST_LS_KEY, JSON.stringify(WELL_HISTORY)); } catch(e){}
       try { localStorage.setItem('sm_wc_history', JSON.stringify(WC_HISTORY)); } catch(e){}
-      console.log(`[date-fix] Corrected ${fixed} future-dated record(s)`);
+      console.log(`[date-fix] Corrected ${fixed} future-dated record(s) at startup`);
+      try { if(_histCurrentWell) _renderHistoryFor(_histCurrentWell); } catch(e){}
     }
-    localStorage.setItem('sm_date_fix_v36', '1');
   } catch(e){ console.warn('[date-fix] failed', e); }
 }, 1500);
 
@@ -5967,6 +5984,7 @@ function startWCHistoryListener(){
           const realName = dd.well || _wcNameFromDocId(d.id);
           obj[realName] = dd.rows || [];
         });
+        try { _normalizeFutureDatesWC(obj); } catch(e){}
         WC_HISTORY = obj;
         _saveWCHistory();
         if(_histCurrentWell && _onHistPage()) try { _renderHistoryFor(_histCurrentWell); } catch(e){}
