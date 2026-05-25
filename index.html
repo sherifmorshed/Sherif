@@ -4031,8 +4031,9 @@ document.getElementById('dataFileInput').addEventListener('change',function(){
     document.getElementById('dataPreviewCount').textContent=valid.length;
     document.getElementById('dataPreviewTable').innerHTML=mkTable(valid,['Well','Type','Status','RATE , M3/D','W.C %','ACT , M3/D','Loc. Manifold']);
     document.getElementById('dataPreviewArea').style.display='block';
+    document.getElementById('dataUploadZone').style.display='';
     document.getElementById('dataUploadOk').style.display='none';
-    document.getElementById('dataUploadZone').style.display='none';
+    // Keep upload zone visible so user can re-upload immediately
   },true); // isDataSheet=true
   this.value='';
 });
@@ -5076,8 +5077,15 @@ function _parseHistoryBuffer(buf){
         if(date > todayEnd){ droppedFuture++; continue; }
         const well = String(wellRaw).trim().toUpperCase();
         if(!data[well]) data[well] = {tests:[], comments:[]};
-        const actRate = row[4];
-        const hasTest = actRate !== null && actRate !== undefined && actRate !== '';
+        // A row is a TEST if ANY of the numeric test columns has a value
+        // (previously only row[4]/actRate was checked, which silently dropped
+        //  tests whose actRate cell was blank but wc/whp/amp/netOil were filled).
+        const _has = v => v !== null && v !== undefined && String(v).trim() !== '';
+        const hasTest = _has(row[4]) || _has(row[5]) || _has(row[6]) || _has(row[7]) || _has(row[8]);
+        // A row has a COMMENT if row[2] has any text. Capture it INDEPENDENTLY
+        // from the test check so test rows with a remark don't lose the remark.
+        const commentText = String(row[2] == null ? '' : row[2]).trim();
+        let captured = false;
         if(hasTest){
           data[well].tests.push({
             d: _isoDate(date),
@@ -5085,15 +5093,16 @@ function _parseHistoryBuffer(buf){
             wc: row[5],
             whp: row[6],
             amp: row[7],
-            netOil: row[8]
+            netOil: row[8],
+            rem: commentText || ''
           });
-        } else {
-          const text = String(row[2] == null ? '' : row[2]).trim();
-          if(text){
-            data[well].comments.push({ d: _isoDate(date), text: text });
-          }
+          captured = true;
         }
-        totalRows++;
+        if(commentText){
+          data[well].comments.push({ d: _isoDate(date), text: commentText });
+          captured = true;
+        }
+        if(captured) totalRows++;
       }
       // Sort each well's records
       Object.values(data).forEach(o => {
@@ -5627,7 +5636,7 @@ function _saveWCHistory(){
 function _wcNormName(s){
   return String(s||'')
     .toUpperCase()
-    .split(/[\s\-_]+/)                   // split on dashes/underscores/spaces
+    .split(/[\s\-_\/\\.]+/)              // split on dashes / underscores / spaces / slashes / dots
     .map(seg => seg.replace(/^0+(\d)/, '$1'))  // strip leading zeros per segment
     .join('');
 }
