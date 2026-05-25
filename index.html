@@ -1333,22 +1333,8 @@ pre{
     <input type="file" id="histFileInput" class="file-input" accept=".xlsx,.xls">
     <label style="display:flex;align-items:center;gap:8px;margin-top:8px;font-size:12px;color:var(--muted);cursor:pointer;">
       <input type="checkbox" id="histSkipFuture" checked style="margin:0;">
-      <span>🔄 Auto-fix future dates by swapping day↔month <strong style="color:var(--text)">(recommended)</strong> — e.g. Dec 5 2026 → May 12 2026. Unrecoverable rows are dropped.</span>
+      <span>🔄 Treat all Excel-typed dates as DD/MM <strong style="color:var(--text)">(recommended)</strong> — swaps day↔month on ambiguous cells (e.g. "Jan 5 2026" → "May 1 2026", "Dec 5 2026" → "May 12 2026"). Text cells like "19/5/2026" stay as-is.</span>
     </label>
-    <details style="margin-top:6px;font-size:11px;color:var(--muted);">
-      <summary style="cursor:pointer;">📋 Required sheet format</summary>
-      <div style="padding:8px 0 0 18px;line-height:1.7;">
-        Row 1–4 = headers, data starts at row 5. Columns:<br>
-        <strong>A</strong>=DATE (real Excel date cell, any display format) ·
-        <strong>B</strong>=WELL NO. (text) ·
-        <strong>C</strong>=Comment text (optional) ·
-        <strong>E</strong>=Act Rate ·
-        <strong>F</strong>=W.C.% ·
-        <strong>G</strong>=WHP ·
-        <strong>H</strong>=AMP ·
-        <strong>I</strong>=Net Oil
-      </div>
-    </details>
     <div id="histAdminStatus" style="display:none;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-top:8px;line-height:1.7;"></div>
 
     <!-- ── Lab W.C. History upload (admin) ── -->
@@ -1368,19 +1354,8 @@ pre{
     <input type="file" id="wcFileInput" class="file-input" accept=".xlsx,.xls">
     <label style="display:flex;align-items:center;gap:8px;margin-top:8px;font-size:12px;color:var(--muted);cursor:pointer;">
       <input type="checkbox" id="wcSkipFuture" checked style="margin:0;">
-      <span>🔄 Auto-fix future dates by swapping day↔month <strong style="color:var(--text)">(recommended)</strong> — e.g. Dec 5 2026 → May 12 2026. Unrecoverable rows are dropped.</span>
+      <span>🔄 Treat all Excel-typed dates as DD/MM <strong style="color:var(--text)">(recommended)</strong> — swaps day↔month on ambiguous cells (e.g. "Jan 5 2026" → "May 1 2026", "Dec 5 2026" → "May 12 2026"). Text cells like "19/5/2026" stay as-is.</span>
     </label>
-    <details style="margin-top:6px;font-size:11px;color:var(--muted);">
-      <summary style="cursor:pointer;">📋 Required sheet format</summary>
-      <div style="padding:8px 0 0 18px;line-height:1.7;">
-        Row 1–4 = headers, data starts at row 5. Columns:<br>
-        <strong>A</strong>=DATED (real Excel date cell) ·
-        <strong>B</strong>=WELL NO. (text) ·
-        <strong>C</strong>=LAB W.C.% (number) ·
-        <strong>D</strong>=SALINITY (number) ·
-        <strong>E</strong>=REMARKS (text, optional)
-      </div>
-    </details>
     <div id="wcAdminStatus" style="display:none;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-top:8px;line-height:1.7;"></div>
 
     <div id="dataPreviewArea" style="display:none;">
@@ -5114,20 +5089,27 @@ function parseHistoryFile(file){
   r.readAsArrayBuffer(file);
 }
 
-// Future-date recovery: a date past today was almost certainly typed with
-// day/month transposed (e.g. user typed "12/1/2026" meaning 12 Jan in DD/MM,
-// but Excel's m/d/yy cell format stored it as Dec 1 2026 = serial 46358).
-// Swapping day↔month recovers the real date.
-// Returns: the original date if not future, the swapped date if recoverable,
-// or null if unrecoverable (day>12 OR mon>12 OR swap is still future).
-function _recoverFutureDate(d, today){
+// Excel-date normalization. Egyptian data-entry uses DD/MM/YYYY, but Excel
+// often parses typed values using its own locale's m/d/yyyy rule. The two
+// only collide when BOTH numbers are ≤12 (ambiguous). We handle three cases:
+//
+//   • Text-typed cells like "19/5/2026" → already parsed as DD/MM by _toDate,
+//     so we pass them through untouched (fromExcelTyped === false).
+//   • Excel-typed cells (Date instance or numeric serial) with day≤12 AND
+//     mon≤12 → ambiguous; user intent is DD/MM so we swap day↔month, even
+//     when the date is already past (e.g. "Jan 5 2026" → "May 1 2026").
+//     This is what recovers the "missing May records" the user reports.
+//   • Excel-typed cells with day>12 (unambiguous DD/MM) or mon>12 (impossible)
+//     → leave as-is if past, drop (return null) if still future.
+function _normalizeExcelDate(d, today, fromExcelTyped){
   if(!d) return d;
-  if(d <= today) return d;
   const day = d.getDate(), mon = d.getMonth() + 1, yr = d.getFullYear();
-  if(day > 12 || mon > 12) return null;          // unambiguous → can't swap
-  const swap = new Date(yr, day - 1, mon);
-  if(isNaN(swap)) return null;
-  return swap <= today ? swap : null;             // swap must land in past
+  if(fromExcelTyped && day <= 12 && mon <= 12){
+    const swap = new Date(yr, day - 1, mon);
+    if(!isNaN(swap)) return swap;
+  }
+  if(d > today) return null;                      // unrecoverable future → drop
+  return d;
 }
 
 function _parseHistoryBuffer(buf){
@@ -5139,7 +5121,7 @@ function _parseHistoryBuffer(buf){
       let totalRows = 0;
       let skippedRows = 0;
       let skippedFuture = 0;
-      let recoveredFuture = 0;
+      let swappedDates = 0;
       let skippedBadDate = 0;
       const autoFix = (function(){ const el=document.getElementById('histSkipFuture'); return el ? el.checked : true; })();
       const TODAY = new Date(); TODAY.setHours(23,59,59,999);
@@ -5150,25 +5132,36 @@ function _parseHistoryBuffer(buf){
       // dropped. This was the root cause of "last sample missing in app"
       // reports — the merged date cell only carries a value on its first row.
       let _ffDate = null;
+      let _ffExcelTyped = false;
       let _ffWell = null;
       // Skip 4 header rows; data starts at index 4
       for(let i = 4; i < rows.length; i++){
         const row = rows[i];
         if(!row) continue;
-        let date = _toDate(row[0]);
+        const rawCell = row[0];
+        // Excel-typed cell = Date instance (from {cellDates:true}) or numeric
+        // serial. Text cells like "19/5/2026" go through _toDate's DD/MM parser
+        // and are NOT considered Excel-typed (already correct, don't swap).
+        // Use Object.prototype.toString rather than `instanceof Date` because
+        // the XLSX bundle may construct Date objects in a different realm.
+        let fromExcelTyped =
+          Object.prototype.toString.call(rawCell) === '[object Date]' ||
+          typeof rawCell === 'number';
+        let date = _toDate(rawCell);
         // Reject obviously-bogus dates BEFORE forward-fill: serial 0 / empty
         // cells become 1899-12-30, and other garbage can predate Y2K.
         if(date && date < MIN_DATE) date = null;
-        if(date) _ffDate = date;
-        else if(_ffDate) date = _ffDate;
+        if(date){ _ffDate = date; _ffExcelTyped = fromExcelTyped; }
+        else if(_ffDate){ date = _ffDate; fromExcelTyped = _ffExcelTyped; }
         let wellRaw = row[1];
         if(wellRaw != null && String(wellRaw).trim() !== '') _ffWell = wellRaw;
         else if(_ffWell != null) wellRaw = _ffWell;
         if(!date){ skippedBadDate++; continue; }
-        if(autoFix && date > TODAY){
-          const fixed = _recoverFutureDate(date, TODAY);
-          if(fixed){ date = fixed; recoveredFuture++; }
-          else { skippedFuture++; continue; }
+        if(autoFix){
+          const orig = date;
+          const fixed = _normalizeExcelDate(date, TODAY, fromExcelTyped);
+          if(fixed === null){ skippedFuture++; continue; }
+          if(fixed.getTime() !== orig.getTime()){ date = fixed; swappedDates++; }
         }
         if(wellRaw == null || String(wellRaw).trim() === ''){ skippedRows++; continue; }
         const well = String(wellRaw).trim().toUpperCase();
@@ -5205,13 +5198,13 @@ function _parseHistoryBuffer(buf){
       const total = Object.keys(data).length;
       const reportLines = [
         `✅ Imported ${totalRows} records across ${total} wells`,
-        recoveredFuture > 0 ? `🔄 Recovered ${recoveredFuture} future-dated row(s) by swapping day↔month` : '',
+        swappedDates > 0 ? `🔄 Swapped day↔month on ${swappedDates} Excel-typed date cell(s) → DD/MM intent` : '',
         skippedFuture > 0 ? `🚫 Dropped ${skippedFuture} unrecoverable future row(s) (day>12 — can't swap)` : '',
         skippedBadDate > 0 ? `⚠️ Skipped ${skippedBadDate} row(s) with missing/invalid date` : '',
         skippedRows > 0 ? `⚠️ Skipped ${skippedRows} row(s) with no well name` : ''
       ].filter(Boolean).join('\n');
-      if(skippedRows + skippedFuture + skippedBadDate + recoveredFuture > 0){
-        console.warn(`[wells-hist] recoveredFuture=${recoveredFuture}, skippedFuture=${skippedFuture}, badDate=${skippedBadDate}, noWell=${skippedRows}`);
+      if(skippedRows + skippedFuture + skippedBadDate + swappedDates > 0){
+        console.warn(`[wells-hist] swappedDates=${swappedDates}, skippedFuture=${skippedFuture}, badDate=${skippedBadDate}, noWell=${skippedRows}`);
       }
       showToast(`✅ Parsed ${totalRows} records for ${total} wells`);
       _histCurrentWell = null;
@@ -5902,7 +5895,7 @@ function _parseWCBuffer(buf){
     let totalRows = 0;
     let skippedRows = 0;
     let skippedFuture = 0;
-    let recoveredFuture = 0;
+    let swappedDates = 0;
     let skippedBadDate = 0;
     const autoFix = (function(){ const el=document.getElementById('wcSkipFuture'); return el ? el.checked : true; })();
     const TODAY = new Date(); TODAY.setHours(23,59,59,999);
@@ -5912,23 +5905,29 @@ function _parseWCBuffer(buf){
     // — without this we silently dropped real samples (e.g. the latest entry
     //  for a well not appearing in the app).
     let _ffDate = null;
+    let _ffExcelTyped = false;
     let _ffWell = null;
     // Header rows 0-3, data from row index 4
     for(let i = 4; i < rows.length; i++){
       const row = rows[i];
       if(!row) continue;
-      let date = _toDate(row[0]);
+      const rawCell = row[0];
+      let fromExcelTyped =
+        Object.prototype.toString.call(rawCell) === '[object Date]' ||
+        typeof rawCell === 'number';
+      let date = _toDate(rawCell);
       if(date && date < MIN_DATE) date = null;
-      if(date) _ffDate = date;
-      else if(_ffDate) date = _ffDate;
+      if(date){ _ffDate = date; _ffExcelTyped = fromExcelTyped; }
+      else if(_ffDate){ date = _ffDate; fromExcelTyped = _ffExcelTyped; }
       let wellRaw = row[1];
       if(wellRaw != null && String(wellRaw).trim() !== '') _ffWell = wellRaw;
       else if(_ffWell != null) wellRaw = _ffWell;
       if(!date){ skippedBadDate++; continue; }
-      if(autoFix && date > TODAY){
-        const fixed = _recoverFutureDate(date, TODAY);
-        if(fixed){ date = fixed; recoveredFuture++; }
-        else { skippedFuture++; continue; }
+      if(autoFix){
+        const orig = date;
+        const fixed = _normalizeExcelDate(date, TODAY, fromExcelTyped);
+        if(fixed === null){ skippedFuture++; continue; }
+        if(fixed.getTime() !== orig.getTime()){ date = fixed; swappedDates++; }
       }
       if(wellRaw == null || String(wellRaw).trim() === ''){ skippedRows++; continue; }
       const raw = String(wellRaw).trim();
@@ -5957,9 +5956,9 @@ function _parseWCBuffer(buf){
     const wellCount = Object.keys(data).length;
     const unmatchedList = Array.from(unmatched.keys()).sort();
     let summary = `✅ Imported ${totalRows} W.C. rows for ${wellCount} matched wells`;
-    if(recoveredFuture > 0) summary += `\n🔄 Recovered ${recoveredFuture} future-dated row(s) by swapping day↔month`;
-    if(skippedFuture > 0)   summary += `\n🚫 Dropped ${skippedFuture} unrecoverable future row(s) (day>12 — can't swap)`;
-    if(skippedBadDate > 0)  summary += `\n⚠️ Skipped ${skippedBadDate} row(s) with missing/invalid date`;
+    if(swappedDates > 0)   summary += `\n🔄 Swapped day↔month on ${swappedDates} Excel-typed date cell(s) → DD/MM intent`;
+    if(skippedFuture > 0)  summary += `\n🚫 Dropped ${skippedFuture} unrecoverable future row(s) (day>12 — can't swap)`;
+    if(skippedBadDate > 0) summary += `\n⚠️ Skipped ${skippedBadDate} row(s) with missing/invalid date`;
     if(unmatchedList.length){
       summary += `\n⚠️ ${unmatchedList.length} unmatched well name(s): ` + unmatchedList.slice(0,15).join(', ');
       if(unmatchedList.length > 15) summary += ` … (+${unmatchedList.length - 15} more)`;
