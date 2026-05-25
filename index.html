@@ -5085,13 +5085,25 @@ function _parseHistoryBuffer(buf){
       const rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:null, raw:true});
       const data = {};
       let totalRows = 0;
+      let skippedRows = 0;
+      // Forward-fill state — when a row's date or well cell is null/blank
+      // (common in Excel when the user MERGED cells or omitted repeats), we
+      // re-use the most recent non-empty value so that row isn't silently
+      // dropped. This was the root cause of "last sample missing in app"
+      // reports — the merged date cell only carries a value on its first row.
+      let _ffDate = null;
+      let _ffWell = null;
       // Skip 4 header rows; data starts at index 4
       for(let i = 4; i < rows.length; i++){
         const row = rows[i];
         if(!row) continue;
-        const date = _swapDayMonthIfFuture(_toDate(row[0]));
-        const wellRaw = row[1];
-        if(!date || wellRaw == null || String(wellRaw).trim() === '') continue;
+        let date = _swapDayMonthIfFuture(_toDate(row[0]));
+        if(date) _ffDate = date;
+        else if(_ffDate) date = _ffDate;
+        let wellRaw = row[1];
+        if(wellRaw != null && String(wellRaw).trim() !== '') _ffWell = wellRaw;
+        else if(_ffWell != null) wellRaw = _ffWell;
+        if(!date || wellRaw == null || String(wellRaw).trim() === ''){ skippedRows++; continue; }
         const well = String(wellRaw).trim().toUpperCase();
         if(!data[well]) data[well] = {tests:[], comments:[]};
         // A row is a TEST if ANY of the numeric test columns has a value
@@ -5124,6 +5136,7 @@ function _parseHistoryBuffer(buf){
       WELL_HISTORY = data;
       _saveHistory();
       const total = Object.keys(data).length;
+      if(skippedRows > 0) console.warn(`[wells-hist] Skipped ${skippedRows} row(s) with no date/well (after forward-fill).`);
       showToast(`✅ Parsed ${totalRows} records for ${total} wells`);
       _histCurrentWell = null;
       refreshHistoryPage();
@@ -5724,16 +5737,28 @@ function _wcNormName(s){
   return _WC_ALIASES[k] || k;
 }
 
-// Build map: normalized → canonical well name from the live WELLS DB
+// Build map: normalized → canonical well name from the live WELLS DB.
+// Warn when two well names collapse to the same normalized key (e.g.
+// "113-188" and "113-1-88" both become "113188") — only the first wins,
+// causing the second well's W.C. samples to be misrouted or hidden.
 function _wcBuildMatchMap(){
   const m = new Map();
   if(typeof WELLS === 'undefined' || !Array.isArray(WELLS)) return m;
+  const collisions = [];
   WELLS.forEach(w => {
     const name = (w && (w['Well'] || w.Well)) || '';
     if(!name) return;
     const k = _wcNormName(name);
-    if(k && !m.has(k)) m.set(k, String(name).trim());
+    if(!k) return;
+    if(m.has(k) && m.get(k) !== String(name).trim()){
+      collisions.push(`${m.get(k)} ⇄ ${name} (key="${k}")`);
+    } else if(!m.has(k)){
+      m.set(k, String(name).trim());
+    }
   });
+  if(collisions.length){
+    console.warn('[wc-match] Well-name collisions (only the first wins):', collisions);
+  }
   return m;
 }
 
@@ -5764,13 +5789,24 @@ function _parseWCBuffer(buf){
     const data = {};
     const unmatched = new Map(); // raw name → count
     let totalRows = 0;
+    let skippedRows = 0;
+    // Forward-fill empty date/well cells from the previous row. Common in
+    // Excel when cells are MERGED across rows or the user leaves repeats blank
+    // — without this we silently dropped real samples (e.g. the latest entry
+    //  for a well not appearing in the app).
+    let _ffDate = null;
+    let _ffWell = null;
     // Header rows 0-3, data from row index 4
     for(let i = 4; i < rows.length; i++){
       const row = rows[i];
       if(!row) continue;
-      const date = _swapDayMonthIfFuture(_toDate(row[0]));
-      const wellRaw = row[1];
-      if(!date || wellRaw == null || String(wellRaw).trim() === '') continue;
+      let date = _swapDayMonthIfFuture(_toDate(row[0]));
+      if(date) _ffDate = date;
+      else if(_ffDate) date = _ffDate;
+      let wellRaw = row[1];
+      if(wellRaw != null && String(wellRaw).trim() !== '') _ffWell = wellRaw;
+      else if(_ffWell != null) wellRaw = _ffWell;
+      if(!date || wellRaw == null || String(wellRaw).trim() === ''){ skippedRows++; continue; }
       const raw = String(wellRaw).trim();
       const key = _wcNormName(raw);
       const canonical = matchMap.get(key);
@@ -5791,6 +5827,7 @@ function _parseWCBuffer(buf){
     Object.values(data).forEach(arr => arr.sort((a,b)=> a.d.localeCompare(b.d)));
     WC_HISTORY = data;
     _saveWCHistory();
+    if(skippedRows > 0) console.warn(`[wc-hist] Skipped ${skippedRows} row(s) with no date/well (after forward-fill).`);
     const wellCount = Object.keys(data).length;
     const unmatchedList = Array.from(unmatched.keys()).sort();
     let summary = `✅ Parsed ${totalRows} W.C. rows for ${wellCount} matched wells`;
