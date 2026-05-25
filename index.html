@@ -5031,9 +5031,11 @@ function _swapDayMonthIfFuture(d){
   const today = new Date();
   today.setHours(23,59,59,999);
   if(d <= today) return d;                       // not in the future → keep
-  const day = d.getUTCDate(), mon = d.getUTCMonth() + 1, yr = d.getUTCFullYear();
+  // Use LOCAL components (matches _isoDate). Using UTC here would mis-read
+  // local-midnight dates in positive-offset timezones (Egypt UTC+2/+3).
+  const day = d.getDate(), mon = d.getMonth() + 1, yr = d.getFullYear();
   if(day > 12 || mon > 12) return d;             // unambiguous → can't swap
-  const swapped = new Date(Date.UTC(yr, day - 1, mon));
+  const swapped = new Date(yr, day - 1, mon);    // local-time constructor
   if(isNaN(swapped)) return d;
   return swapped <= today ? swapped : d;
 }
@@ -5074,7 +5076,7 @@ function _parseHistoryBuffer(buf){
       for(let i = 4; i < rows.length; i++){
         const row = rows[i];
         if(!row) continue;
-        const date = _toDate(row[0]);
+        const date = _swapDayMonthIfFuture(_toDate(row[0]));
         const wellRaw = row[1];
         if(!date || wellRaw == null || String(wellRaw).trim() === '') continue;
         const well = String(wellRaw).trim().toUpperCase();
@@ -5679,7 +5681,7 @@ function _parseWCBuffer(buf){
     for(let i = 4; i < rows.length; i++){
       const row = rows[i];
       if(!row) continue;
-      const date = _toDate(row[0]);
+      const date = _swapDayMonthIfFuture(_toDate(row[0]));
       const wellRaw = row[1];
       if(!date || wellRaw == null || String(wellRaw).trim() === '') continue;
       const raw = String(wellRaw).trim();
