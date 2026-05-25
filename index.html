@@ -4974,7 +4974,20 @@ let WELL_HISTORY = (function(){
 let _histCurrentWell = null;
 let _histMetric = 'actRate';
 
+// Debounced localStorage writes — JSON.stringify of large history datasets
+// (1000s of rows) can take 100+ ms and block the UI. Cluster rapid sequential
+// updates into a single deferred write that runs when the browser is idle.
+let _saveHistoryTimer = null;
 function _saveHistory(){
+  if(_saveHistoryTimer) clearTimeout(_saveHistoryTimer);
+  _saveHistoryTimer = setTimeout(() => {
+    _saveHistoryTimer = null;
+    try { localStorage.setItem(HIST_LS_KEY, JSON.stringify(WELL_HISTORY)); }
+    catch(e){ showToast('⚠️ Could not save history (storage full?)', true); }
+  }, 250);
+}
+function _saveHistoryNow(){
+  if(_saveHistoryTimer){ clearTimeout(_saveHistoryTimer); _saveHistoryTimer = null; }
   try { localStorage.setItem(HIST_LS_KEY, JSON.stringify(WELL_HISTORY)); }
   catch(e){ showToast('⚠️ Could not save history (storage full?)', true); }
 }
@@ -5601,7 +5614,14 @@ function _buildHistoryChart(tests, metricKey){
   }
   const si = document.getElementById('histSearchInput');
   if(si){
-    si.addEventListener('input', _histSearchHandler);
+    // Debounce keystrokes so we don't filter+sort+rebuild suggestion HTML
+    // on every single character (noticeable lag with many wells).
+    let _histSearchTimer = null;
+    const _histSearchDebounced = () => {
+      if(_histSearchTimer) clearTimeout(_histSearchTimer);
+      _histSearchTimer = setTimeout(_histSearchHandler, 120);
+    };
+    si.addEventListener('input', _histSearchDebounced);
     si.addEventListener('focus', _histSearchHandler);
   }
   // Initial paint of stats so they show even without opening the tab
@@ -5617,9 +5637,66 @@ let WC_HISTORY = (function(){
   try { return JSON.parse(localStorage.getItem('sm_wc_history') || '{}'); }
   catch(e){ return {}; }
 })();
+// Debounced — see _saveHistory comment above.
+let _saveWCTimer = null;
 function _saveWCHistory(){
-  try { localStorage.setItem('sm_wc_history', JSON.stringify(WC_HISTORY)); } catch(e){}
+  if(_saveWCTimer) clearTimeout(_saveWCTimer);
+  _saveWCTimer = setTimeout(() => {
+    _saveWCTimer = null;
+    try { localStorage.setItem('sm_wc_history', JSON.stringify(WC_HISTORY)); } catch(e){}
+  }, 250);
 }
+
+// One-time cleanup: walk every record already in storage and swap day↔month
+// on any date that is in the future. Fixes wells that were parsed under the
+// old logic (before v36) and stored with US-locale MM/DD dates from Excel.
+// Runs once per browser; flag lives in localStorage so it doesn't repeat.
+// Deferred to after first paint so it never blocks app startup.
+setTimeout(function _fixFutureDatesOnce(){
+  try {
+    if(localStorage.getItem('sm_date_fix_v36') === '1') return;
+    const today = new Date(); today.setHours(23,59,59,999);
+    const swapIso = iso => {
+      if(!iso || typeof iso !== 'string') return iso;
+      const m = iso.match(/^(\d{4})-(\d{2})-(\d{2})/);
+      if(!m) return iso;
+      const yr = +m[1], mon = +m[2], day = +m[3];
+      const d = new Date(yr, mon - 1, day);
+      if(isNaN(d) || d <= today) return iso;
+      if(day > 12 || mon > 12) return iso;        // unambiguous → can't swap
+      const s = new Date(yr, day - 1, mon);
+      if(isNaN(s) || s > today) return iso;
+      return `${yr}-${String(day).padStart(2,'0')}-${String(mon).padStart(2,'0')}`;
+    };
+    let fixed = 0;
+    if(WELL_HISTORY && typeof WELL_HISTORY === 'object'){
+      Object.values(WELL_HISTORY).forEach(w => {
+        if(w && Array.isArray(w.tests)){
+          w.tests.forEach(t => { const n = swapIso(t.d); if(n !== t.d){ t.d = n; fixed++; } });
+          w.tests.sort((a,b)=> (a.d||'').localeCompare(b.d||''));
+        }
+        if(w && Array.isArray(w.comments)){
+          w.comments.forEach(c => { const n = swapIso(c.d); if(n !== c.d){ c.d = n; fixed++; } });
+          w.comments.sort((a,b)=> (a.d||'').localeCompare(b.d||''));
+        }
+      });
+    }
+    if(WC_HISTORY && typeof WC_HISTORY === 'object'){
+      Object.values(WC_HISTORY).forEach(arr => {
+        if(Array.isArray(arr)){
+          arr.forEach(r => { const n = swapIso(r.d); if(n !== r.d){ r.d = n; fixed++; } });
+          arr.sort((a,b)=> (a.d||'').localeCompare(b.d||''));
+        }
+      });
+    }
+    if(fixed > 0){
+      try { localStorage.setItem(HIST_LS_KEY, JSON.stringify(WELL_HISTORY)); } catch(e){}
+      try { localStorage.setItem('sm_wc_history', JSON.stringify(WC_HISTORY)); } catch(e){}
+      console.log(`[date-fix] Corrected ${fixed} future-dated record(s)`);
+    }
+    localStorage.setItem('sm_date_fix_v36', '1');
+  } catch(e){ console.warn('[date-fix] failed', e); }
+}, 1500);
 
 // Normalize a well name for fuzzy matching across dash + leading-zero variants.
 //   "113-A-16"  → "113A16"
@@ -5629,12 +5706,22 @@ function _saveWCHistory(){
 //   "112-7"     → "1127"     (matches "112-07")
 //   "112-07"    → "1127"
 //   "112-007"   → "1127"
+// Known aliases — raw lab-sheet names that don't share a normalized form with
+// the canonical well name. Keys & values are BOTH the post-normalize strings
+// (uppercase, no separators, leading-zeros stripped per segment).
+//   "West F-02"  → norm "WESTF2"  → alias to "WF2" → matches "WF-2"
+const _WC_ALIASES = {
+  'WESTF2': 'WF2',
+  'WESTF02': 'WF2',
+};
+
 function _wcNormName(s){
-  return String(s||'')
+  const k = String(s||'')
     .toUpperCase()
     .split(/[\s\-_\/\\.]+/)              // split on dashes / underscores / spaces / slashes / dots
     .map(seg => seg.replace(/^0+(\d)/, '$1'))  // strip leading zeros per segment
     .join('');
+  return _WC_ALIASES[k] || k;
 }
 
 // Build map: normalized → canonical well name from the live WELLS DB
@@ -5823,9 +5910,16 @@ function startWCHistoryListener(){
       const whn = document.getElementById('wc-cloud-when');
       if(cnt) cnt.textContent = data.count != null ? data.count : (data.wellNames||[]).length;
       if(whn && ts) whn.textContent = new Date(ts).toLocaleString('en-GB');
+      // Only re-render if the user is actually viewing the history page.
+      // Otherwise we waste CPU rebuilding ~500-row HTML tables off-screen
+      // every time a cloud snapshot arrives.
+      const _onHistPage = () => {
+        const ap = document.querySelector('.page.active');
+        return ap && ap.id === 'page-history';
+      };
       if(_skipNextWCSnapshotReload){
         _skipNextWCSnapshotReload = false;
-        if(_histCurrentWell) try { _renderHistoryFor(_histCurrentWell); } catch(e){}
+        if(_histCurrentWell && _onHistPage()) try { _renderHistoryFor(_histCurrentWell); } catch(e){}
         return;
       }
       try {
@@ -5838,7 +5932,7 @@ function startWCHistoryListener(){
         });
         WC_HISTORY = obj;
         _saveWCHistory();
-        if(_histCurrentWell) try { _renderHistoryFor(_histCurrentWell); } catch(e){}
+        if(_histCurrentWell && _onHistPage()) try { _renderHistoryFor(_histCurrentWell); } catch(e){}
         if(!isFirst) showToast('🔄 W.C. history synced from cloud');
       } catch(err){
         console.error('[Firestore] W.C. fetch error', err);
