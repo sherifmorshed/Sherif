@@ -5061,20 +5061,13 @@ function _parseHistoryBuffer(buf){
       const rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:null, raw:true});
       const data = {};
       let totalRows = 0;
-      let swappedDates = 0;
-      let droppedFuture = 0;
-      const todayEnd = new Date(); todayEnd.setHours(23,59,59,999);
       // Skip 4 header rows; data starts at index 4
       for(let i = 4; i < rows.length; i++){
         const row = rows[i];
         if(!row) continue;
-        let date = _toDate(row[0]);
+        const date = _toDate(row[0]);
         const wellRaw = row[1];
         if(!date || wellRaw == null || String(wellRaw).trim() === '') continue;
-        // Auto-correct DD/MM ↔ MM/DD data-entry swaps that landed in the future
-        const fixed = _swapDayMonthIfFuture(date);
-        if(fixed !== date){ date = fixed; swappedDates++; }
-        if(date > todayEnd){ droppedFuture++; continue; }
         const well = String(wellRaw).trim().toUpperCase();
         if(!data[well]) data[well] = {tests:[], comments:[]};
         // A row is a TEST if ANY of the numeric test columns has a value
@@ -5082,10 +5075,7 @@ function _parseHistoryBuffer(buf){
         //  tests whose actRate cell was blank but wc/whp/amp/netOil were filled).
         const _has = v => v !== null && v !== undefined && String(v).trim() !== '';
         const hasTest = _has(row[4]) || _has(row[5]) || _has(row[6]) || _has(row[7]) || _has(row[8]);
-        // A row has a COMMENT if row[2] has any text. Capture it INDEPENDENTLY
-        // from the test check so test rows with a remark don't lose the remark.
         const commentText = String(row[2] == null ? '' : row[2]).trim();
-        let captured = false;
         if(hasTest){
           data[well].tests.push({
             d: _isoDate(date),
@@ -5096,13 +5086,11 @@ function _parseHistoryBuffer(buf){
             netOil: row[8],
             rem: commentText || ''
           });
-          captured = true;
-        }
-        if(commentText){
+          totalRows++;
+        } else if(commentText){
           data[well].comments.push({ d: _isoDate(date), text: commentText });
-          captured = true;
+          totalRows++;
         }
-        if(captured) totalRows++;
       }
       // Sort each well's records
       Object.values(data).forEach(o => {
@@ -5112,13 +5100,10 @@ function _parseHistoryBuffer(buf){
       WELL_HISTORY = data;
       _saveHistory();
       const total = Object.keys(data).length;
-      let extras = '';
-      if(swappedDates) extras += ` 🔁 ${swappedDates} date(s) auto-fixed (day↔month swap).`;
-      if(droppedFuture) extras += ` ⛔ ${droppedFuture} future-dated row(s) dropped.`;
       showToast(`✅ Parsed ${totalRows} records for ${total} wells`);
       _histCurrentWell = null;
       refreshHistoryPage();
-      _setHistAdminStatus(`📤 Parsed ${total} wells / ${totalRows} records.${extras} Uploading to cloud…`);
+      _setHistAdminStatus(`📤 Parsed ${total} wells / ${totalRows} records. Uploading to cloud…`);
       // Push to cloud (admin only)
       if(typeof isAdmin !== 'undefined' && isAdmin){
         saveHistoryToFirestore(WELL_HISTORY)
@@ -5681,21 +5666,13 @@ function _parseWCBuffer(buf){
     const data = {};
     const unmatched = new Map(); // raw name → count
     let totalRows = 0;
-    let swappedDates = 0;
-    let droppedFuture = 0;
     // Header rows 0-3, data from row index 4
     for(let i = 4; i < rows.length; i++){
       const row = rows[i];
       if(!row) continue;
-      let date = _toDate(row[0]);
+      const date = _toDate(row[0]);
       const wellRaw = row[1];
       if(!date || wellRaw == null || String(wellRaw).trim() === '') continue;
-      // Auto-correct DD/MM ↔ MM/DD data-entry swaps that landed in the future
-      const fixed = _swapDayMonthIfFuture(date);
-      if(fixed !== date){ date = fixed; swappedDates++; }
-      // If still in the future (unambiguous, e.g. day > 12), drop it
-      const today = new Date(); today.setHours(23,59,59,999);
-      if(date > today){ droppedFuture++; continue; }
       const raw = String(wellRaw).trim();
       const key = _wcNormName(raw);
       const canonical = matchMap.get(key);
@@ -5719,8 +5696,6 @@ function _parseWCBuffer(buf){
     const wellCount = Object.keys(data).length;
     const unmatchedList = Array.from(unmatched.keys()).sort();
     let summary = `✅ Parsed ${totalRows} W.C. rows for ${wellCount} matched wells`;
-    if(swappedDates) summary += `\n🔁 Auto-fixed ${swappedDates} future-dated row(s) by swapping day↔month`;
-    if(droppedFuture) summary += `\n⛔ Dropped ${droppedFuture} row(s) still dated in the future (un-fixable)`;
     if(unmatchedList.length){
       summary += `\n⚠️ ${unmatchedList.length} unmatched well name(s): ` + unmatchedList.slice(0,15).join(', ');
       if(unmatchedList.length > 15) summary += ` … (+${unmatchedList.length - 15} more)`;
