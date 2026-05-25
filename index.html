@@ -891,6 +891,9 @@ pre{
 .hist-metric-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
 .hist-metric-btn{flex:1;min-width:80px;padding:7px 8px;background:var(--surface);color:var(--muted);border:1px solid var(--border);border-radius:6px;font-size:11px;font-family:'JetBrains Mono',monospace;font-weight:700;letter-spacing:.5px;cursor:pointer;}
 .hist-metric-btn.active{background:var(--accent);color:var(--bg);border-color:var(--accent);}
+.hist-row-actions{display:inline-flex;gap:3px;margin-left:6px;vertical-align:middle;}
+.hist-row-btn{background:transparent;border:1px solid var(--border);border-radius:4px;padding:1px 4px;cursor:pointer;font-size:10px;line-height:1;opacity:.55;transition:opacity .15s;}
+.hist-row-btn:hover{opacity:1;background:var(--surface);}
 </style>
 </head>
 <body>
@@ -1328,6 +1331,24 @@ pre{
       <p>WELL_TEST_HISTORY.xlsx</p>
     </div>
     <input type="file" id="histFileInput" class="file-input" accept=".xlsx,.xls">
+    <label style="display:flex;align-items:center;gap:8px;margin-top:8px;font-size:12px;color:var(--muted);cursor:pointer;">
+      <input type="checkbox" id="histSkipFuture" checked style="margin:0;">
+      <span>🔄 Auto-fix future dates by swapping day↔month <strong style="color:var(--text)">(recommended)</strong> — e.g. Dec 5 2026 → May 12 2026. Unrecoverable rows are dropped.</span>
+    </label>
+    <details style="margin-top:6px;font-size:11px;color:var(--muted);">
+      <summary style="cursor:pointer;">📋 Required sheet format</summary>
+      <div style="padding:8px 0 0 18px;line-height:1.7;">
+        Row 1–4 = headers, data starts at row 5. Columns:<br>
+        <strong>A</strong>=DATE (real Excel date cell, any display format) ·
+        <strong>B</strong>=WELL NO. (text) ·
+        <strong>C</strong>=Comment text (optional) ·
+        <strong>E</strong>=Act Rate ·
+        <strong>F</strong>=W.C.% ·
+        <strong>G</strong>=WHP ·
+        <strong>H</strong>=AMP ·
+        <strong>I</strong>=Net Oil
+      </div>
+    </details>
     <div id="histAdminStatus" style="display:none;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-top:8px;line-height:1.7;"></div>
 
     <!-- ── Lab W.C. History upload (admin) ── -->
@@ -1345,6 +1366,21 @@ pre{
       <p>W.C.HISTORY.xlsx</p>
     </div>
     <input type="file" id="wcFileInput" class="file-input" accept=".xlsx,.xls">
+    <label style="display:flex;align-items:center;gap:8px;margin-top:8px;font-size:12px;color:var(--muted);cursor:pointer;">
+      <input type="checkbox" id="wcSkipFuture" checked style="margin:0;">
+      <span>🔄 Auto-fix future dates by swapping day↔month <strong style="color:var(--text)">(recommended)</strong> — e.g. Dec 5 2026 → May 12 2026. Unrecoverable rows are dropped.</span>
+    </label>
+    <details style="margin-top:6px;font-size:11px;color:var(--muted);">
+      <summary style="cursor:pointer;">📋 Required sheet format</summary>
+      <div style="padding:8px 0 0 18px;line-height:1.7;">
+        Row 1–4 = headers, data starts at row 5. Columns:<br>
+        <strong>A</strong>=DATED (real Excel date cell) ·
+        <strong>B</strong>=WELL NO. (text) ·
+        <strong>C</strong>=LAB W.C.% (number) ·
+        <strong>D</strong>=SALINITY (number) ·
+        <strong>E</strong>=REMARKS (text, optional)
+      </div>
+    </details>
     <div id="wcAdminStatus" style="display:none;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-top:8px;line-height:1.7;"></div>
 
     <div id="dataPreviewArea" style="display:none;">
@@ -5078,6 +5114,22 @@ function parseHistoryFile(file){
   r.readAsArrayBuffer(file);
 }
 
+// Future-date recovery: a date past today was almost certainly typed with
+// day/month transposed (e.g. user typed "12/1/2026" meaning 12 Jan in DD/MM,
+// but Excel's m/d/yy cell format stored it as Dec 1 2026 = serial 46358).
+// Swapping day↔month recovers the real date.
+// Returns: the original date if not future, the swapped date if recoverable,
+// or null if unrecoverable (day>12 OR mon>12 OR swap is still future).
+function _recoverFutureDate(d, today){
+  if(!d) return d;
+  if(d <= today) return d;
+  const day = d.getDate(), mon = d.getMonth() + 1, yr = d.getFullYear();
+  if(day > 12 || mon > 12) return null;          // unambiguous → can't swap
+  const swap = new Date(yr, day - 1, mon);
+  if(isNaN(swap)) return null;
+  return swap <= today ? swap : null;             // swap must land in past
+}
+
 function _parseHistoryBuffer(buf){
     try {
       const wb = XLSX.read(buf, {type:'array', cellDates:true});
@@ -5086,6 +5138,12 @@ function _parseHistoryBuffer(buf){
       const data = {};
       let totalRows = 0;
       let skippedRows = 0;
+      let skippedFuture = 0;
+      let recoveredFuture = 0;
+      let skippedBadDate = 0;
+      const autoFix = (function(){ const el=document.getElementById('histSkipFuture'); return el ? el.checked : true; })();
+      const TODAY = new Date(); TODAY.setHours(23,59,59,999);
+      const MIN_DATE = new Date(2000, 0, 1);
       // Forward-fill state — when a row's date or well cell is null/blank
       // (common in Excel when the user MERGED cells or omitted repeats), we
       // re-use the most recent non-empty value so that row isn't silently
@@ -5097,13 +5155,22 @@ function _parseHistoryBuffer(buf){
       for(let i = 4; i < rows.length; i++){
         const row = rows[i];
         if(!row) continue;
-        let date = _swapDayMonthIfFuture(_toDate(row[0]));
+        let date = _toDate(row[0]);
+        // Reject obviously-bogus dates BEFORE forward-fill: serial 0 / empty
+        // cells become 1899-12-30, and other garbage can predate Y2K.
+        if(date && date < MIN_DATE) date = null;
         if(date) _ffDate = date;
         else if(_ffDate) date = _ffDate;
         let wellRaw = row[1];
         if(wellRaw != null && String(wellRaw).trim() !== '') _ffWell = wellRaw;
         else if(_ffWell != null) wellRaw = _ffWell;
-        if(!date || wellRaw == null || String(wellRaw).trim() === ''){ skippedRows++; continue; }
+        if(!date){ skippedBadDate++; continue; }
+        if(autoFix && date > TODAY){
+          const fixed = _recoverFutureDate(date, TODAY);
+          if(fixed){ date = fixed; recoveredFuture++; }
+          else { skippedFuture++; continue; }
+        }
+        if(wellRaw == null || String(wellRaw).trim() === ''){ skippedRows++; continue; }
         const well = String(wellRaw).trim().toUpperCase();
         if(!data[well]) data[well] = {tests:[], comments:[]};
         // A row is a TEST if ANY of the numeric test columns has a value
@@ -5136,18 +5203,27 @@ function _parseHistoryBuffer(buf){
       WELL_HISTORY = data;
       _saveHistory();
       const total = Object.keys(data).length;
-      if(skippedRows > 0) console.warn(`[wells-hist] Skipped ${skippedRows} row(s) with no date/well (after forward-fill).`);
+      const reportLines = [
+        `✅ Imported ${totalRows} records across ${total} wells`,
+        recoveredFuture > 0 ? `🔄 Recovered ${recoveredFuture} future-dated row(s) by swapping day↔month` : '',
+        skippedFuture > 0 ? `🚫 Dropped ${skippedFuture} unrecoverable future row(s) (day>12 — can't swap)` : '',
+        skippedBadDate > 0 ? `⚠️ Skipped ${skippedBadDate} row(s) with missing/invalid date` : '',
+        skippedRows > 0 ? `⚠️ Skipped ${skippedRows} row(s) with no well name` : ''
+      ].filter(Boolean).join('\n');
+      if(skippedRows + skippedFuture + skippedBadDate + recoveredFuture > 0){
+        console.warn(`[wells-hist] recoveredFuture=${recoveredFuture}, skippedFuture=${skippedFuture}, badDate=${skippedBadDate}, noWell=${skippedRows}`);
+      }
       showToast(`✅ Parsed ${totalRows} records for ${total} wells`);
       _histCurrentWell = null;
       refreshHistoryPage();
-      _setHistAdminStatus(`📤 Parsed ${total} wells / ${totalRows} records. Uploading to cloud…`);
+      _setHistAdminStatus(reportLines + `\n📤 Uploading to cloud…`);
       // Push to cloud (admin only)
       if(typeof isAdmin !== 'undefined' && isAdmin){
         saveHistoryToFirestore(WELL_HISTORY)
-          .then(() => _setHistAdminStatus(`☁️ Cloud sync complete — ${total} wells / ${totalRows} records pushed to all devices.`))
-          .catch(err => _setHistAdminStatus(`⚠️ Local OK but cloud upload failed: ${err.message}`));
+          .then(() => _setHistAdminStatus(reportLines + `\n☁️ Cloud sync complete — pushed to all devices.`))
+          .catch(err => _setHistAdminStatus(reportLines + `\n⚠️ Local OK but cloud upload failed: ${err.message}`));
       } else {
-        _setHistAdminStatus(`✅ Saved on this device only (admin required to push to cloud).`);
+        _setHistAdminStatus(reportLines + `\n✅ Saved on this device only (admin required to push to cloud).`);
       }
     } catch(err){
       console.error(err);
@@ -5430,10 +5506,28 @@ function _renderHistoryFor(name){
 
   const chartHtml = _buildHistoryChart(h.tests, _histMetric);
 
-  // Merge tests + comments into one chronological feed (most recent first)
+  const isAdm = (typeof isAdmin !== 'undefined' && isAdmin);
+  const escName = escAttr(name);
+  // Tiny inline buttons appended to every row — admin only. The DEFINITIVE
+  // way to fix any wrong date the auto-swap heuristic couldn't disambiguate.
+  const rowBtns = (kind, idx) => isAdm
+    ? `<span class="hist-row-actions">
+         <button class="hist-row-btn" title="Edit date" onclick="editHistDate('${kind}','${escName}',${idx})">✏️</button>
+         <button class="hist-row-btn" title="Delete row" onclick="deleteHistRow('${kind}','${escName}',${idx})">🗑️</button>
+       </span>` : '';
+  const wcBtns = idx => isAdm
+    ? `<span class="hist-row-actions">
+         <button class="hist-row-btn" title="Edit date" onclick="editWCDate('${escName}',${idx})">✏️</button>
+         <button class="hist-row-btn" title="Delete row" onclick="deleteWCRow('${escName}',${idx})">🗑️</button>
+       </span>` : '';
+
+  // Merge tests + comments into one chronological feed (most recent first).
+  // We keep srcIdx — the index in the ORIGINAL source array — so the admin
+  // edit/delete buttons can mutate the right record (the merged feed is sorted
+  // descending and the source arrays are ascending).
   const merged = [];
-  (h.tests    || []).forEach(t => merged.push({ kind:'test',    d:t.d, row:t }));
-  (h.comments || []).forEach(c => merged.push({ kind:'comment', d:c.d, row:c }));
+  (h.tests    || []).forEach((t, i) => merged.push({ kind:'test',    d:t.d, row:t, srcIdx:i }));
+  (h.comments || []).forEach((c, i) => merged.push({ kind:'comment', d:c.d, row:c, srcIdx:i }));
   // Sort by date descending; tests before comments on the same day
   merged.sort((a, b) => {
     if(a.d !== b.d) return b.d.localeCompare(a.d);
@@ -5452,7 +5546,7 @@ function _renderHistoryFor(name){
           if(item.kind === 'test'){
             const t = item.row;
             return `<tr>
-              <td>${_fmtHistDate(t.d)}</td>
+              <td style="white-space:nowrap;">${_fmtHistDate(t.d)}${rowBtns('test', item.srcIdx)}</td>
               <td>${_fmtVal(t.actRate)}</td>
               <td>${_fmtVal(t.wc)}</td>
               <td>${_fmtVal(t.whp)}</td>
@@ -5462,7 +5556,7 @@ function _renderHistoryFor(name){
           } else {
             const c = item.row;
             return `<tr class="hist-cmt-row">
-              <td style="color:var(--accent);font-weight:700;white-space:nowrap;">${_fmtHistDate(c.d)}</td>
+              <td style="color:var(--accent);font-weight:700;white-space:nowrap;">${_fmtHistDate(c.d)}${rowBtns('comment', item.srcIdx)}</td>
               <td colspan="5" style="text-align:left;font-style:italic;color:var(--text);background:rgba(0,200,240,0.06);border-left:3px solid var(--accent);max-width:0;">
                 <div class="hist-cmt-text" onclick="this.classList.toggle('expanded')">💬 ${escHtml(c.text)}</div>
               </td>
@@ -5471,18 +5565,18 @@ function _renderHistoryFor(name){
         }).join('')}</tbody>
       </table></div>`;
 
-  // W.C. history rows for this well (most recent first)
-  const wcRows = (typeof WC_HISTORY !== 'undefined' && WC_HISTORY[name])
-    ? WC_HISTORY[name].slice().sort((a,b)=> b.d.localeCompare(a.d))
-    : [];
+  // W.C. history rows for this well (most recent first). Carry srcIdx so the
+  // edit/delete buttons can find the original entry in WC_HISTORY[name].
+  const wcSrc = (typeof WC_HISTORY !== 'undefined' && WC_HISTORY[name]) ? WC_HISTORY[name] : [];
+  const wcRows = wcSrc.map((r, i) => ({ r, i })).sort((a,b)=> (b.r.d||'').localeCompare(a.r.d||''));
   const wcHtml = wcRows.length === 0
     ? '<p style="color:var(--muted);font-size:13px;text-align:center;padding:20px;">No W.C. records for this well.</p>'
     : `<div class="preview-wrap"><table class="preview-table">
         <thead><tr>
           <th>Date</th><th>Lab W.C.<br>(%)</th><th>Salinity</th><th>Remarks</th>
         </tr></thead>
-        <tbody>${wcRows.map(r => `<tr>
-          <td>${_fmtHistDate(r.d)}</td>
+        <tbody>${wcRows.map(({r, i}) => `<tr>
+          <td style="white-space:nowrap;">${_fmtHistDate(r.d)}${wcBtns(i)}</td>
           <td><strong style="color:var(--accent);">${_fmtVal(r.wc)}</strong></td>
           <td>${_fmtVal(r.sal)}</td>
           <td style="white-space:normal;word-break:break-word;max-width:0;font-style:${r.rem?'italic':'normal'};color:${r.rem?'var(--text)':'var(--muted)'};">${r.rem ? escHtml(r.rem) : '—'}</td>
@@ -5807,6 +5901,12 @@ function _parseWCBuffer(buf){
     const unmatched = new Map(); // raw name → count
     let totalRows = 0;
     let skippedRows = 0;
+    let skippedFuture = 0;
+    let recoveredFuture = 0;
+    let skippedBadDate = 0;
+    const autoFix = (function(){ const el=document.getElementById('wcSkipFuture'); return el ? el.checked : true; })();
+    const TODAY = new Date(); TODAY.setHours(23,59,59,999);
+    const MIN_DATE = new Date(2000, 0, 1);
     // Forward-fill empty date/well cells from the previous row. Common in
     // Excel when cells are MERGED across rows or the user leaves repeats blank
     // — without this we silently dropped real samples (e.g. the latest entry
@@ -5817,13 +5917,20 @@ function _parseWCBuffer(buf){
     for(let i = 4; i < rows.length; i++){
       const row = rows[i];
       if(!row) continue;
-      let date = _swapDayMonthIfFuture(_toDate(row[0]));
+      let date = _toDate(row[0]);
+      if(date && date < MIN_DATE) date = null;
       if(date) _ffDate = date;
       else if(_ffDate) date = _ffDate;
       let wellRaw = row[1];
       if(wellRaw != null && String(wellRaw).trim() !== '') _ffWell = wellRaw;
       else if(_ffWell != null) wellRaw = _ffWell;
-      if(!date || wellRaw == null || String(wellRaw).trim() === ''){ skippedRows++; continue; }
+      if(!date){ skippedBadDate++; continue; }
+      if(autoFix && date > TODAY){
+        const fixed = _recoverFutureDate(date, TODAY);
+        if(fixed){ date = fixed; recoveredFuture++; }
+        else { skippedFuture++; continue; }
+      }
+      if(wellRaw == null || String(wellRaw).trim() === ''){ skippedRows++; continue; }
       const raw = String(wellRaw).trim();
       const key = _wcNormName(raw);
       const canonical = matchMap.get(key);
@@ -5844,10 +5951,15 @@ function _parseWCBuffer(buf){
     Object.values(data).forEach(arr => arr.sort((a,b)=> a.d.localeCompare(b.d)));
     WC_HISTORY = data;
     _saveWCHistory();
-    if(skippedRows > 0) console.warn(`[wc-hist] Skipped ${skippedRows} row(s) with no date/well (after forward-fill).`);
+    if(skippedRows + skippedFuture + skippedBadDate > 0){
+      console.warn(`[wc-hist] Skipped: future=${skippedFuture}, badDate=${skippedBadDate}, noWell=${skippedRows}`);
+    }
     const wellCount = Object.keys(data).length;
     const unmatchedList = Array.from(unmatched.keys()).sort();
-    let summary = `✅ Parsed ${totalRows} W.C. rows for ${wellCount} matched wells`;
+    let summary = `✅ Imported ${totalRows} W.C. rows for ${wellCount} matched wells`;
+    if(recoveredFuture > 0) summary += `\n🔄 Recovered ${recoveredFuture} future-dated row(s) by swapping day↔month`;
+    if(skippedFuture > 0)   summary += `\n🚫 Dropped ${skippedFuture} unrecoverable future row(s) (day>12 — can't swap)`;
+    if(skippedBadDate > 0)  summary += `\n⚠️ Skipped ${skippedBadDate} row(s) with missing/invalid date`;
     if(unmatchedList.length){
       summary += `\n⚠️ ${unmatchedList.length} unmatched well name(s): ` + unmatchedList.slice(0,15).join(', ');
       if(unmatchedList.length > 15) summary += ` … (+${unmatchedList.length - 15} more)`;
@@ -5997,6 +6109,122 @@ function startWCHistoryListener(){
 function stopWCHistoryListener(){
   if(_wcMetaUnsub){ _wcMetaUnsub(); _wcMetaUnsub = null; }
   _wcFirstSnapshot = true;
+}
+
+// ══════════════════════════════════════════════════════════════
+//  Admin click-to-edit / click-to-delete history rows
+//  The DEFINITIVE fix for any date the auto-swap can't disambiguate.
+//  Edits mutate WELL_HISTORY / WC_HISTORY in place, save locally, and
+//  push the affected well's doc to Firestore so all devices update.
+// ══════════════════════════════════════════════════════════════
+
+// Parse a user-entered date. Accepts:
+//   2026-05-12           (ISO)
+//   12/5/2026, 12-5-2026 (DD/MM/YYYY — Egyptian / UK)
+//   12/05/2026
+// Returns ISO "YYYY-MM-DD" or null on failure.
+function _parseUserDate(s){
+  if(!s) return null;
+  s = String(s).trim();
+  if(!s) return null;
+  let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if(m){
+    const y=+m[1], mo=+m[2], d=+m[3];
+    if(mo<1||mo>12||d<1||d>31) return null;
+    return `${y}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+  }
+  m = s.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})$/);
+  if(m){
+    let d=+m[1], mo=+m[2], y=+m[3];
+    if(y<100) y+=2000;
+    if(mo<1||mo>12||d<1||d>31) return null;
+    return `${y}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+  }
+  return null;
+}
+
+function _pushOneHistWell(name){
+  if(typeof db === 'undefined') return Promise.resolve();
+  const h = WELL_HISTORY[name];
+  if(!h) return db.collection(HIST_COL).doc(_histDocId(name)).delete().catch(()=>{});
+  return db.collection(HIST_COL).doc(_histDocId(name)).set({
+    well: name,
+    tests:    h.tests    || [],
+    comments: h.comments || []
+  });
+}
+function _pushOneWCWell(name){
+  if(typeof db === 'undefined') return Promise.resolve();
+  const rows = WC_HISTORY[name];
+  if(!rows || rows.length === 0) return db.collection(WC_COL).doc(_wcDocId(name)).delete().catch(()=>{});
+  return db.collection(WC_COL).doc(_wcDocId(name)).set({ well: name, rows });
+}
+
+function editHistDate(kind, well, idx){
+  if(typeof isAdmin === 'undefined' || !isAdmin){ showToast('Admin only', true); return; }
+  const h = WELL_HISTORY[well]; if(!h) return;
+  const arr = kind === 'test' ? h.tests : h.comments;
+  const rec = arr && arr[idx];
+  if(!rec) return;
+  const current = rec.d || '';
+  const input = prompt(`Edit date for ${well} (DD/MM/YYYY)\n\nCurrent: ${current}`, current.split('-').reverse().join('/'));
+  if(input === null) return;
+  const iso = _parseUserDate(input);
+  if(!iso){ showToast('❌ Invalid date format. Use DD/MM/YYYY', true); return; }
+  rec.d = iso;
+  arr.sort((a,b)=> (a.d||'').localeCompare(b.d||''));
+  _saveHistory();
+  _renderHistoryFor(well);
+  showToast('💾 Saving to cloud…');
+  _pushOneHistWell(well)
+    .then(()=> showToast('✅ Date updated everywhere'))
+    .catch(err => showToast('⚠️ Cloud save failed: '+err.message, true));
+}
+
+function deleteHistRow(kind, well, idx){
+  if(typeof isAdmin === 'undefined' || !isAdmin){ showToast('Admin only', true); return; }
+  const h = WELL_HISTORY[well]; if(!h) return;
+  const arr = kind === 'test' ? h.tests : h.comments;
+  const rec = arr && arr[idx]; if(!rec) return;
+  if(!confirm(`Delete this ${kind} for ${well} (${rec.d})?`)) return;
+  arr.splice(idx, 1);
+  _saveHistory();
+  _renderHistoryFor(well);
+  _pushOneHistWell(well)
+    .then(()=> showToast('🗑️ Deleted everywhere'))
+    .catch(err => showToast('⚠️ Cloud save failed: '+err.message, true));
+}
+
+function editWCDate(well, idx){
+  if(typeof isAdmin === 'undefined' || !isAdmin){ showToast('Admin only', true); return; }
+  const arr = WC_HISTORY[well]; if(!arr) return;
+  const rec = arr[idx]; if(!rec) return;
+  const current = rec.d || '';
+  const input = prompt(`Edit W.C. date for ${well} (DD/MM/YYYY)\n\nCurrent: ${current}`, current.split('-').reverse().join('/'));
+  if(input === null) return;
+  const iso = _parseUserDate(input);
+  if(!iso){ showToast('❌ Invalid date format. Use DD/MM/YYYY', true); return; }
+  rec.d = iso;
+  arr.sort((a,b)=> (a.d||'').localeCompare(b.d||''));
+  _saveWCHistory();
+  _renderHistoryFor(well);
+  showToast('💾 Saving to cloud…');
+  _pushOneWCWell(well)
+    .then(()=> showToast('✅ W.C. date updated everywhere'))
+    .catch(err => showToast('⚠️ Cloud save failed: '+err.message, true));
+}
+
+function deleteWCRow(well, idx){
+  if(typeof isAdmin === 'undefined' || !isAdmin){ showToast('Admin only', true); return; }
+  const arr = WC_HISTORY[well]; if(!arr) return;
+  const rec = arr[idx]; if(!rec) return;
+  if(!confirm(`Delete this W.C. sample for ${well} (${rec.d})?`)) return;
+  arr.splice(idx, 1);
+  _saveWCHistory();
+  _renderHistoryFor(well);
+  _pushOneWCWell(well)
+    .then(()=> showToast('🗑️ Deleted everywhere'))
+    .catch(err => showToast('⚠️ Cloud save failed: '+err.message, true));
 }
 </script>
       <!-- your existing scripts above -->
