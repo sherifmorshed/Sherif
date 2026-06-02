@@ -1559,11 +1559,6 @@ pre{
       <span class="sdval" id="dispUploadVal">—</span>
       <span class="sdage" id="dispUploadBy"></span>
     </div>
-    <div class="db-stat-grid" style="grid-template-columns:1fr 1fr;">
-      <div class="db-stat"><div class="ds-val" id="disp-wells-count">0</div><div class="ds-lbl">Disposal Wells</div></div>
-      <div class="db-stat"><div class="ds-val" id="disp-total-rate">—</div><div class="ds-lbl">Total Latest Rate (BBL/D)</div></div>
-    </div>
-
     <div id="disp-empty">
       <div class="empty-state" style="margin-top:14px;">
         <div class="big">💧</div>
@@ -1573,7 +1568,6 @@ pre{
     </div>
 
     <div id="disp-main" style="display:none;">
-      <div style="font-size:13px;font-weight:700;color:var(--accent);margin:6px 0 8px;font-family:'JetBrains Mono',monospace;">🛢️ All Disposal Wells — Latest Injection</div>
       <div id="dispTablesArea" style="margin-bottom:14px;"></div>
 
       <div class="hist-divider">
@@ -5982,15 +5976,6 @@ function clearDisposalData(){
 function refreshDisposalPage(){
   const names = Object.keys(DISPOSAL_HISTORY).sort(function(a,b){ return a.localeCompare(b,undefined,{numeric:true}); });
   const count = names.length;
-  const cEl = document.getElementById('disp-wells-count');
-  if(cEl) cEl.textContent = count;
-  let totalRate = 0, haveRate=false;
-  names.forEach(function(n){
-    const recs = DISPOSAL_HISTORY[n];
-    for(let i=recs.length-1;i>=0;i--){ if(recs[i].rate!==null){ totalRate+=recs[i].rate; haveRate=true; break; } }
-  });
-  const tEl = document.getElementById('disp-total-rate');
-  if(tEl) tEl.textContent = haveRate ? Math.round(totalRate).toLocaleString() : '—';
 
   const empty = document.getElementById('disp-empty');
   const main = document.getElementById('disp-main');
@@ -6079,16 +6064,16 @@ function refreshDisposalPage(){
           '</td></tr>';
         zi=0; body += older.map(function(r){ return renderRow(r, zi++, ++num, true); }).join('');
       }
-      const heading = '<div style="font-size:12px;font-weight:800;color:var(--text);margin:10px 0 5px;font-family:\'JetBrains Mono\',monospace;letter-spacing:.3px;">' + escHtml(title) + ' <span style="color:var(--muted);font-weight:600;">(' + list.length + ' wells)</span></div>';
+      const heading = '<div class="hist-well-hdr"><span>' + escHtml(title) + '</span><span class="hist-summary">' + list.length + ' wells</span></div>';
       return {
-        html: heading + '<div class="preview-wrap"><table class="preview-table">' + head + '<tbody>' + body + '</tbody></table></div>',
+        html: heading + '<div class="hist-section"><div class="preview-wrap"><table class="preview-table">' + head + '<tbody>' + body + '</tbody></table></div></div>',
         sum: haveSum ? sum : 0
       };
     };
     const list1001 = rows.filter(function(r){ return SET_1001[canon(r.name)]; });
     const listBala = rows.filter(function(r){ return !SET_1001[canon(r.name)]; });
-    const t1 = buildTable('🛢️ TANK BATTERY 10/1 DISPOSAL', list1001);
-    const t2 = buildTable('🛢️ BALAYIEM DISPOSAL', listBala);
+    const t1 = buildTable('🛢️ TANK BATTERY 10/1 DISPOSAL WELLS', list1001);
+    const t2 = buildTable('🛢️ BALAYIEM DISPOSAL WELLS', listBala);
     area.innerHTML = t1.html + t2.html;
   }
 
