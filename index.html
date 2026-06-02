@@ -977,6 +977,7 @@ pre{
   <line x1="19" y1="18" x2="19" y2="21" stroke="currentColor" stroke-width="1.2"/>
   <line x1="3" y1="13" x2="21" y2="13" stroke="currentColor" stroke-width="0.8" stroke-dasharray="2 2" opacity="0.5"/>
 </svg></span>T.B.</button>
+  <button class="nav-btn" onclick="showPage('disposal')" id="nav-disposal"><span class="icon">💧</span>Disposal</button>
   <button class="nav-btn" onclick="showPage('data')" id="nav-data"><span class="icon">🗄️</span>Update DB</button>
 </nav>
 
@@ -1350,6 +1351,24 @@ pre{
     <input type="file" id="wcFileInput" class="file-input" accept=".xlsx,.xls">
     <div id="wcAdminStatus" style="display:none;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-top:8px;line-height:1.7;"></div>
 
+    <!-- ── Water Disposal Wells History upload (admin) ── -->
+    <div class="update-intro" style="margin-top:18px;">
+      <h3>💧 Water Disposal Wells History</h3>
+      <p>Upload <strong>WATER_DISPOSAL_WELLS_HISTORY.xlsx</strong>.</p>
+      <ul>
+        <li>Last sync: <strong style="color:var(--text)" id="disp-cloud-when">—</strong></li>
+      </ul>
+    </div>
+    <span style="display:none" id="disp-cloud-count"></span>
+    <div class="upload-zone" id="dispAdminUploadZone" onclick="document.getElementById('dispFileInput').click()">
+      <div class="uz-icon">💧</div>
+      <p><strong>Tap to choose disposal history Excel file</strong></p>
+      <p>WATER_DISPOSAL_WELLS_HISTORY.xlsx</p>
+    </div>
+    <input type="file" id="dispFileInput" class="file-input" accept=".xlsx,.xls">
+    <div id="dispAdminStatus" style="display:none;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-top:8px;line-height:1.7;"></div>
+
+
     <div id="dataPreviewArea" style="display:none;">
       <p style="font-size:12px;color:var(--accent);margin-bottom:8px;font-family:'JetBrains Mono',monospace;">
         Found <span id="dataPreviewCount">0</span> wells in file:
@@ -1525,6 +1544,62 @@ pre{
     </div>
   </div>
   <div id="tb-batteries-container" style="padding-bottom:30px;"></div>
+</div>
+
+<!-- ══════════════ PAGE: WATER DISPOSAL WELLS ══════════════ -->
+<div class="page" id="page-disposal" style="display:none;">
+  <div class="page-hdr">
+    <h2>💧 Water Disposal Wells</h2>
+    <p>Injection wells — latest rate &amp; full injection history</p>
+  </div>
+
+  <div style="padding:14px 14px 8px;">
+    <div class="situation-date-bar" id="dispUploadBar">
+      <span class="sdlbl">📅 History Uploaded</span>
+      <span class="sdval" id="dispUploadVal">—</span>
+      <span class="sdage" id="dispUploadBy"></span>
+    </div>
+    <div class="db-stat-grid" style="grid-template-columns:1fr 1fr;">
+      <div class="db-stat"><div class="ds-val" id="disp-wells-count">0</div><div class="ds-lbl">Disposal Wells</div></div>
+      <div class="db-stat"><div class="ds-val" id="disp-total-rate">—</div><div class="ds-lbl">Total Latest Rate (BBL/D)</div></div>
+    </div>
+
+    <div id="disp-empty">
+      <div class="empty-state" style="margin-top:14px;">
+        <div class="big">💧</div>
+        <p>No water disposal history loaded yet.<br>
+        <span style="font-size:12px;color:var(--muted);">Admin can upload <strong>WATER_DISPOSAL_WELLS_HISTORY.xlsx</strong> from the <strong>Update DB</strong> tab — it will sync to all devices automatically.</span></p>
+      </div>
+    </div>
+
+    <div id="disp-main" style="display:none;">
+      <div style="font-size:13px;font-weight:700;color:var(--accent);margin:6px 0 8px;font-family:'JetBrains Mono',monospace;">🛢️ All Disposal Wells — Latest Injection</div>
+      <div id="dispTablesArea" style="margin-bottom:14px;"></div>
+
+      <div class="hist-divider">
+        <div class="hist-divider-line"></div>
+        <div class="hist-divider-title">💧 PER-WELL INJECTION HISTORY</div>
+        <div class="hist-divider-line"></div>
+      </div>
+
+      <div class="search-section">
+        <div class="search-row">
+          <div class="search-input-wrap">
+            <span class="s-icon">🔎</span>
+            <input class="search-input" id="dispSearchInput" type="text"
+              placeholder="Search disposal well..." autocomplete="off" spellcheck="false"
+              autocorrect="off" autocapitalize="none" inputmode="text">
+            <button class="s-clear" onclick="clearDispSearch()">✕</button>
+          </div>
+        </div>
+        <div class="suggestions" id="dispSuggestions"></div>
+      </div>
+
+      <div id="dispDetail" class="well-card-area">
+        <div class="empty-state"><div class="big">💧</div><p>Tap a well in the table above to see its injection history</p></div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="footer">Powered by <span>Sherif Morshed</span></div>
@@ -1747,6 +1822,7 @@ function stopFirestoreListener() {
   _firstSnapshot = true;  // Reset so next login always applies cloud data
   try { stopHistoryListener(); } catch(e){}
   try { stopWCHistoryListener(); } catch(e){}
+  try { stopDisposalListener(); } catch(e){}
 }
 
 // Start real-time listener — all 50 readers auto-update
@@ -1758,6 +1834,7 @@ function startFirestoreListener() {
   // Also start the wells-history listener for all logged-in users
   try { startHistoryListener(); } catch(e){ console.warn('history listener', e); }
   try { startWCHistoryListener(); } catch(e){ console.warn('wc listener', e); }
+  try { startDisposalListener(); } catch(e){ console.warn('disposal listener', e); }
   _firestoreUnsub = db.collection('wells').doc('landWells')
     .onSnapshot(function(doc) {
       if (doc.exists) {
@@ -2421,6 +2498,7 @@ function showPage(page, pushState=true) {
   else if(page==='data') updateDBStats();
   else if(page==='tb') renderTBPage();
   else if(page==='history') refreshHistoryPage();
+  else if(page==='disposal') refreshDisposalPage();
   // When returning to lookup — always show clean home state
   if(page==='lookup'){
     const statsEl = document.getElementById('headerStats');
@@ -5728,6 +5806,556 @@ function _buildHistoryChart(tests, metricKey){
   // Initial paint of stats so they show even without opening the tab
   try { refreshHistoryPage(); } catch(e){}
 })();
+
+// ════════════════════════════════════════════════════════════
+//  Water Disposal Wells Injection History
+//  - Per-well docs in `disposalHistory/{wellId}`
+//  - Meta doc in `disposalHistoryMeta/info` triggers listeners
+// ════════════════════════════════════════════════════════════
+const DISP_LS_KEY = 'wells_disposal_v1';
+let DISPOSAL_HISTORY = (function(){
+  try { return JSON.parse(localStorage.getItem(DISP_LS_KEY) || '{}') || {}; }
+  catch(e){ return {}; }
+})();
+let _dispCurrentWell = null;
+let _dispMetric = 'rate';
+let _dispSort = { key:'date', dir:'desc' };
+
+function dispSortBy(key){
+  if(_dispSort.key === key){
+    _dispSort.dir = (_dispSort.dir === 'asc') ? 'desc' : 'asc';
+  } else {
+    _dispSort.key = key;
+    _dispSort.dir = (key === 'date') ? 'desc' : 'desc';
+  }
+  refreshDisposalPage();
+}
+
+let _saveDispTimer = null;
+function _saveDisposal(){
+  if(_saveDispTimer) clearTimeout(_saveDispTimer);
+  _saveDispTimer = setTimeout(function(){
+    _saveDispTimer = null;
+    try { localStorage.setItem(DISP_LS_KEY, JSON.stringify(DISPOSAL_HISTORY)); }
+    catch(e){ showToast('⚠️ Could not save disposal history (storage full?)', true); }
+  }, 250);
+}
+
+const DISP_METRICS = [
+  { key:'rate', label:'Rate', unit:'BBL/D', color:'#38bdf8' },
+  { key:'whp',  label:'WHP',  unit:'BAR',   color:'#f472b6' }
+];
+
+function _dispNum(v){
+  if(v===null||v===undefined||v==='') return null;
+  if(typeof v==='number') return isNaN(v)?null:v;
+  const n = parseFloat(String(v).replace(/[^0-9.\-]/g,''));
+  return isNaN(n)?null:n;
+}
+
+function parseDisposalFile(file){
+  const sizeKb = Math.round(file.size/1024);
+  _setDispAdminStatus('📂 Reading file (' + sizeKb + ' KB)…');
+  const r = new FileReader();
+  r.onload = function(e){
+    _setDispAdminStatus('⚙️ Parsing workbook… (this may take a few seconds for large files)');
+    setTimeout(function(){ _parseDisposalBuffer(e.target.result); }, 30);
+  };
+  r.readAsArrayBuffer(file);
+}
+
+function _parseDisposalBuffer(buf){
+  try {
+    const wb = XLSX.read(buf, {type:'array', cellDates:false});
+    const sheetName = wb.SheetNames.find(function(n){ return /disposal/i.test(n) && /history/i.test(n); }) || wb.SheetNames[0];
+    const ws = wb.Sheets[sheetName];
+    const rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:null, raw:true});
+    const MIN_DATE = new Date(2000,0,1);
+    const TODAY = new Date(); TODAY.setHours(23,59,59,999);
+    const canon = function(s){ return String(s).toUpperCase().replace(/[^A-Z0-9]/g,''); };
+
+    // ── PASS 1 ── forward-fill date + well in original file order ──
+    let _ffDate=null, _ffWell=null;
+    const seqDates=[], seqRows=[];
+    for(let i=2;i<rows.length;i++){
+      const row = rows[i];
+      if(!row){ seqDates.push(null); seqRows.push(null); continue; }
+      let date = _toDate(row[1]);
+      if(date && date < MIN_DATE) date = null;
+      if(date) _ffDate = date; else if(_ffDate) date = _ffDate;
+      let wellRaw = row[2];
+      if(wellRaw!=null && String(wellRaw).trim()!=='') _ffWell = String(wellRaw).trim();
+      else if(_ffWell!=null) wellRaw = _ffWell;
+      seqDates.push(date);
+      seqRows.push({ wellRaw: wellRaw, rate: row[3], whp: row[4] });
+    }
+    const fixedDates = _fixFlippedDateSequence(seqDates);
+
+    // ── PASS 2 ── collect readings, group by canonical well key ──
+    const byKey = {};
+    let totalRecs=0, skippedFuture=0, skippedBad=0, skippedNoWell=0, swapped=0;
+    for(let j=0;j<seqRows.length;j++){
+      const entry = seqRows[j];
+      if(!entry) continue;
+      let date = fixedDates[j];
+      const orig = seqDates[j];
+      if(!date){ skippedBad++; continue; }
+      if(date > TODAY){ skippedFuture++; continue; }
+      if(orig && date.getTime()!==orig.getTime()) swapped++;
+      const wellRaw = entry.wellRaw;
+      if(wellRaw==null || String(wellRaw).trim()===''){ skippedNoWell++; continue; }
+      const name = String(wellRaw).trim();
+      const key = canon(name);
+      if(!key){ skippedNoWell++; continue; }
+      const rate = _dispNum(entry.rate);
+      const whp = _dispNum(entry.whp);
+      if(rate===null && whp===null) continue;
+      if(!byKey[key]) byKey[key] = { names:{}, recs:[] };
+      byKey[key].names[name] = (byKey[key].names[name]||0)+1;
+      byKey[key].recs.push({ d:_isoDate(date), rate:rate, whp:whp });
+      totalRecs++;
+    }
+
+    // Build dataset keyed by the best display name for each well
+    const data = {};
+    Object.keys(byKey).forEach(function(key){
+      const g = byKey[key];
+      const display = Object.keys(g.names).sort(function(a,b){
+        const d = g.names[b]-g.names[a];
+        if(d) return d;
+        if(a.length!==b.length) return a.length-b.length;
+        return a.localeCompare(b);
+      })[0];
+      const map = {};
+      g.recs.forEach(function(r){
+        if(!map[r.d]) map[r.d] = { d:r.d, rate:null, whp:null };
+        if(r.rate!==null) map[r.d].rate = r.rate;
+        if(r.whp!==null)  map[r.d].whp = r.whp;
+      });
+      data[display] = Object.keys(map).map(function(k){ return map[k]; }).sort(function(a,b){ return a.d.localeCompare(b.d); });
+    });
+
+    DISPOSAL_HISTORY = data;
+    _saveDisposal();
+    const wellCount = Object.keys(data).length;
+    const report = [
+      '✅ Imported ' + totalRecs + ' readings across ' + wellCount + ' disposal wells',
+      swapped>0 ? '🔄 Repaired ' + swapped + ' flipped date(s) (DD/MM ↔ MM/DD)' : '',
+      skippedFuture>0 ? '🚫 Dropped ' + skippedFuture + ' future-dated row(s)' : '',
+      skippedBad>0 ? '⚠️ Skipped ' + skippedBad + ' row(s) with missing/invalid date' : '',
+      skippedNoWell>0 ? '⚠️ Skipped ' + skippedNoWell + ' row(s) with no well name' : ''
+    ].filter(Boolean).join('\n');
+    showToast('✅ Parsed ' + totalRecs + ' readings for ' + wellCount + ' wells');
+    _dispCurrentWell = null;
+    refreshDisposalPage();
+    _setDispAdminStatus(report + '\n📤 Uploading to cloud…');
+    if(typeof isAdmin!=='undefined' && isAdmin){
+      saveDisposalToFirestore(DISPOSAL_HISTORY)
+        .then(function(){ _setDispAdminStatus(report + '\n☁️ Cloud sync complete — pushed to all devices.'); })
+        .catch(function(err){ _setDispAdminStatus(report + '\n⚠️ Local OK but cloud upload failed: ' + err.message); });
+    } else {
+      _setDispAdminStatus(report + '\n✅ Saved on this device only (admin required to push to cloud).');
+    }
+  } catch(err){
+    console.error(err);
+    showToast('❌ Error: '+err.message, true);
+    _setDispAdminStatus('❌ Error: ' + err.message);
+  }
+}
+
+function _setDispAdminStatus(text){
+  const el = document.getElementById('dispAdminStatus');
+  if(!el) return;
+  el.style.display='block';
+  el.textContent = text;
+}
+
+function clearDisposalData(){
+  if(!confirm('Remove all loaded water disposal history from this device?')) return;
+  DISPOSAL_HISTORY = {};
+  _dispCurrentWell = null;
+  try { localStorage.removeItem(DISP_LS_KEY); } catch(e){}
+  refreshDisposalPage();
+  showToast('🗑️ Disposal history cleared');
+}
+
+function refreshDisposalPage(){
+  const names = Object.keys(DISPOSAL_HISTORY).sort(function(a,b){ return a.localeCompare(b,undefined,{numeric:true}); });
+  const count = names.length;
+  const cEl = document.getElementById('disp-wells-count');
+  if(cEl) cEl.textContent = count;
+  let totalRate = 0, haveRate=false;
+  names.forEach(function(n){
+    const recs = DISPOSAL_HISTORY[n];
+    for(let i=recs.length-1;i>=0;i--){ if(recs[i].rate!==null){ totalRate+=recs[i].rate; haveRate=true; break; } }
+  });
+  const tEl = document.getElementById('disp-total-rate');
+  if(tEl) tEl.textContent = haveRate ? Math.round(totalRate).toLocaleString() : '—';
+
+  const empty = document.getElementById('disp-empty');
+  const main = document.getElementById('disp-main');
+  if(!empty || !main) return;
+  if(count===0){ empty.style.display='block'; main.style.display='none'; return; }
+  empty.style.display='none'; main.style.display='block';
+
+  const area = document.getElementById('dispTablesArea');
+  if(area){
+    const fmtNum = function(v){
+      if(v===null||v===undefined||v==='') return '<span style="color:var(--muted);">—</span>';
+      if(typeof v === 'number') return (Math.round(v*100)/100).toLocaleString('en-US');
+      return escHtml(String(v));
+    };
+    const canon = function(s){ return String(s).toUpperCase().replace(/[^A-Z0-9]/g,''); };
+    // Wells belonging to Tank Battery 10/1 (different system from Balayiem)
+    const SET_1001 = { 'AR9':1, 'ARM17':1, 'SID11':1, 'SID19':1 };
+    // Build a row record per well with its latest reading
+    const rows = names.map(function(n){
+      const recs = DISPOSAL_HISTORY[n];
+      const last = recs[recs.length-1];
+      return {
+        name: n,
+        last: last,
+        t: last ? Date.parse(last.d) : NaN,
+        rate: (last && last.rate!==null) ? last.rate : null,
+        whp:  (last && last.whp!==null)  ? last.whp  : null
+      };
+    });
+    // "Last month" cut-off, anchored to the most recent reading in the data
+    let maxT = -Infinity;
+    rows.forEach(function(r){ if(!isNaN(r.t) && r.t>maxT) maxT=r.t; });
+    const cutoff = (maxT===-Infinity) ? -Infinity : (maxT - 31*86400000);
+    const isRecent = function(r){ return !isNaN(r.t) && r.t>=cutoff; };
+    // Sort comparator (nulls/missing always sink to the bottom of each group)
+    const key = _dispSort.key, dir = (_dispSort.dir==='asc') ? 1 : -1;
+    const cmp = function(a,b){
+      let av, bv;
+      if(key==='rate'){ av=a.rate; bv=b.rate; }
+      else if(key==='whp'){ av=a.whp; bv=b.whp; }
+      else { av=isNaN(a.t)?null:a.t; bv=isNaN(b.t)?null:b.t; }
+      const an=(av===null||av===undefined), bn=(bv===null||bv===undefined);
+      if(an&&bn) return a.name.localeCompare(b.name,undefined,{numeric:true});
+      if(an) return 1;
+      if(bn) return -1;
+      if(av<bv) return -1*dir;
+      if(av>bv) return  1*dir;
+      return a.name.localeCompare(b.name,undefined,{numeric:true});
+    };
+    const arrow = function(k){ return _dispSort.key===k ? (_dispSort.dir==='asc'?' ▲':' ▼') : ' ⇅'; };
+    const head = '<thead><tr>' +
+      '<th style="white-space:nowrap;">No.</th>' +
+      '<th>Well</th>' +
+      '<th data-sort="date" style="cursor:pointer;user-select:none;white-space:nowrap;">Last Date' + arrow('date') + '</th>' +
+      '<th data-sort="rate" style="cursor:pointer;user-select:none;white-space:nowrap;">Rate<br>( BPD )' + arrow('rate') + '</th>' +
+      '<th data-sort="whp" style="cursor:pointer;user-select:none;white-space:nowrap;">WHP<br>(BAR)' + arrow('whp') + '</th>' +
+      '</tr></thead>';
+    const renderRow = function(r, zi, num, oos){
+      const zebra = (zi % 2 === 1) ? 'background:rgba(56,189,248,0.07);' : '';
+      const rowStyle = oos ? 'cursor:pointer;opacity:0.5;background:rgba(148,163,184,0.06);' : ('cursor:pointer;' + zebra);
+      const nameColor = oos ? 'var(--muted)' : 'var(--accent)';
+      return '<tr style="' + rowStyle + '" data-well="' + escAttr(r.name) + '">' +
+        '<td style="white-space:nowrap;color:var(--muted);font-weight:700;">' + num + '</td>' +
+        '<td style="white-space:nowrap;font-weight:700;color:' + nameColor + ';">' + escHtml(r.name) + (oos ? ' <span style="font-size:9px;font-weight:700;color:var(--muted);">⛔</span>' : '') + '</td>' +
+        '<td style="white-space:nowrap;">' + (r.last? _fmtHistDate(r.last.d) : '—') + '</td>' +
+        '<td><strong>' + fmtNum(r.rate) + '</strong></td>' +
+        '<td>' + fmtNum(r.whp) + '</td>' +
+      '</tr>';
+    };
+    // Build one system table; returns { html, sum } where sum = recent rate total
+    const buildTable = function(title, list){
+      const recent = list.filter(isRecent).sort(cmp);
+      const older  = list.filter(function(r){ return !isRecent(r); }).sort(cmp);
+      let sum = 0, haveSum = false;
+      recent.forEach(function(r){ if(r.rate!==null){ sum+=r.rate; haveSum=true; } });
+      let zi=0, num=0, body = recent.map(function(r){ return renderRow(r, zi++, ++num); }).join('');
+      // per-system in-service total row, shown directly after the in-service wells
+      body += '<tr aria-hidden="true">' +
+        '<td colspan="3" style="text-align:right;font-weight:800;font-size:13px;border-top:2px solid var(--accent);border-bottom:2px solid var(--accent);background:rgba(56,189,248,0.10);">Σ Current Injection (in service)</td>' +
+        '<td style="font-weight:900;font-size:16px;color:var(--accent);border-top:2px solid var(--accent);border-bottom:2px solid var(--accent);background:rgba(56,189,248,0.10);">' + (haveSum? Math.round(sum).toLocaleString('en-US') : '—') + '</td>' +
+        '<td style="border-top:2px solid var(--accent);border-bottom:2px solid var(--accent);background:rgba(56,189,248,0.10);"></td></tr>';
+      if(older.length){
+        body += '<tr class="disp-sep" aria-hidden="true"><td colspan="5" style="padding:0;border:none;background:transparent;">' +
+          '<div style="border-top:3px solid #f87171;margin:10px 0 0;"></div>' +
+          '<div style="font-size:10px;color:#f87171;text-align:center;padding:4px 0 5px;font-family:\'JetBrains Mono\',monospace;letter-spacing:.5px;font-weight:700;">⛔ OLD READING — WELLS OUT OF SERVICE (not in total)</div>' +
+          '</td></tr>';
+        zi=0; body += older.map(function(r){ return renderRow(r, zi++, ++num, true); }).join('');
+      }
+      const heading = '<div style="font-size:12px;font-weight:800;color:var(--text);margin:10px 0 5px;font-family:\'JetBrains Mono\',monospace;letter-spacing:.3px;">' + escHtml(title) + ' <span style="color:var(--muted);font-weight:600;">(' + list.length + ' wells)</span></div>';
+      return {
+        html: heading + '<div class="preview-wrap"><table class="preview-table">' + head + '<tbody>' + body + '</tbody></table></div>',
+        sum: haveSum ? sum : 0
+      };
+    };
+    const list1001 = rows.filter(function(r){ return SET_1001[canon(r.name)]; });
+    const listBala = rows.filter(function(r){ return !SET_1001[canon(r.name)]; });
+    const t1 = buildTable('🛢️ TANK BATTERY 10/1 DISPOSAL', list1001);
+    const t2 = buildTable('🛢️ BALAYIEM DISPOSAL', listBala);
+    area.innerHTML = t1.html + t2.html;
+  }
+
+  if(_dispCurrentWell && DISPOSAL_HISTORY[_dispCurrentWell]){
+    _renderDisposalFor(_dispCurrentWell);
+  } else {
+    const det = document.getElementById('dispDetail');
+    if(det) det.innerHTML = '<div class="empty-state"><div class="big">💧</div><p>Tap a well in the table above to see its injection history</p></div>';
+  }
+}
+
+function clearDispSearch(){
+  const inp = document.getElementById('dispSearchInput');
+  if(inp) inp.value='';
+  const s = document.getElementById('dispSuggestions');
+  if(s) s.classList.remove('show');
+}
+
+function _dispSearchHandler(){
+  const q = (document.getElementById('dispSearchInput').value||'').trim().toUpperCase();
+  const sEl = document.getElementById('dispSuggestions');
+  if(!sEl) return;
+  if(!q){ sEl.classList.remove('show'); return; }
+  const names = Object.keys(DISPOSAL_HISTORY).filter(function(n){ return n.toUpperCase().includes(q); }).sort().slice(0,12);
+  if(names.length===0){
+    sEl.innerHTML = '<div class="sug-item"><span class="sug-name" style="color:var(--muted)">No match for "' + escHtml(q) + '"</span></div>';
+    sEl.classList.add('show'); return;
+  }
+  sEl.innerHTML = names.map(function(n){
+    const recs = DISPOSAL_HISTORY[n];
+    return '<div class="sug-item" data-well="' + escAttr(n) + '">' +
+      '<span class="sug-dot" style="background:#38bdf8"></span>' +
+      '<span class="sug-name">' + escHtml(n) + '</span>' +
+      '<span class="sug-info">' + recs.length + ' readings</span>' +
+    '</div>';
+  }).join('');
+  sEl.classList.add('show');
+}
+
+function pickDisposalWell(name){
+  _dispCurrentWell = name;
+  const inp = document.getElementById('dispSearchInput');
+  if(inp) inp.value = name;
+  const sEl = document.getElementById('dispSuggestions');
+  if(sEl) sEl.classList.remove('show');
+  _renderDisposalFor(name);
+  const det = document.getElementById('dispDetail');
+  if(det && det.scrollIntoView){ try { det.scrollIntoView({behavior:'smooth', block:'start'}); } catch(e){} }
+}
+
+function _setDispMetric(m){
+  _dispMetric = m;
+  if(_dispCurrentWell) _renderDisposalFor(_dispCurrentWell);
+}
+
+function _renderDisposalFor(name){
+  const recs = DISPOSAL_HISTORY[name];
+  const out = document.getElementById('dispDetail');
+  if(!out) return;
+  if(!recs){ out.innerHTML=''; return; }
+  const metricTabs = DISP_METRICS.map(function(m){
+    return '<button class="hist-metric-btn ' + (m.key===_dispMetric?'active':'') + '" onclick="_setDispMetric(\'' + m.key + '\')">' + m.label + '</button>';
+  }).join('');
+  const chartHtml = _buildDispChart(recs, _dispMetric);
+  const rowsDesc = recs.slice().sort(function(a,b){ return b.d.localeCompare(a.d); });
+  const tableHtml = rowsDesc.length===0
+    ? '<p style="color:var(--muted);font-size:13px;text-align:center;padding:20px;">No readings.</p>'
+    : '<div class="preview-wrap"><table class="preview-table">' +
+        '<thead><tr><th>Date</th><th>Rate (BBL/D)</th><th>WHP (BAR)</th></tr></thead>' +
+        '<tbody>' + rowsDesc.map(function(r){ return '<tr>' +
+          '<td style="white-space:nowrap;">' + _fmtHistDate(r.d) + '</td>' +
+          '<td><strong style="color:var(--accent);">' + _fmtVal(r.rate) + '</strong></td>' +
+          '<td>' + _fmtVal(r.whp) + '</td>' +
+        '</tr>'; }).join('') + '</tbody></table></div>';
+  const last = recs[recs.length-1];
+  out.innerHTML =
+    '<div class="hist-well-hdr">' +
+      '<span>💧 ' + escHtml(name) + '</span>' +
+      '<span class="hist-summary">' + recs.length + ' readings · last ' + (last? _fmtHistDate(last.d):'—') + '</span>' +
+    '</div>' +
+    '<div class="hist-section">' +
+      '<h3>📈 Injection Trend</h3>' +
+      '<div class="hist-metric-tabs">' + metricTabs + '</div>' +
+      chartHtml +
+    '</div>' +
+    '<div class="hist-section">' + tableHtml + '</div>';
+}
+
+function _buildDispChart(recs, metricKey){
+  const meta = DISP_METRICS.find(function(m){ return m.key===metricKey; }) || DISP_METRICS[0];
+  const pts = recs.map(function(r,i){
+    const v = r[metricKey];
+    if(typeof v!=='number'||isNaN(v)) return null;
+    return { x:new Date(r.d).getTime(), y:v, idx:i };
+  }).filter(Boolean);
+  if(pts.length<2) return '<p style="color:var(--muted);font-size:13px;text-align:center;padding:20px;">Not enough numeric data to plot.</p>';
+  const W=640,H=260,P=44;
+  const xs=pts.map(function(p){return p.x;}), ys=pts.map(function(p){return p.y;});
+  let minX=Math.min.apply(null,xs), maxX=Math.max.apply(null,xs);
+  let minY=Math.min.apply(null,[0].concat(ys)), maxY=Math.max.apply(null,ys);
+  if(maxY===minY) maxY=minY+1;
+  maxY = maxY + (maxY-minY)*0.08;
+  const sx = function(x){ return P + (x-minX)/(maxX-minX||1)*(W-2*P); };
+  const sy = function(y){ return H - P - (y-minY)/(maxY-minY||1)*(H-2*P); };
+  const path = pts.map(function(p,i){ return (i?'L':'M')+sx(p.x).toFixed(1)+','+sy(p.y).toFixed(1); }).join(' ');
+  const areaPath = path + ' L'+sx(pts[pts.length-1].x).toFixed(1)+','+(H-P).toFixed(1)+' L'+sx(pts[0].x).toFixed(1)+','+(H-P).toFixed(1)+' Z';
+  const dots = pts.map(function(p,i){
+    const cx=sx(p.x).toFixed(1); const cyN=+sy(p.y).toFixed(1);
+    const val = (Math.abs(p.y)>=100||Number.isInteger(p.y))?Math.round(p.y).toString():(Math.round(p.y*10)/10).toString();
+    const above = (i%2===0);
+    let ly = above ? cyN-9 : cyN+15;
+    if(ly<12) ly=cyN+15;
+    if(ly>H-P-2) ly=cyN-9;
+    return '<circle cx="'+cx+'" cy="'+cyN+'" r="3.4" fill="'+meta.color+'" stroke="#0b1220" stroke-width="1.2"/>' +
+           '<text x="'+cx+'" y="'+ly.toFixed(1)+'" text-anchor="middle" fill="'+meta.color+'" font-size="10" font-weight="700" font-family="JetBrains Mono" paint-order="stroke" stroke="#0b1220" stroke-width="2.5" stroke-linejoin="round">'+val+'</text>';
+  }).join('');
+  let yAxis='';
+  const yTicks=4;
+  for(let i=0;i<=yTicks;i++){
+    const v=minY+(maxY-minY)*i/yTicks; const yy=sy(v);
+    yAxis += '<line x1="'+P+'" y1="'+yy.toFixed(1)+'" x2="'+(W-P)+'" y2="'+yy.toFixed(1)+'" stroke="rgba(148,163,184,.15)" stroke-width="1"/><text x="'+(P-6)+'" y="'+(yy+3).toFixed(1)+'" text-anchor="end" fill="#94a3b8" font-size="10" font-family="JetBrains Mono">'+(Math.round(v*10)/10).toString()+'</text>';
+  }
+  let xAxis='';
+  const xTickCount=Math.min(5,pts.length-1);
+  for(let i=0;i<=xTickCount;i++){
+    const v=minX+(maxX-minX)*i/xTickCount; const xx=sx(v);
+    const d=new Date(v); const label=d.toLocaleDateString('en-GB',{day:'2-digit',month:'short'});
+    xAxis += '<text x="'+xx.toFixed(1)+'" y="'+(H-P+16).toFixed(1)+'" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="JetBrains Mono">'+label+'</text>';
+  }
+  const lastVal=pts[pts.length-1].y; const minVal=Math.min.apply(null,ys); const maxVal=Math.max.apply(null,ys);
+  const summary = '<div class="hist-chart-row">' +
+      '<span class="hist-legend"><span class="sw" style="background:'+meta.color+';"></span>'+meta.label+' ('+meta.unit+')</span>' +
+      '<span class="hist-legend">MIN '+minVal.toFixed(1)+'</span>' +
+      '<span class="hist-legend">MAX '+maxVal.toFixed(1)+'</span>' +
+      '<span class="hist-legend">LAST <strong style="color:'+meta.color+';">'+lastVal.toFixed(1)+'</strong></span>' +
+    '</div>';
+  return '<div style="overflow-x:auto;">' +
+    '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;min-width:300px;height:auto;background:rgba(15,23,42,.4);border:1px solid var(--border);border-radius:8px;display:block;">' +
+      yAxis + xAxis +
+      '<path d="'+areaPath+'" fill="'+meta.color+'" fill-opacity="0.08" stroke="none"/>' +
+      '<path d="'+path+'" stroke="'+meta.color+'" stroke-width="2" fill="none" stroke-linejoin="round"/>' +
+      dots +
+    '</svg></div>' + summary;
+}
+
+// ── Cloud sync for water disposal history ──
+const DISP_COL = 'disposalHistory';
+const DISP_META = { col:'disposalHistoryMeta', doc:'info' };
+let _disposalMetaUnsub = null;
+let _lastDisposalTimestamp = 0;
+let _disposalFirstSnapshot = true;
+let _skipNextDisposalSnapshotReload = false;
+function _dispDocId(name){ return String(name).replace(/\//g,'__SL__'); }
+function _dispNameFromDocId(id){ return String(id).replace(/__SL__/g,'/'); }
+
+async function saveDisposalToFirestore(obj){
+  if(typeof db==='undefined') throw new Error('Firestore not initialised');
+  const entries = Object.entries(obj);
+  const wellNames = entries.map(function(e){ return e[0]; });
+  const BATCH_SIZE=50, PARALLEL=4;
+  const batches=[];
+  for(let i=0;i<entries.length;i+=BATCH_SIZE){
+    const slice = entries.slice(i,i+BATCH_SIZE);
+    const batch = db.batch();
+    slice.forEach(function(pair){
+      batch.set(db.collection(DISP_COL).doc(_dispDocId(pair[0])), { well:pair[0], readings:pair[1]||[] });
+    });
+    batches.push(batch);
+  }
+  for(let i=0;i<batches.length;i+=PARALLEL){
+    const group = batches.slice(i,i+PARALLEL);
+    await Promise.all(group.map(function(b){ return b.commit(); }));
+    await new Promise(function(res){ setTimeout(res,0); });
+  }
+  _skipNextDisposalSnapshotReload = true;
+  await db.collection(DISP_META.col).doc(DISP_META.doc).set({
+    wellNames: wellNames,
+    count: wellNames.length,
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    updatedBy: (typeof currentUser!=='undefined' && currentUser) ? currentUser.name : 'admin'
+  });
+  if(typeof updateCloudStatus==='function') updateCloudStatus('synced', 'Cloud ✓');
+  setTimeout(function(){
+    db.collection(DISP_COL).get().then(function(snap){
+      const stale=[];
+      snap.forEach(function(d){ const realName=(d.data()&&d.data().well)||_dispNameFromDocId(d.id); if(!obj[realName]) stale.push(d.id); });
+      if(!stale.length) return;
+      const ps=[];
+      for(let i=0;i<stale.length;i+=BATCH_SIZE){ const b=db.batch(); stale.slice(i,i+BATCH_SIZE).forEach(function(id){ b.delete(db.collection(DISP_COL).doc(id)); }); ps.push(b.commit()); }
+      Promise.all(ps).catch(function(){});
+    }).catch(function(){});
+  }, 500);
+}
+
+function startDisposalListener(){
+  stopDisposalListener();
+  if(typeof db==='undefined') return;
+  console.log('[Firestore] Disposal listener starting');
+  _disposalMetaUnsub = db.collection(DISP_META.col).doc(DISP_META.doc)
+    .onSnapshot(async function(doc){
+      if(!doc.exists){ _disposalFirstSnapshot=false; return; }
+      const data = doc.data()||{};
+      const ts = data.updatedAt ? data.updatedAt.toMillis() : 0;
+      const isFirst = _disposalFirstSnapshot;
+      _disposalFirstSnapshot=false;
+      if(!isFirst && ts===_lastDisposalTimestamp) return;
+      _lastDisposalTimestamp = ts;
+      const cnt = document.getElementById('disp-cloud-count');
+      const whn = document.getElementById('disp-cloud-when');
+      if(cnt) cnt.textContent = data.count!=null ? data.count : (data.wellNames||[]).length;
+      if(whn && ts) whn.textContent = new Date(ts).toLocaleString('en-GB');
+      const upVal = document.getElementById('dispUploadVal');
+      const upBy = document.getElementById('dispUploadBy');
+      if(upVal && ts) upVal.textContent = new Date(ts).toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+      if(upBy && data.updatedBy) upBy.textContent = 'by '+data.updatedBy;
+      if(_skipNextDisposalSnapshotReload){ _skipNextDisposalSnapshotReload=false; try{refreshDisposalPage();}catch(e){} return; }
+      try {
+        const snap = await db.collection(DISP_COL).get();
+        const obj = {};
+        snap.forEach(function(d){ const dd=d.data()||{}; const realName=dd.well||_dispNameFromDocId(d.id); obj[realName]=dd.readings||[]; });
+        DISPOSAL_HISTORY = obj;
+        _saveDisposal();
+        try { refreshDisposalPage(); } catch(e){}
+        if(!isFirst) showToast('🔄 Disposal history synced from cloud');
+      } catch(err){ console.error('[Firestore] Disposal fetch error', err); }
+    }, function(err){ console.error('[Firestore] Disposal listener error', err); });
+}
+function stopDisposalListener(){
+  if(_disposalMetaUnsub){ _disposalMetaUnsub(); _disposalMetaUnsub=null; }
+  _disposalFirstSnapshot=true;
+  _lastDisposalTimestamp=0;
+}
+
+// Wire up disposal file input + search
+(function wireDisposal(){
+  const fi = document.getElementById('dispFileInput');
+  if(fi){
+    fi.addEventListener('change', function(){
+      if(this.files && this.files[0]){ parseDisposalFile(this.files[0]); this.value=''; }
+    });
+  }
+  const si = document.getElementById('dispSearchInput');
+  if(si){
+    let t=null;
+    const deb = function(){ if(t) clearTimeout(t); t=setTimeout(_dispSearchHandler,120); };
+    si.addEventListener('input', deb);
+    si.addEventListener('focus', _dispSearchHandler);
+  }
+  const area = document.getElementById('dispTablesArea');
+  if(area){
+    area.addEventListener('click', function(e){
+      const th = e.target.closest('th[data-sort]');
+      if(th){ dispSortBy(th.getAttribute('data-sort')); return; }
+      const row = e.target.closest('tr[data-well]');
+      if(row) pickDisposalWell(row.getAttribute('data-well'));
+    });
+  }
+  const sEl = document.getElementById('dispSuggestions');
+  if(sEl){
+    sEl.addEventListener('click', function(e){
+      const it = e.target.closest('.sug-item[data-well]');
+      if(it) pickDisposalWell(it.getAttribute('data-well'));
+    });
+  }
+  try { refreshDisposalPage(); } catch(e){}
+})();
+
 
 // ════════════════════════════════════════════════════════════
 //  Lab W.C. History (Water-Cut sheet)
