@@ -414,6 +414,7 @@ body::before{
 .substation-table{
   width:100%;border-collapse:collapse;font-family:'JetBrains Mono',monospace;font-size:12px;min-width:640px;
 }
+.chem-well-table{min-width:1020px;}
 .substation-table th{
   background:var(--surface);color:var(--accent);padding:10px 8px;text-align:left;
   border-bottom:1px solid var(--border);font-size:10px;letter-spacing:.7px;white-space:nowrap;
@@ -894,6 +895,221 @@ pre{
 .hist-row-actions{display:inline-flex;gap:3px;margin-left:6px;vertical-align:middle;}
 .hist-row-btn{background:transparent;border:1px solid var(--border);border-radius:4px;padding:1px 4px;cursor:pointer;font-size:10px;line-height:1;opacity:.55;transition:opacity .15s;}
 .hist-row-btn:hover{opacity:1;background:var(--surface);}
+
+/* ══════════════════════════════════════════════════════════
+   DAY / LIGHT MODE  ·  WhatsApp-inspired warm palette
+   ──────────────────────────────────────────────────────────
+   Activated by  <body class="light-mode">
+   Auto-detects system prefers-color-scheme at startup.
+   Toggle with the ☀️ / 🌙 button in the user bar.
+   ══════════════════════════════════════════════════════════ */
+
+body.light-mode{
+  --bg:#ECE5DD;--surface:#FFFFFF;--card:#F0F2F5;--border:#D1D7DB;
+  --accent:#075E54;--accent2:#D97706;--green:#128C7E;--yellow:#92400E;
+  --red:#B91C1C;--text:#111B21;--muted:#667781;
+  --gold:#92400E;--deep:#E9EDEF;
+}
+
+/* Strip dark atmospheric gradients & vignette */
+body.light-mode{background-image:none !important;}
+body.light-mode #login-page{background-image:none !important;}
+body.light-mode::before{display:none !important;}
+
+/* ── Nav ── */
+body.light-mode .nav-btn.active{background:rgba(7,94,84,.08) !important;}
+body.light-mode .nav-icon-glow{background:radial-gradient(circle, rgba(7,94,84,.10) 0%, transparent 70%) !important;}
+
+/* ── Stat cards ── */
+body.light-mode .stat-card-breakdown{border-top-color:rgba(18,140,126,.2) !important;}
+body.light-mode .breakdown-divider{background:rgba(18,140,126,.25) !important;}
+
+/* ── Search ── */
+body.light-mode .search-input:focus{box-shadow:0 0 0 2px rgba(7,94,84,.15) !important;}
+body.light-mode .sug-item:active{background:rgba(7,94,84,.08) !important;}
+
+/* ── Well hero — Actual production section (has dark hardcoded gradient) ── */
+body.light-mode .actual-section{
+  border-color:rgba(7,94,84,.3) !important;
+  background:linear-gradient(135deg, rgba(7,94,84,.07), rgba(240,242,245,.97) 55%) !important;
+  box-shadow:0 0 16px rgba(7,94,84,.08) !important;
+}
+body.light-mode .actual-section .field{border-bottom-color:rgba(7,94,84,.1) !important;}
+body.light-mode .actual-title{
+  background:linear-gradient(90deg, rgba(7,94,84,.1), rgba(240,242,245,1)) !important;
+}
+
+/* Live rate box */
+body.light-mode .live-box{
+  background:rgba(7,94,84,.05) !important;
+  border-color:rgba(7,94,84,.18) !important;
+}
+
+/* ── Field separators & table cell borders ── */
+body.light-mode .field{border-bottom-color:rgba(0,0,0,.08) !important;}
+body.light-mode .preview-table td,
+body.light-mode .substation-table td{border-bottom-color:rgba(0,0,0,.08) !important;}
+
+/* ── Light-on-light text fixes ── */
+body.light-mode .f-val.wht{color:#1a4a6e !important;}
+body.light-mode .f-val.bbl{color:#1a6e8a !important;}
+body.light-mode .badge.rep{color:var(--green) !important;border-color:rgba(18,140,126,.4) !important;background:rgba(18,140,126,.1) !important;}
+body.light-mode .badge.tmr{color:#374e66 !important;border-color:#4a6680 !important;background:rgba(58,96,128,.1) !important;}
+body.light-mode .badge.rig{background:rgba(7,94,84,.1) !important;}
+body.light-mode .badge.live{background:rgba(7,94,84,.15) !important;}
+
+/* ── Suggestion items ── */
+body.light-mode .is-item:active{background:rgba(7,94,84,.08) !important;}
+
+/* ── Upload zone ── */
+body.light-mode .upload-zone:active,
+body.light-mode .upload-zone.drag{background:rgba(7,94,84,.04) !important;}
+
+/* ── Update intro panel ── */
+body.light-mode .update-intro{
+  background:rgba(7,94,84,.06) !important;
+  border-color:rgba(7,94,84,.2) !important;
+}
+
+/* ── Substation chip ── */
+body.light-mode .substation-chip:active{background:rgba(7,94,84,.08) !important;}
+
+/* ── Map links ── */
+body.light-mode .well-map-link{border-color:rgba(7,94,84,.35) !important;}
+body.light-mode .well-map-link:hover{background:rgba(7,94,84,.12) !important;}
+body.light-mode .well-map-pin:hover{background:rgba(7,94,84,.15) !important;}
+
+/* ── Manifold icon wrap ── */
+body.light-mode .manifold-icon-wrap{
+  background:rgba(7,94,84,.06) !important;
+  border-color:rgba(7,94,84,.18) !important;
+  box-shadow:0 0 18px rgba(7,94,84,.08) !important;
+}
+
+/* ── Chemical page ── */
+body.light-mode .chem-card{
+  background:linear-gradient(135deg, rgba(7,94,84,.06), rgba(240,242,245,.98)) !important;
+}
+body.light-mode .chem-pill{border-color:rgba(7,94,84,.25) !important;background:rgba(7,94,84,.07) !important;}
+body.light-mode .chem-pill.active{box-shadow:0 0 0 1px rgba(7,94,84,.12) inset !important;}
+body.light-mode .chem-well:active{background:rgba(7,94,84,.06) !important;}
+/* ── Chemical Survey Cards (daily injection detail) ── */
+.chem-survey-banner{
+  background:rgba(0,200,240,.07);border:1px solid rgba(0,200,240,.18);
+  border-radius:8px;padding:8px 12px;font-size:12px;color:var(--text);line-height:1.6;
+}
+.chem-survey-card{
+  background:var(--card);border:1px solid var(--border);border-radius:10px;
+  padding:12px 14px;margin-bottom:10px;
+}
+.chem-survey-type{font-size:14px;font-weight:700;color:var(--accent);display:flex;align-items:center;gap:8px;margin-bottom:4px;}
+.chem-survey-brand{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:8px;}
+.chem-survey-field{font-size:12px;color:var(--text);margin-top:4px;font-family:'JetBrains Mono',monospace;}
+.chem-survey-doses{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:8px 0;}
+.chem-dose-item{text-align:center;background:var(--surface);border-radius:6px;padding:6px 4px;}
+.chem-dose-val{font-size:14px;font-weight:700;color:var(--text);font-family:'JetBrains Mono',monospace;}
+.chem-dose-lbl{font-size:10px;color:var(--muted);margin-top:2px;}
+.chem-survey-remark{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.4;font-style:italic;}
+.chem-well-survey-row{
+  font-size:11px;color:var(--muted);margin-top:6px;padding:5px 8px;
+  background:var(--surface);border-radius:6px;font-family:'JetBrains Mono',monospace;line-height:1.5;
+}
+body.light-mode .chem-survey-banner{background:rgba(7,94,84,.07) !important;border-color:rgba(7,94,84,.18) !important;}
+/* ── Chemical Consumption Dashboard ── */
+.chem-cons-section{margin:0 14px 12px;border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.chem-cons-header{background:var(--surface);padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;}
+.chem-cons-title{font-size:13px;font-weight:700;color:var(--text);font-family:'JetBrains Mono',monospace;letter-spacing:.3px;}
+.chem-cons-date{font-size:10px;color:var(--muted);}
+.chem-kpi-row{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);}
+.chem-kpi-box{background:var(--card);padding:10px 8px;text-align:center;}
+.chem-kpi-val{font-size:17px;font-weight:800;color:var(--text);font-family:'JetBrains Mono',monospace;line-height:1.15;}
+.chem-kpi-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-top:3px;}
+.chem-cons-tbl{width:100%;border-collapse:collapse;font-size:11px;}
+.chem-cons-tbl th{background:var(--surface);color:var(--muted);text-transform:uppercase;letter-spacing:.8px;font-size:9px;padding:6px 10px;border-bottom:1px solid var(--border);text-align:right;white-space:nowrap;}
+.chem-cons-tbl th:first-child{text-align:left;}
+.chem-cons-tbl td{padding:7px 10px;border-bottom:1px solid var(--border);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:11px;text-align:right;}
+.chem-cons-tbl td:first-child{text-align:left;color:var(--text);font-family:inherit;font-size:12px;}
+.chem-cons-tbl tr.chem-total-row td{border-bottom:none;font-weight:700;background:var(--surface);border-top:1px solid var(--border);}
+.chem-days-ok{color:var(--green);font-weight:700;}
+.chem-days-warn{color:#f59e0b;font-weight:700;}
+.chem-days-crit{color:var(--red);font-weight:700;}
+.chem-inj-type-bar{padding:8px 12px;display:flex;flex-wrap:wrap;gap:6px;border-bottom:1px solid var(--border);}
+/* Color-coded frames: Wells / Tank Batteries / Manifolds each get their own
+   consistent color, reused across the chip bar, table headers and totals so
+   the same category always reads as the same color at a glance. */
+.chem-inj-chip{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;border:1px solid;font-size:11px;line-height:1.4;background:var(--card);}
+.chem-inj-chip strong{font-family:'JetBrains Mono',monospace;}
+.chem-inj-chip-wells{border-color:var(--accent);color:var(--accent);background:rgba(34,211,238,.10);}
+.chem-inj-chip-batteries{border-color:var(--accent2);color:var(--accent2);background:rgba(245,158,11,.10);}
+.chem-inj-chip-manifolds{border-color:var(--green);color:var(--green);background:rgba(16,185,129,.10);}
+.chem-cons-tbl th.chem-col-wells{color:var(--accent);}
+.chem-cons-tbl th.chem-col-batteries{color:var(--accent2);}
+.chem-cons-tbl th.chem-col-manifolds{color:var(--green);}
+.chem-cons-tbl td.chem-col-wells{color:var(--accent);}
+.chem-cons-tbl td.chem-col-batteries{color:var(--accent2);}
+.chem-cons-tbl td.chem-col-manifolds{color:var(--green);}
+body.light-mode .chem-cons-section{border-color:rgba(7,94,84,.2) !important;}
+body.light-mode .chem-cons-header{background:rgba(7,94,84,.05) !important;}
+
+/* ── T.B. Production page ── */
+body.light-mode .tb-date-pill{background:rgba(7,94,84,.10) !important;border-color:rgba(7,94,84,.25) !important;}
+body.light-mode .tb-total-cell.act-box{background:rgba(7,94,84,.04) !important;border-color:rgba(7,94,84,.18) !important;}
+body.light-mode .tb-battery-hdr:active,
+body.light-mode .tb-battery-hdr.open{background:rgba(7,94,84,.05) !important;}
+body.light-mode .tb-box-title{border-bottom-color:rgba(0,0,0,.08) !important;}
+body.light-mode .tb-metric{border-bottom-color:rgba(0,0,0,.06) !important;}
+body.light-mode .tb-thead{background:rgba(220,224,227,.95) !important;}
+
+/* ── Login card ── */
+body.light-mode .login-card{box-shadow:0 8px 32px rgba(0,0,0,.12) !important;}
+body.light-mode .login-logo img{box-shadow:0 4px 16px rgba(7,94,84,.15) !important;}
+
+/* ── History divider ── */
+body.light-mode .hist-divider-title{
+  background:rgba(7,94,84,.08) !important;
+  border-color:rgba(7,94,84,.35) !important;
+}
+
+/* ── Analysis page chips & WO button ── */
+body.light-mode .anl-chip.wc{border-color:rgba(7,94,84,.4) !important;}
+body.light-mode .anl-wo-btn.active{
+  background:rgba(7,94,84,.14) !important;
+  border-color:var(--accent) !important;
+  color:var(--accent) !important;
+}
+
+/* ── Analysis Compare button — hardcoded #04121a text is invisible on dark-teal bg ── */
+body.light-mode .anl-run{color:#FFFFFF !important;}
+
+/* ── Lookup page header — hardcoded dark navy gradient ── */
+body.light-mode .app-header{
+  background:linear-gradient(135deg,#FFFFFF,#F0F2F5) !important;
+  border-bottom-color:var(--border) !important;
+}
+body.light-mode .app-header::after{
+  background:radial-gradient(circle, rgba(7,94,84,.06) 0%, transparent 70%) !important;
+}
+/* Situation date bar — hardcoded cyan rgba tints */
+body.light-mode .situation-date-bar{
+  background:rgba(7,94,84,.06) !important;
+  border-color:rgba(7,94,84,.2) !important;
+}
+/* Install-as-app banner — hardcoded cyan rgba tints */
+body.light-mode .install-banner{
+  background:rgba(7,94,84,.06) !important;
+  border-color:rgba(7,94,84,.22) !important;
+}
+
+/* ── Theme toggle button (sits inside the user bar) ── */
+.theme-toggle{
+  background:none;border:none;cursor:pointer;
+  font-size:17px;line-height:1;padding:3px 7px;
+  border-radius:7px;flex-shrink:0;
+  color:var(--muted);margin-left:4px;
+  -webkit-tap-highlight-color:transparent;
+  transition:background .15s;
+}
+.theme-toggle:active{background:rgba(128,128,128,.15);}
 </style>
 </head>
 <body>
@@ -942,6 +1158,7 @@ pre{
 <div class="user-bar hidden" id="userBar">
   <span class="ub-email" id="ubEmail"></span>
   <span class="ub-role" id="ubRole"></span>
+  <button class="theme-toggle" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle day / night mode" aria-label="Toggle theme">🌙</button>
   <button class="ub-logout" onclick="handleLogout()">LOGOUT</button>
 </div>
 
@@ -978,6 +1195,7 @@ pre{
   <line x1="3" y1="13" x2="21" y2="13" stroke="currentColor" stroke-width="0.8" stroke-dasharray="2 2" opacity="0.5"/>
 </svg></span>T.B.</button>
   <button class="nav-btn" onclick="showPage('disposal')" id="nav-disposal"><span class="icon">💧</span>Disposal</button>
+  <button class="nav-btn" onclick="showPage('analysis')" id="nav-analysis"><span class="icon">📉</span>Analysis</button>
   <button class="nav-btn" onclick="showPage('data')" id="nav-data"><span class="icon">🗄️</span>Update DB</button>
 </nav>
 
@@ -1369,6 +1587,39 @@ pre{
     <div id="dispAdminStatus" style="display:none;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-top:8px;line-height:1.7;"></div>
 
 
+    <!-- ── Chemical Injection Survey upload (admin) ── -->
+    <div class="update-intro" style="margin-top:18px;">
+      <h3>🧪 Chemical Injection Survey</h3>
+      <p>Upload the daily <strong>H2S_Scavenger_Demulsifier_Daily_Survey.xlsx</strong>. All 10 chemical sheets are parsed automatically — doses, skid levels, and pump status per well are synced to every device. Diesel stays sourced from the main well database.</p>
+      <ul>
+        <li>Last sync: <strong style="color:var(--text)" id="chem-survey-cloud-when">—</strong></li>
+        <li>Report date: <strong style="color:var(--text)" id="chem-survey-report-date">—</strong></li>
+      </ul>
+    </div>
+    <div class="upload-zone" id="chemSurveyUploadZone" onclick="document.getElementById('chemSurveyFileInput').click()">
+      <div class="uz-icon">🧪</div>
+      <p><strong>Tap to choose chemical survey Excel file</strong></p>
+      <p>H2S_Scavenger_Demulsifier_Daily_Survey.xlsx</p>
+    </div>
+    <input type="file" id="chemSurveyFileInput" class="file-input" accept=".xlsx,.xls">
+    <div id="chemSurveyAdminStatus" style="display:none;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-top:8px;line-height:1.7;"></div>
+
+    <!-- ── Comparison / Baseline Snapshot upload (admin) ── -->
+    <div class="update-intro" style="margin-top:18px;">
+      <h3>📉 Comparison File (Loss Analysis)</h3>
+      <p>Upload an older monthly file to store it as a <strong>baseline snapshot</strong> for the Analysis tab. Saved to Firebase only — this does <strong>not</strong> change the live well data.</p>
+      <ul>
+        <li>Stored snapshots: <strong style="color:var(--text)" id="snapCloudCount">—</strong></li>
+      </ul>
+    </div>
+    <div class="upload-zone" id="cmpAdminUploadZone" onclick="document.getElementById('cmpFileInput').click()">
+      <div class="uz-icon">📉</div>
+      <p><strong>Tap to choose comparison Excel file</strong></p>
+      <p>Stored as a dated baseline snapshot</p>
+    </div>
+    <input type="file" id="cmpFileInput" class="file-input" accept=".xlsx,.xls">
+    <div id="cmpAdminStatus" style="display:none;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-top:8px;line-height:1.7;"></div>
+
     <div id="dataPreviewArea" style="display:none;">
       <p style="font-size:12px;color:var(--accent);margin-bottom:8px;font-family:'JetBrains Mono',monospace;">
         Found <span id="dataPreviewCount">0</span> wells in file:
@@ -1596,6 +1847,124 @@ pre{
   </div>
 </div>
 
+<!-- ══════════════ PAGE: ANALYSIS (Production Loss) ══════════════ -->
+<style>
+.anl-controls{display:flex;align-items:flex-end;gap:8px;margin-bottom:8px;}
+.anl-field{flex:1;display:flex;flex-direction:column;gap:4px;min-width:0;}
+.anl-field label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+.anl-field select{width:100%;padding:9px 8px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;}
+.anl-arrow{color:var(--accent);font-size:15px;padding-bottom:9px;}
+.anl-run{padding:10px 14px;background:var(--accent);border:none;border-radius:8px;color:#04121a;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap;}
+.anl-run:active{opacity:.85;}
+.anl-admin-upload{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:4px 0 12px;padding:10px;background:var(--surface);border:1px dashed var(--border);border-radius:8px;}
+.anl-hint{font-size:11px;color:var(--muted);}
+.anl-upload-btn{font-size:12px;color:var(--accent);border:1px solid var(--accent);border-radius:8px;padding:6px 10px;cursor:pointer;}
+.anl-summary{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:12px 0 14px;}
+.anl-sum-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:11px;}
+.anl-sum-val{font-size:17px;font-weight:700;color:var(--text);}
+.anl-sum-val.loss{color:var(--red);}
+.anl-sum-val.gain{color:var(--green);}
+.anl-sum-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-top:3px;}
+.anl-subtabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+.anl-woempty{font-size:12px;color:var(--muted);padding:8px 10px;}
+.anl-subtab{flex:1 1 40%;padding:8px 4px;text-align:center;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer;}
+.anl-subtab.active{color:var(--accent);border-color:var(--accent);}
+.anl-row{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px;cursor:pointer;}
+.anl-row-top{display:flex;justify-content:space-between;align-items:center;gap:8px;}
+.anl-well{font-weight:700;font-size:14px;color:var(--text);}
+.anl-well .rank{color:var(--muted);font-size:11px;font-weight:400;margin-right:6px;}
+.anl-loss{font-weight:700;font-size:15px;}
+.anl-loss.pos{color:var(--red);}
+.anl-loss.neg{color:var(--green);}
+.anl-nets{font-size:11px;color:var(--muted);margin-top:3px;}
+.anl-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px;}
+.anl-chip{font-size:10px;padding:3px 7px;border-radius:20px;border:1px solid var(--border);color:var(--muted);}
+.anl-chip.rate{color:var(--yellow);border-color:rgba(251,191,36,.4);}
+.anl-chip.wc{color:var(--accent);border-color:rgba(34,211,238,.4);}
+.anl-chip.pump-down{color:var(--red);border-color:rgba(248,113,113,.4);}
+.anl-chip.pump-up{color:var(--green);border-color:rgba(16,185,129,.4);}
+.anl-chip.pump-type{color:#c084fc;border-color:rgba(192,132,252,.4);}
+.anl-chip.wo-restart{color:var(--green);border-color:rgba(16,185,129,.5);background:rgba(16,185,129,.12);font-weight:700;}
+.anl-chip.wo-stop{color:var(--red);border-color:rgba(248,113,113,.5);background:rgba(248,113,113,.12);font-weight:700;}
+.anl-wo-btn{width:100%;padding:9px 12px;margin-bottom:10px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer;font-family:'JetBrains Mono',monospace;}
+.anl-wo-btn.active{background:rgba(34,211,238,.14);border-color:var(--accent);color:var(--accent);}
+.anl-chip.primary{background:rgba(248,113,113,.14);font-weight:700;}
+.anl-detail{margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:none;}
+.anl-detail.open{display:block;}
+.anl-dgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.anl-dcell{background:var(--surface);border-radius:8px;padding:8px;text-align:center;}
+.anl-dcell .dl{font-size:9px;color:var(--muted);text-transform:uppercase;}
+.anl-dcell .dv{font-size:12px;font-weight:600;margin-top:3px;word-break:break-word;}
+.anl-sec-title{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:16px 0 8px;font-weight:700;}
+.anl-search{width:100%;padding:9px 12px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;margin-bottom:10px;font-family:'JetBrains Mono',monospace;}
+.anl-fltbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+.anl-flt-lbl{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;letter-spacing:.5px;}
+.anl-flt-sel{flex:1;min-width:64px;padding:8px 10px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;font-family:'JetBrains Mono',monospace;}
+.anl-flt-arrow{color:var(--muted);font-size:14px;}
+.anl-flt-reset{padding:8px 10px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer;}
+.anl-flt-count{margin-left:auto;}
+/* ── Snapshot list rows (Update DB → Comparison section) ── */
+.snap-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);}
+.snap-row:last-child{border-bottom:none;}
+.snap-row-date{font-size:12px;color:var(--text);font-family:'JetBrains Mono',monospace;line-height:1.4;}
+.snap-del-btn{
+  background:none;border:none;cursor:pointer;
+  font-size:16px;line-height:1;padding:4px 7px;
+  border-radius:7px;opacity:.55;flex-shrink:0;
+  transition:opacity .15s,background .15s;
+  -webkit-tap-highlight-color:transparent;
+}
+.snap-del-btn:active{opacity:1;background:rgba(248,113,113,.18);}
+
+/* ── Balance tab footer ── */
+.anl-bal-footer{margin-top:18px;padding-top:14px;border-top:2px solid var(--border);}
+.anl-bal-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.anl-bal-item{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 10px;text-align:center;}
+.anl-bal-item.loss{border-color:rgba(248,113,113,.35);}
+.anl-bal-item.gain{border-color:rgba(16,185,129,.35);}
+.anl-bal-icon{font-size:22px;margin-bottom:5px;}
+.anl-bal-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:7px;}
+.anl-bal-m3{font-size:16px;font-weight:800;font-family:'JetBrains Mono',monospace;line-height:1.1;}
+.anl-bal-bbl{font-size:11px;font-family:'JetBrains Mono',monospace;margin-top:4px;opacity:.8;}
+.anl-bal-item.loss .anl-bal-m3,.anl-bal-item.loss .anl-bal-bbl{color:var(--red);}
+.anl-bal-item.gain .anl-bal-m3,.anl-bal-item.gain .anl-bal-bbl{color:var(--green);}
+.anl-bal-net{border-radius:14px;padding:18px 14px;text-align:center;}
+.anl-bal-net.loss{background:rgba(248,113,113,.08);border:2px solid rgba(248,113,113,.4);}
+.anl-bal-net.gain{background:rgba(16,185,129,.08);border:2px solid rgba(16,185,129,.4);}
+.anl-bal-net.zero{background:var(--surface);border:2px solid var(--border);}
+.anl-bal-net-lbl{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.anl-bal-net-m3{font-size:32px;font-weight:800;font-family:'JetBrains Mono',monospace;line-height:1;}
+.anl-bal-net-bbl{font-size:16px;font-family:'JetBrains Mono',monospace;margin-top:6px;font-weight:700;}
+.anl-bal-net-note{font-size:11px;color:var(--muted);margin-top:6px;letter-spacing:.3px;}
+.anl-bal-net.loss .anl-bal-net-m3,.anl-bal-net.loss .anl-bal-net-bbl{color:var(--red);}
+.anl-bal-net.gain .anl-bal-net-m3,.anl-bal-net.gain .anl-bal-net-bbl{color:var(--green);}
+.anl-bal-net.zero .anl-bal-net-m3,.anl-bal-net.zero .anl-bal-net-bbl{color:var(--muted);}
+</style>
+<div class="page" id="page-analysis" style="display:none;">
+  <div class="page-hdr">
+    <h2>📉 Loss Analysis</h2>
+    <p>Compare well ACT production between two dates &amp; rank losses</p>
+  </div>
+  <div style="padding:12px 14px 30px;">
+    <div class="anl-controls">
+      <div class="anl-field">
+        <label>Baseline (older)</label>
+        <select id="anlBaseDate"><option value="">—</option></select>
+      </div>
+      <div class="anl-arrow">→</div>
+      <div class="anl-field">
+        <label>Compare to</label>
+        <select id="anlCurrDate"><option value="">—</option></select>
+      </div>
+      <button class="anl-run" id="anlRunBtn" onclick="anlRun()">Compare</button>
+    </div>
+    <div id="anlSummary" class="anl-summary" style="display:none;"></div>
+    <div id="anlBody">
+      <div class="empty-state"><div class="big">📉</div><p>Select two dates and tap Compare</p></div>
+    </div>
+  </div>
+</div>
+
 <div class="footer">Powered by <span>Sherif Morshed</span></div>
 <div class="toast" id="toast"></div>
 <div id="swUpdateBanner"><span>🔄 </span><span>App update available — </span><strong>Tap to refresh</strong></div>
@@ -1679,6 +2048,21 @@ function handleLogin() {
 function handleLogout() {
   if (!confirm('Sign out?')) return;
   auth.signOut();
+}
+
+// This makes the loading screen fade away — guaranteed removal.
+// Defined here (rather than further down the file) because the Firebase
+// auth listener below can fire showLogin()/hideLoadingScreen() before
+// later <script> blocks — e.g. after the xlsx/html2canvas library tags —
+// have finished loading, which previously threw
+// "hideLoadingScreen is not defined" on fast/cached auth resolutions.
+function hideLoadingScreen() {
+    var loader = document.getElementById('loading-screen');
+    if(!loader || loader.dataset.hidden) return;
+    loader.dataset.hidden = '1';
+    loader.style.transition = 'opacity 0.5s ease';
+    loader.style.opacity = '0';
+    setTimeout(function() { loader.style.display = 'none'; }, 550);
 }
 
 function showApp(user) {
@@ -1817,6 +2201,7 @@ function stopFirestoreListener() {
   try { stopHistoryListener(); } catch(e){}
   try { stopWCHistoryListener(); } catch(e){}
   try { stopDisposalListener(); } catch(e){}
+  try { if(typeof stopSnapshotsListener==='function') stopSnapshotsListener(); } catch(e){}
 }
 
 // Start real-time listener — all 50 readers auto-update
@@ -1829,6 +2214,8 @@ function startFirestoreListener() {
   try { startHistoryListener(); } catch(e){ console.warn('history listener', e); }
   try { startWCHistoryListener(); } catch(e){ console.warn('wc listener', e); }
   try { startDisposalListener(); } catch(e){ console.warn('disposal listener', e); }
+  try { if(typeof startSnapshotsListener==='function') startSnapshotsListener(); } catch(e){ console.warn('snapshots listener', e); }
+  try { if(typeof startChemSurveyListener==='function') startChemSurveyListener(); } catch(e){ console.warn('chem survey listener', e); }
   _firestoreUnsub = db.collection('wells').doc('landWells')
     .onSnapshot(function(doc) {
       if (doc.exists) {
@@ -1857,7 +2244,7 @@ function startFirestoreListener() {
             lsSet(STORAGE_KEYS.situationDate, remoteSitDate);
           }
           // Only refresh the active page — mark others as stale
-          _stalePages = { substation:true, manifold:true, chemical:true, tb:true, data:true, lookup:true };
+          _stalePages = { substation:true, manifold:true, chemical:true, tb:true, data:true, lookup:true, analysis:true };
           var activePage = document.querySelector('.page.active');
           var activeId = activePage ? activePage.id.replace('page-','') : 'lookup';
           _refreshPage(activeId);
@@ -1896,6 +2283,7 @@ function _refreshPage(page) {
   else if(page==='chemical') refreshChemicalView();
   else if(page==='tb') renderTBPage();
   else if(page==='data') updateDBStats();
+  else if(page==='analysis') refreshAnalysisPage();
 }
 
 // ── Online/Offline detection ──
@@ -1944,6 +2332,7 @@ function attachDelegatedClicks(container){
       case 'selectManifold':      selectManifold(key); break;
       case 'selectChemical':      selectChemical(key); break;
       case 'selectChemicalWell':  selectChemicalWell(key); break;
+      case 'viewChemLocation':    viewChemLocationWells(key, key2); break;
       case 'openFromSubstation':  openWellFromSubstation(key); break;
       case 'openFromManifold':    openWellFromManifold(key); break;
       case 'openFromOverlay':     openWellFromOverlay(key); break;
@@ -2493,6 +2882,7 @@ function showPage(page, pushState=true) {
   else if(page==='tb') renderTBPage();
   else if(page==='history') refreshHistoryPage();
   else if(page==='disposal') refreshDisposalPage();
+  else if(page==='analysis') refreshAnalysisPage();
   // When returning to lookup — always show clean home state
   if(page==='lookup'){
     const statsEl = document.getElementById('headerStats');
@@ -2811,7 +3201,13 @@ function renderWell(well, source='lookup'){
   const amp = getWellValue(well, ['AMP']);
   const hz = getHz(well);
   const hp = getMotorHp(well);
-  const chem = getWellValue(well, ['CHEMICAL', 'CHEMICAL ']);
+  // Chemical injection type: prefer the live Chemical Injection Survey (matches
+  // the Chemical tab exactly, well name is Firestore-synced across devices) and
+  // fall back to the raw well-DB "Chemical" column for wells the survey doesn't cover.
+  const chemRec = getChemicalRecordByWell(well['Well']);
+  const chemFromSurvey = (chemRec && chemRec.chemicals.length) ? chemRec.chemicals.join(' + ') : '';
+  const chem = chemFromSurvey || getWellValue(well, ['CHEMICAL', 'CHEMICAL ']);
+  const chemSurveyEntries = (chemRec && chemRec.surveyData && chemRec.surveyData.length) ? chemRec.surveyData : [];
   const runningDays = calcRunningDays(getWellValue(well, ['LAST W.O', 'LAST WO']));
   const chemicalBadge = chem ? `<span class="badge other">${escHtml(chem)}</span>` : '';
   const h2sPpmRaw = safeNum(getWellValue(well, COLUMNS.h2sPpm));
@@ -2907,6 +3303,12 @@ function renderWell(well, source='lookup'){
       ${fld('Actual Net (m³/d)', actNet, {grn:true, roundWhole:true})}
 
     </div>
+
+    ${chemSurveyEntries.length ? `
+    <div class="section">
+      <div class="sec-title">💉 Chemical Injection Details <span style="font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;">${escHtml((typeof CHEM_SURVEY!=='undefined'&&CHEM_SURVEY&&CHEM_SURVEY.reportDate)||'')}</span></div>
+      <div style="padding:12px 14px;">${chemSurveyEntries.map(chemSurveyCard).join('')}</div>
+    </div>` : ''}
 
     <div class="section">
       <div class="sec-title">Pump Data</div>
@@ -3610,6 +4012,145 @@ const chemicalSuggEl = document.getElementById('chemicalSuggestions');
 let currentChemicalName = '';
 let currentChemicalWellFilter = '';
 let currentChemicalFocusedWell = '';
+let currentChemLocationView = null; // {chemKey, chemName, label} — set when drilling into a consumption-dashboard station/area
+
+// Survey record for a given chemical key on this well — carries the actual
+// dose, injection point type, and brand. Null when no survey data covers
+// this well (e.g. Water/Diesel from the WELLS column).
+function chemSurveyDataForKey(rec, key){
+  if(!(CHEM_SURVEY && rec.surveyData)) return null;
+  return rec.surveyData.find(r => normalizeChemicalName(r.chemType)===key) || null;
+}
+// Shared row template for the "wells injected with this chemical" tables —
+// used by both the chemical-group view and the consumption-dashboard
+// station/area drill-down view.
+function buildChemWellRow(rec, key){
+  const w = rec.well;
+  const statusClass = sc(w['Status']);
+  const isMixed = rec.chemicals.length > 1;
+  const sd = chemSurveyDataForKey(rec, key);
+  const quantStr = (sd && sd.actDose!=null && sd.actDose!=='') ? fmtChemDose(parseFloat(sd.actDose)||0,0)+' L/D' : '—';
+  const pointStr = (sd && sd.pointType) ? sd.pointType : '—';
+  const brandStr = (sd && sd.brand) ? sd.brand : '—';
+  const actNet = getWellValue(w, ['ACT NET', 'ACT NET ', 'ACT. NET', 'ACT NET M3/D']);
+  const wc = currentWcForWell(w);
+  return `<tr data-action="goToWellFromChem" data-key="${escAttr(w['Well']||'')}" style="cursor:pointer;" onmouseover="this.style.background='rgba(0,200,240,.06)'" onmouseout="this.style.background=''">
+    <td class="well-link" style="color:var(--accent);font-weight:700;">${escHtml(w['Well']||'—')} <span style="font-size:9px;color:var(--muted);">↗</span></td>
+    <td style="font-weight:700;color:var(--accent2);">${escHtml(quantStr)}</td>
+    <td>${escHtml(pointStr)}</td>
+    <td>${escHtml(brandStr)}</td>
+    <td>${escHtml(roundToNearestWholeDisplay(actNet)||'—')}</td>
+    <td>${escHtml(fn(wc)||'—')}</td>
+    <td>${escHtml(getBatteryValue(w)||'—')}</td>
+    <td>${escHtml(getManifoldValue(w)||'—')}</td>
+    <td class="status-cell" style="color:${DOT[statusClass]}">${escHtml(w['Status']||'—')}</td>
+    <td><span class="badge ${isMixed ? 'waiting' : 'producer'}" style="margin:0;">${isMixed ? rec.chemicals.length + ' Chem.' : 'Single'}</span></td>
+    <td><button class="substation-mini-btn" data-action="goToWellFromChem" data-key="${escAttr(w['Well']||'')}">Enter</button></td>
+  </tr>`;
+}
+// Drill down from a consumption-dashboard station/area row into the list of
+// wells behind it for that chemical.
+function viewChemLocationWells(chemTypeRaw, locationLabel){
+  const chemKey = normalizeChemicalName(chemTypeRaw);
+  const group = getChemicalByKey(chemKey);
+  currentChemLocationView = { chemKey, chemName: group ? group.name : canonicalChemicalName(chemTypeRaw), label: locationLabel };
+  currentChemicalName = '';
+  currentChemicalWellFilter = '';
+  currentChemicalFocusedWell = '';
+  chemicalInput.value = '';
+  const clearBtn = document.getElementById('chemicalClearBtn');
+  if(clearBtn) clearBtn.style.display = 'none';
+  chemicalSuggEl.classList.remove('show');
+  renderChemLocationResult();
+}
+function renderChemLocationResult(){
+  const view = currentChemLocationView;
+  const resultEl = document.getElementById('chemicalResult');
+  if(!view){ renderChemicalLanding(); return; }
+  const records = getWellsForChemLocation(view.chemKey, view.label);
+  const rowsHtml = records.length
+    ? records.map(rec=>buildChemWellRow(rec, view.chemKey)).join('')
+    : `<tr><td colspan="11" class="chem-search-empty" style="text-align:center;">No wells matched to "${escHtml(view.label)}" by TK Battery, Manifold, or Substation.</td></tr>`;
+  resultEl.innerHTML = `
+    <div class="substation-summary">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+        <div>
+          <div class="substation-name">${escHtml(view.label)}</div>
+          <div class="substation-note" style="margin-top:4px;">${escHtml(view.chemName)} — wells linked to this consumption entry (matched by TK Battery / Manifold / Substation name).</div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;"><button class="nav-back-btn" onclick="backToChemicalLanding()">← Back</button></div>
+      </div>
+      <div class="substation-meta">
+        <div class="badge live">${records.length} Well${records.length===1?'':'s'}</div>
+        <div class="badge other">${escHtml(view.chemName)}</div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="sec-title">${escHtml(view.chemName)} @ ${escHtml(view.label)}</div>
+      <div class="substation-table-wrap">
+        <table class="substation-table chem-well-table">
+          <thead>
+            <tr>
+              <th>WELL</th>
+              <th>QUANTITY</th>
+              <th>INJ. POINT</th>
+              <th>BRAND</th>
+              <th>ACT NET</th>
+              <th>W.C.</th>
+              <th>TK BATTERY</th>
+              <th>MANIFOLD</th>
+              <th>STATUS</th>
+              <th>CHEMICALS</th>
+              <th>ENTER</th>
+            </tr>
+          </thead>
+          <tbody>${rowsHtml}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+// Words that show up in station/area labels and in TK Battery/Manifold/
+// Substation values but carry no matching signal on their own (e.g. "T.B."
+// is just short for "Tank Battery" — the *number* after it is what needs to
+// match). Stripping them first, rather than stripping all punctuation, lets
+// "T.B. 10-1" and the well database's raw TK Battery value "10/1" (which has
+// no "T.B." prefix at all) reduce to the same "101" token.
+const LOC_STOPWORDS = new Set(['t','b','tb','tk','tanks','tank','battery','batteries','manifold','manifolds','substation','substations','station','stations','sub','st','area','areas','loc','location','no','number','of','and','new','old']);
+function normalizeLocToken(s){
+  const words = String(s||'').toLowerCase().split(/[^a-z0-9]+/).filter(Boolean).filter(w=>!LOC_STOPWORDS.has(w));
+  return words.join('');
+}
+// Consumption-dashboard area labels can be compound, e.g. "TB 10-1 & 2020" —
+// split on common separators so each piece can be matched independently.
+// Deliberately excludes "/" — battery numbers themselves are written like
+// "10/1", so splitting on it would break a single battery id into two tokens.
+function splitLocLabel(label){
+  return String(label||'').split(/\s*&\s*|\s*,\s*|\s*;\s*|\s+and\s+/i).map(s=>s.trim()).filter(Boolean);
+}
+// Best-effort lookup of wells behind a consumption-dashboard station/area row.
+// The survey's station/area names don't share a consistent format with the
+// WELLS database's TK Battery/Manifold/Substation fields (punctuation and
+// spacing vary), so we match on normalized substrings across all three
+// location fields rather than requiring an exact key.
+function getWellsForChemLocation(chemKey, locationLabel){
+  const rawTokens = splitLocLabel(locationLabel).map(normalizeLocToken).filter(Boolean);
+  const tokens = (rawTokens.length ? rawTokens : [normalizeLocToken(locationLabel)]).filter(t=>t.length>=2);
+  if(!tokens.length) return [];
+  return getChemicalRecords().filter(rec=>{
+    const hasChem = rec.chemicals.some(c=>normalizeChemicalName(c)===chemKey);
+    if(!hasChem) return false;
+    const battery    = normalizeLocToken(getBatteryValue(rec.well));
+    const manifold   = normalizeLocToken(getManifoldValue(rec.well));
+    const substation = normalizeLocToken(getSubstationValue(rec.well));
+    return tokens.some(t=>
+      (battery && battery.includes(t)) ||
+      (manifold && manifold.includes(t)) ||
+      (substation && substation.includes(t))
+    );
+  }).sort((a,b)=>String(a.well['Well']||'').localeCompare(String(b.well['Well']||''), undefined, {numeric:true, sensitivity:'base'}));
+}
+let CHEM_SURVEY = null; // {wellsMap, facilityLines, reportDate} — loaded from daily survey upload
 
 function getChemicalValue(w){
   const keys = ['CHEMICAL', 'CHEMICAL ', 'Chemical', 'Chemical '];
@@ -3672,13 +4213,72 @@ function isExcludedChemicalWell(w){
   const type = String(w['Type'] || '').toLowerCase();
   return status.includes('waiting work over') || status.includes('work over') || status.includes('rig') || shut.includes('rig') || type.includes('rig');
 }
+/**
+ * Normalize a well name for matching: lowercase, strip EVERY separator
+ * character (slash, backslash, hyphen, dash variants, spaces, dots, etc. —
+ * anything that isn't a letter or digit), then strip leading zeros from the
+ * remaining numeric run(s). Different Excel sources punctuate the same well
+ * inconsistently — e.g. the live well database may use "A/ZSE-1" (slash)
+ * while the Chemical Injection Survey uses "A-ZSE-1" (hyphen) or "AZSE-1"
+ * (nothing) for the exact same well — so the separator character itself
+ * cannot be trusted and must be discarded entirely rather than normalized
+ * to one specific character. This makes "A/ZSE-1" == "A-ZSE-1" == "AZSE-1",
+ * "A/RM-37" == "ARM-37", and "WF-02" == "WF-2" all resolve to the same key.
+ */
+function normWellKey(name){
+  return String(name||'')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g,'')
+    .replace(/\d+/g, function(digits){ return String(parseInt(digits,10)); });
+}
+
 function getChemicalRecords(){
-  return WELLS
-    .map(w=>{
+  if(CHEM_SURVEY && Object.keys(CHEM_SURVEY.wellsMap).length > 0){
+    // Build lookup keyed by NORMALIZED well name (slashes stripped) so that
+    // "A/RM-37" (WELLS DB) matches "ARM-37" (survey sheet).
+    const wellsByNormKey = {};
+    WELLS.forEach(function(w){
+      const n = normWellKey(w['Well']||'');
+      if(n) wellsByNormKey[n] = w;
+    });
+    // Survey key set also uses normalized keys for the diesel-exclusion check.
+    const surveyNormKeys = new Set(
+      Object.keys(CHEM_SURVEY.wellsMap).map(function(n){ return normWellKey(n); })
+    );
+    const records = [];
+    // Primary: survey-based records
+    Object.entries(CHEM_SURVEY.wellsMap).forEach(function([wellName, chemRecs]){
+      // Match survey name → WELLS object (slash-insensitive). Fall back to a
+      // minimal stub so the well still appears even if it's not in WELLS yet.
+      const wellObj = wellsByNormKey[normWellKey(wellName)] || {'Well': wellName.trim()};
+      // Expand composite chemTypes like "Demulsifier & Xylene" into both
+      const chemicals = Array.from(new Set(
+        chemRecs.flatMap(function(r){ return splitChemicalTokens(r.chemType).map(canonicalChemicalName); })
+      ));
+      // Also carry Diesel if the matched WELLS entry has it
+      const dieselFromDB = splitChemicalTokens(getChemicalValue(wellObj))
+        .filter(function(c){ return normalizeChemicalName(c)==='diesel'; });
+      dieselFromDB.forEach(function(d){ if(!chemicals.includes(d)) chemicals.push(d); });
+      records.push({well:wellObj, raw:chemicals.join(' + '), chemicals:chemicals, surveyData:chemRecs});
+    });
+    // Include ALL wells from WELLS that are absent from the survey (Water, Diesel, etc.)
+    // Water injection wells are not in the survey file, so they must come from here.
+    WELLS.forEach(function(w){
+      const n = normWellKey(w['Well']||'');
+      if(!n || surveyNormKeys.has(n)) return;
       const raw = getChemicalValue(w);
-      const chemicals = splitChemicalTokens(raw);
-      return { well:w, raw, chemicals };
-    }).filter(rec=>rec.chemicals.length);
+      const chems = splitChemicalTokens(raw);
+      if(chems.length) records.push({well:w, raw:raw, chemicals:chems});
+    });
+    return records.filter(function(r){ return r.chemicals.length; })
+      .sort(function(a,b){ return String(a.well['Well']||'').localeCompare(String(b.well['Well']||''),undefined,{numeric:true,sensitivity:'base'}); });
+  }
+  // ── Fallback: original WELLS Chemical-column logic ──
+  return WELLS.map(function(w){
+    const raw = getChemicalValue(w);
+    const chemicals = splitChemicalTokens(raw);
+    return { well:w, raw, chemicals };
+  }).filter(function(rec){ return rec.chemicals.length; });
 }
 
 function getChemicalWellMatches(q, limit=12){
@@ -3694,8 +4294,9 @@ function getChemicalWellMatches(q, limit=12){
   }).sort((a,b)=>String(a.well['Well']||'').localeCompare(String(b.well['Well']||''), undefined, {numeric:true, sensitivity:'base'})).slice(0,limit);
 }
 function getChemicalRecordByWell(name){
-  const q = String(name||'').trim().toLowerCase();
-  return getChemicalRecords().find(rec=>String(rec.well['Well']||'').trim().toLowerCase()===q) || null;
+  // Use normWellKey so "A/RM-37" and "ARM-37" resolve to the same record.
+  const q = normWellKey(name);
+  return getChemicalRecords().find(rec=>normWellKey(rec.well['Well'])===q) || null;
 }
 function getChemicalGroups(){
   const map = new Map();
@@ -3736,6 +4337,273 @@ function getChemicalMatches(q, limit=12){
 function chemicalSafe(v){
   return String(v||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
 }
+// Number formatter for chemical survey dose values (rounded, thousands-separated).
+// NOTE: intentionally local to this section — do not rely on the loss-analysis
+// module's `fmt()`, which is scoped inside its own IIFE and not global.
+function fmtChemDose(v,d){
+  if(v==null||v===''||isNaN(v)) return '—';
+  const p = Math.pow(10, d==null?1:d);
+  return (Math.round(Number(v)*p)/p).toLocaleString('en-US');
+}
+// ══════════════════════════════════════════
+//  CHEMICAL SURVEY — parse / Firestore / display helpers
+// ══════════════════════════════════════════
+const CHEM_SURVEY_META_COL = 'chemSurveyMeta';
+const CHEM_SURVEY_DATA_COL = 'chemSurvey';
+let _chemSurveyMetaUnsub = null;
+let _lastChemSurveyTs = 0;
+let _skipNextChemSurveySnap = false;
+
+function parseChemSurveyWorkbook(wb){
+  const SHEET_CHEM_MAP = {
+    'h2s scavenger':        'H2S Scavenger',
+    'demulsifier':          'Demulsifier',
+    'demuls.&xylene(50 50)':'Demulsifier & Xylene',
+    'xylene':               'Xylene',
+    'corrosion inhibitor':  'Corrosion Inhibitor',
+    'scale inhi':           'Scale Inhibitor',
+    'acetic acid':          'Acetic Acid',
+    'antifoulant':          'Antifoulant',
+    'oxygen scavenger':     'Oxygen Scavenger',
+    'biocide':              'Biocide'
+  };
+  const FACILITY_LABELS = new Set(['Oxygen Scavenger','Biocide']);
+  const wellsMap = {}, facilityLines = [], consumptionTables = [];
+  let reportDate = '';
+
+  wb.SheetNames.forEach(function(sheetName){
+    const chemType   = SHEET_CHEM_MAP[sheetName.trim().toLowerCase()] || sheetName.trim();
+    const isFacility = FACILITY_LABELS.has(chemType);
+    const ws = wb.Sheets[sheetName];
+    if(!ws) return;
+    const data = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
+
+    // Date from col 0 of first 20 rows
+    for(let i=0; i<Math.min(20,data.length); i++){
+      const cell = String(data[i][0]||'').trim();
+      const m = cell.match(/date[:\s]+(.+)/i);
+      if(m && !reportDate){ const ds=m[1].trim(); if(ds.length>3) reportDate=ds; break; }
+    }
+
+    // Find header row (has both 'ser' and 'injection point')
+    let hdrRow = -1;
+    for(let i=0; i<data.length; i++){
+      const rs = data[i].map(c=>String(c||'').toLowerCase()).join('|');
+      if(rs.includes('ser') && rs.includes('injection point')){ hdrRow=i; break; }
+    }
+    if(hdrRow < 0) return;
+
+    const hdr = data[hdrRow].map(c=>String(c||'').toLowerCase().replace(/\s+/g,' ').trim());
+    const ci  = function(keywords){ for(let j=0;j<hdr.length;j++){ if(keywords.some(kw=>hdr[j].includes(kw))) return j; } return -1; };
+
+    const cSer    = ci(['ser.','ser']);
+    const cPoint  = ci(['injection point']);
+    const cLoc    = ci(['location']);
+    const cRec    = ci(['recommended dose','recommended']);
+    const cAct    = ci(['actual dose','actual']);
+    const cBrand  = ci(['chemical type']);
+    const cPtType = (function(){ for(let j=0;j<hdr.length;j++){ if(j===cBrand) continue; if(hdr[j].includes('injcetion point type')||hdr[j].includes('injection point type')) return j; } return -1; })();
+    const cSkid   = ci(['skid level','skid']);
+    const cStock  = ci(['stock']);
+    const cRemark = ci(['remark']);
+    const cPump   = ci(['pump status']);
+    const cH2SA   = ci(['h2s concentration after','h2s conc. after']);
+    const cH2SB   = ci(['h2s conc. before','h2s concentration before']);
+
+    for(let i=hdrRow+1; i<data.length; i++){
+      const row = data[i];
+      const ser = cSer>=0 ? row[cSer] : null;
+      if(typeof ser !== 'number' || ser < 1) continue;
+      const point = cPoint>=0 ? String(row[cPoint]||'').trim() : '';
+      if(!point) continue;
+
+      const rec = {
+        chemType : chemType,
+        location : cLoc   >=0 ? String(row[cLoc]||'').trim()   : '',
+        recDose  : cRec   >=0 ? row[cRec]                      : null,
+        actDose  : cAct   >=0 ? row[cAct]                      : null,
+        brand    : cBrand >=0 ? String(row[cBrand]||'').trim() : '',
+        pointType: cPtType>=0 ? String(row[cPtType]||'').trim(): '',
+        skidLevel: cSkid  >=0 ? row[cSkid]                     : null,
+        stock    : cStock >=0 ? row[cStock]                    : null,
+        remarks  : cRemark>=0 ? String(row[cRemark]||'').trim(): '',
+        pumpStatus: cPump >=0 ? String(row[cPump]||'').trim()  : ''
+      };
+      if(cH2SA>=0 && row[cH2SA]!=='') rec.h2sAfter  = row[cH2SA];
+      if(cH2SB>=0 && row[cH2SB]!=='') rec.h2sBefore = String(row[cH2SB]||'').trim();
+
+      if(isFacility){ facilityLines.push(Object.assign({point}, rec)); }
+      else { if(!wellsMap[point]) wellsMap[point]=[]; wellsMap[point].push(rec); }
+    }
+    // ── Consumption section detection ─────────────────────────
+    let consData = null;
+    for(let i = hdrRow + 1; i < data.length && !consData; i++){
+      const rowStr = data[i].map(c=>String(c||'').toLowerCase()).join('|');
+      if(rowStr.includes('consumption by station')){
+        // H2S-style: station table — Ser | Plant | Consumption (L/D) | Stock (L)
+        const stations = []; let totalCons=null, totalStock=null;
+        for(let j=i+1; j<data.length; j++){
+          const r=data[j];
+          const rs=r.map(c=>String(c||'').toLowerCase()).join('|');
+          if(rs.includes('total consumption')){
+            totalCons  = parseFloat(r[7])||null;  // col H
+            totalStock = parseFloat(r[9])||null;  // col J
+            break;
+          }
+          const ser=r[5]; const plant=String(r[6]||'').trim();  // cols F, G
+          const cons=parseFloat(r[7]); const stock=parseFloat(r[9]);  // cols H, J
+          if(typeof ser==='number' && ser>=1 && plant)
+            stations.push({plant, consumption:isNaN(cons)?0:cons, stock:isNaN(stock)?0:stock});
+        }
+        consData = {style:'station', chemType, stations, totalConsumption:totalCons, totalStock};
+      } else if(rowStr.includes('consumption (l/d)') && rowStr.includes('location')){
+        // Demulsifier-style: area breakdown — Location | Total | Wells | T.Batteries | Manifolds
+        const areas = []; let totalCons=null, wellInj=null, tbInj=null, manInj=null;
+        for(let j=i+2; j<data.length; j++){  // skip sub-header row
+          const r=data[j];
+          const rs=r.map(c=>String(c||'').toLowerCase()).join('|');
+          const loc=String(r[2]||'').trim(); const val=parseFloat(r[3]);  // cols C, D
+          if(rs.includes('total consumption'))                              { if(!isNaN(val)) totalCons=val; }
+          else if(rs.includes('well injection'))                            { if(!isNaN(val)) wellInj=val;  }
+          else if(rs.includes('tank batt'))                                 { if(!isNaN(val)) tbInj=val;   }
+          else if(rs.includes('mainfold')||rs.includes('manifold'))         { if(!isNaN(val)) manInj=val;  }
+          else if(loc && !isNaN(val) && val>0)
+            areas.push({location:loc, total:val,
+              wells    :parseFloat(r[4])||0,  // col E
+              batteries:parseFloat(r[5])||0,  // col F
+              manifolds:parseFloat(r[6])||0   // col G
+            });
+        }
+        consData = {style:'area', chemType, areas, totalConsumption:totalCons, wellInjection:wellInj, batteryInjection:tbInj, manifoldInjection:manInj};
+      }
+    }
+    if(consData) consumptionTables.push(consData);
+  });
+  return { wellsMap, facilityLines, reportDate, consumptionTables };
+}
+
+async function saveChemSurveyToFirestore(surveyData){
+  if(typeof db === 'undefined') throw new Error('Firestore not initialised');
+  const upBy = (typeof currentUser!=='undefined'&&currentUser) ? currentUser.name : 'admin';
+  await db.collection(CHEM_SURVEY_DATA_COL).doc('latest').set({
+    wells: surveyData.wellsMap, facilityLines: surveyData.facilityLines,
+    consumptionTables: surveyData.consumptionTables||[],
+    reportDate: surveyData.reportDate,
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp(), updatedBy: upBy
+  });
+  _skipNextChemSurveySnap = true;
+  await db.collection(CHEM_SURVEY_META_COL).doc('info').set({
+    reportDate: surveyData.reportDate,
+    wellCount: Object.keys(surveyData.wellsMap).length,
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp(), updatedBy: upBy
+  });
+}
+
+function startChemSurveyListener(){
+  if(_chemSurveyMetaUnsub) _chemSurveyMetaUnsub();
+  _chemSurveyMetaUnsub = db.collection(CHEM_SURVEY_META_COL).doc('info')
+    .onSnapshot(function(snap){
+      if(!snap.exists) return;
+      if(_skipNextChemSurveySnap){ _skipNextChemSurveySnap=false; return; }
+      const ts = snap.data().updatedAt;
+      const tsMs = ts ? ts.toMillis() : 0;
+      if(tsMs <= _lastChemSurveyTs && CHEM_SURVEY) return;
+      _lastChemSurveyTs = tsMs;
+      db.collection(CHEM_SURVEY_DATA_COL).doc('latest').get().then(function(doc){
+        if(!doc.exists) return;
+        const d = doc.data();
+        CHEM_SURVEY = { wellsMap:d.wells||{}, facilityLines:d.facilityLines||[], consumptionTables:d.consumptionTables||[], reportDate:d.reportDate||'', updatedBy:d.updatedBy||'' };
+        _updateChemSurveyMetaUI();
+        showToast('🧪 Chemical survey updated — '+(CHEM_SURVEY.reportDate||'new data'));
+        var cp = document.getElementById('page-chemical');
+        if(cp && cp.style.display!=='none') renderChemicalLanding();
+      });
+    }, function(err){ console.warn('[ChemSurvey] listener error:',err.code); });
+
+  // File input handler
+  const fi = document.getElementById('chemSurveyFileInput');
+  if(fi) fi.addEventListener('change', async function(){
+    const file = this.files[0]; if(!file) return;
+    const zone = document.getElementById('chemSurveyUploadZone');
+    _setChemSurveyAdminStatus('⏳ Reading file…');
+    if(zone) zone.innerHTML='<div class="uz-icon">⏳</div><p><strong>Processing…</strong></p><p>'+escHtml(file.name)+'</p>';
+    const reader = new FileReader();
+    reader.onload = async function(e){
+      try {
+        const wb = XLSX.read(new Uint8Array(e.target.result),{type:'array'});
+        _setChemSurveyAdminStatus('⚙️ Parsing '+wb.SheetNames.length+' chemical sheets…');
+        const surveyData = parseChemSurveyWorkbook(wb);
+        const wc = Object.keys(surveyData.wellsMap).length;
+        let status = '✅ Parsed '+wc+' wells across '+wb.SheetNames.length+' sheets.\n';
+        status += '📅 Report date: '+(surveyData.reportDate||'not found')+'\n';
+        status += '🏭 Facility lines: '+surveyData.facilityLines.length+'\n';
+        // Apply locally right away
+        CHEM_SURVEY = { wellsMap:surveyData.wellsMap, facilityLines:surveyData.facilityLines,
+          consumptionTables:surveyData.consumptionTables||[],
+          reportDate:surveyData.reportDate,
+          updatedBy:(typeof currentUser!=='undefined'&&currentUser)?currentUser.name:'admin' };
+        _updateChemSurveyMetaUI();
+        var cp = document.getElementById('page-chemical');
+        if(cp && cp.style.display!=='none') renderChemicalLanding();
+        // Push to cloud
+        _setChemSurveyAdminStatus(status+'☁️ Uploading to cloud…');
+        await saveChemSurveyToFirestore(surveyData);
+        _setChemSurveyAdminStatus(status+'☁️ Cloud sync complete — pushed to all devices.');
+        if(zone) zone.innerHTML='<div class="uz-icon">✅</div><p><strong>Chemical survey uploaded</strong></p><p>'+escHtml(file.name)+'</p>';
+        showToast('🧪 Chemical survey synced — '+wc+' wells');
+      } catch(err){
+        console.error(err);
+        _setChemSurveyAdminStatus('❌ Error: '+err.message);
+        if(zone) zone.innerHTML='<div class="uz-icon">🧪</div><p><strong>Tap to choose chemical survey Excel file</strong></p><p>H2S_Scavenger_Demulsifier_Daily_Survey.xlsx</p>';
+        showToast('❌ Chemical survey error: '+err.message,true);
+      }
+    };
+    reader.readAsArrayBuffer(file);
+    this.value='';
+  });
+}
+
+function _updateChemSurveyMetaUI(){
+  if(!CHEM_SURVEY) return;
+  const whenEl = document.getElementById('chem-survey-cloud-when');
+  const dateEl = document.getElementById('chem-survey-report-date');
+  if(whenEl) whenEl.textContent = CHEM_SURVEY.updatedBy ? 'By '+CHEM_SURVEY.updatedBy : '—';
+  if(dateEl) dateEl.textContent = CHEM_SURVEY.reportDate || '—';
+}
+function _setChemSurveyAdminStatus(text){
+  const el = document.getElementById('chemSurveyAdminStatus');
+  if(!el) return;
+  el.style.display='block'; el.textContent=text;
+}
+
+/** Render one chemical injection detail card for the well-focus view. */
+function chemSurveyCard(r){
+  const fD = function(v){ if(v==null||v==='') return '—'; const n=parseFloat(v); return isNaN(n)?String(v):fmtChemDose(n,0)+' L/D'; };
+  const fV = function(v){ if(v==null||v==='') return '—'; const n=parseFloat(v); return isNaN(n)?String(v):fmtChemDose(n,0)+' L'; };
+  let effBadge='';
+  if(r.recDose&&r.actDose&&parseFloat(r.recDose)>0){
+    const pct=Math.round(parseFloat(r.actDose)/parseFloat(r.recDose)*100);
+    const cls=pct>=90?'producer':pct>=60?'waiting':'loss-badge';
+    effBadge=`<span class="badge ${cls}" style="font-size:10px;padding:2px 6px;">${pct}%</span>`;
+  }
+  const pumpOff = r.pumpStatus&&(r.pumpStatus.toLowerCase().includes('stop')||r.pumpStatus.toLowerCase().includes('fault')||r.pumpStatus.toLowerCase().includes(' off'));
+  const pumpColor = pumpOff ? 'var(--red)' : 'var(--green)';
+  return `<div class="chem-survey-card">
+    <div class="chem-survey-type">${escHtml(r.chemType)} ${effBadge}</div>
+    ${r.brand    ?`<div class="chem-survey-brand">Brand: ${escHtml(r.brand)}</div>`:''}
+    ${r.pointType?`<div class="chem-survey-field">Inj. Type: ${escHtml(r.pointType)}</div>`:''}
+    <div class="chem-survey-doses">
+      <div class="chem-dose-item"><div class="chem-dose-val">${escHtml(fD(r.actDose))}</div><div class="chem-dose-lbl">Actual</div></div>
+      <div class="chem-dose-item"><div class="chem-dose-val" style="color:var(--muted)">${escHtml(fD(r.recDose))}</div><div class="chem-dose-lbl">Recommended</div></div>
+      <div class="chem-dose-item"><div class="chem-dose-val" style="color:var(--muted)">${escHtml(fV(r.skidLevel))}</div><div class="chem-dose-lbl">Skid Level</div></div>
+    </div>
+    ${r.h2sAfter !=null?`<div class="chem-survey-field">H₂S After Inj.: <strong>${escHtml(String(r.h2sAfter))}</strong> ppm</div>`:''}
+    ${r.h2sBefore?`<div class="chem-survey-field">H₂S Before: ${escHtml(String(r.h2sBefore))}</div>`:''}
+    ${r.remarks  ?`<div class="chem-survey-remark">📝 ${escHtml(r.remarks)}</div>`:''}
+    ${r.pumpStatus?`<div class="chem-survey-field" style="color:${pumpColor}">⚙ Pump: ${escHtml(r.pumpStatus)}</div>`:''}
+  </div>`;
+}
+
 // ══════════════════════════════════════════
 //  CHEMICAL PAGE — helpers, search, filter, render
 // ══════════════════════════════════════════
@@ -3755,6 +4623,102 @@ function renderChemicalSuggestions(matches,q){
   }).join('');
   chemicalSuggEl.classList.add('show');
 }
+function renderChemConsumptionDashboard(){
+  if(!CHEM_SURVEY || !CHEM_SURVEY.consumptionTables || !CHEM_SURVEY.consumptionTables.length) return '';
+  const fN = function(v){ if(v==null||isNaN(v)||v==='') return '—'; return Number(v).toLocaleString(); };
+  const dCls = function(d){ return(!d||!isFinite(d))?'': d<7?'chem-days-crit':d<14?'chem-days-warn':'chem-days-ok'; };
+  const dLbl = function(cons,stock){
+    if(!cons||cons<=0||stock==null) return '—';
+    const d=stock/cons; return d>365?'>1 yr':d.toFixed(1)+' d';
+  };
+  return CHEM_SURVEY.consumptionTables.map(function(ct){
+    if(ct.style==='station'){
+      // H2S-style: per-station consumption + stock + days-to-depletion
+      const totDays = ct.totalConsumption&&ct.totalStock ? ct.totalStock/ct.totalConsumption : null;
+      const tdc = dCls(totDays);
+      const stationRows = ct.stations.map(function(s){
+        const d = s.consumption>0 ? s.stock/s.consumption : null;
+        return `<tr data-action="viewChemLocation" data-key="${escAttr(ct.chemType)}" data-key2="${escAttr(s.plant)}" style="cursor:pointer;" onmouseover="this.style.background='rgba(0,200,240,.06)'" onmouseout="this.style.background=''">
+          <td style="color:var(--accent);font-weight:700;">${escHtml(s.plant)} <span style="font-size:9px;color:var(--muted);">↗</span></td>
+          <td>${fN(s.consumption)}</td>
+          <td>${fN(s.stock)}</td>
+          <td class="${dCls(d)}">${dLbl(s.consumption,s.stock)}</td>
+        </tr>`;
+      }).join('');
+      return `<div class="chem-cons-section">
+        <div class="chem-cons-header">
+          <span class="chem-cons-title">📊 ${escHtml(ct.chemType)} — Consumption by Station</span>
+          <span class="chem-cons-date">${escHtml(CHEM_SURVEY.reportDate||'')}</span>
+        </div>
+        <div class="chem-kpi-row">
+          <div class="chem-kpi-box">
+            <div class="chem-kpi-val">${fN(ct.totalConsumption)} <span style="font-size:10px;font-weight:400;color:var(--muted)">L/D</span></div>
+            <div class="chem-kpi-lbl">Daily Consumption</div>
+          </div>
+          <div class="chem-kpi-box">
+            <div class="chem-kpi-val">${fN(ct.totalStock)} <span style="font-size:10px;font-weight:400;color:var(--muted)">L</span></div>
+            <div class="chem-kpi-lbl">Total Stock</div>
+          </div>
+          <div class="chem-kpi-box">
+            <div class="chem-kpi-val ${tdc}">${dLbl(ct.totalConsumption,ct.totalStock)}</div>
+            <div class="chem-kpi-lbl">Days Remaining</div>
+          </div>
+        </div>
+        <div style="overflow-x:auto;"><table class="chem-cons-tbl">
+          <thead><tr>
+            <th>Station</th><th>Daily Use (L/D)</th><th>Stock (L)</th><th>Days Left</th>
+          </tr></thead>
+          <tbody>${stationRows}</tbody>
+          <tr class="chem-total-row">
+            <td>TOTAL</td><td>${fN(ct.totalConsumption)}</td>
+            <td>${fN(ct.totalStock)}</td>
+            <td class="${tdc}">${dLbl(ct.totalConsumption,ct.totalStock)}</td>
+          </tr>
+        </table></div>
+      </div>`;
+    } else {
+      // Demulsifier-style: area × injection-type matrix
+      const areaRows = ct.areas.map(function(a){
+        return `<tr data-action="viewChemLocation" data-key="${escAttr(ct.chemType)}" data-key2="${escAttr(a.location)}" style="cursor:pointer;" onmouseover="this.style.background='rgba(0,200,240,.06)'" onmouseout="this.style.background=''">
+          <td style="color:var(--accent);font-weight:700;">${escHtml(a.location)} <span style="font-size:9px;color:var(--muted);">↗</span></td>
+          <td>${fN(a.total)}</td>
+          <td class="chem-col-wells">${fN(a.wells)}</td>
+          <td class="chem-col-batteries">${fN(a.batteries)}</td>
+          <td class="chem-col-manifolds">${fN(a.manifolds)}</td>
+        </tr>`;
+      }).join('');
+      const typeBar = [
+        ct.wellInjection    !=null ? `<span class="chem-inj-chip chem-inj-chip-wells">Wells: <strong>${fN(ct.wellInjection)} L/D</strong></span>` : '',
+        ct.batteryInjection !=null ? `<span class="chem-inj-chip chem-inj-chip-batteries">Tank Batteries: <strong>${fN(ct.batteryInjection)} L/D</strong></span>` : '',
+        ct.manifoldInjection!=null ? `<span class="chem-inj-chip chem-inj-chip-manifolds">Manifolds: <strong>${fN(ct.manifoldInjection)} L/D</strong></span>` : ''
+      ].filter(Boolean).join('');
+      return `<div class="chem-cons-section">
+        <div class="chem-cons-header">
+          <span class="chem-cons-title">📊 ${escHtml(ct.chemType)} — Consumption by Area</span>
+          <span class="chem-cons-date">${escHtml(CHEM_SURVEY.reportDate||'')}</span>
+        </div>
+        <div class="chem-kpi-row">
+          <div class="chem-kpi-box" style="grid-column:1/-1;">
+            <div class="chem-kpi-val">${fN(ct.totalConsumption)} <span style="font-size:10px;font-weight:400;color:var(--muted)">L/D</span></div>
+            <div class="chem-kpi-lbl">Total Daily Consumption</div>
+          </div>
+        </div>
+        ${typeBar ? `<div class="chem-inj-type-bar">${typeBar}</div>` : ''}
+        <div style="overflow-x:auto;"><table class="chem-cons-tbl">
+          <thead><tr>
+            <th>Area</th><th>Total (L/D)</th><th class="chem-col-wells">Wells</th><th class="chem-col-batteries">Tank Batt.</th><th class="chem-col-manifolds">Manifolds</th>
+          </tr></thead>
+          <tbody>${areaRows}</tbody>
+          <tr class="chem-total-row">
+            <td>TOTAL</td><td>${fN(ct.totalConsumption)}</td>
+            <td class="chem-col-wells">${fN(ct.wellInjection)}</td><td class="chem-col-batteries">${fN(ct.batteryInjection)}</td><td class="chem-col-manifolds">${fN(ct.manifoldInjection)}</td>
+          </tr>
+        </table></div>
+      </div>`;
+    }
+  }).join('');
+}
+
 function renderChemicalLanding(){
   currentChemicalName = '';
   currentChemicalWellFilter = '';
@@ -3772,6 +4736,8 @@ function renderChemicalLanding(){
         <div class="badge other">Chemical-first dashboard</div>
       </div>
     </div>
+    ${CHEM_SURVEY && CHEM_SURVEY.reportDate ? `<div style="padding:0 14px 8px;"><div class="chem-survey-banner">🧪 Chemical Survey Active — Report Date: <strong>${escHtml(CHEM_SURVEY.reportDate)}</strong>${CHEM_SURVEY.updatedBy ? ' · Uploaded by '+escHtml(CHEM_SURVEY.updatedBy) : ''}</div></div>` : ''}
+    ${renderChemConsumptionDashboard()}
     <div class="section">
       <div class="sec-title">Chemical Types</div>
       <div style="padding:12px 14px;">
@@ -3819,6 +4785,11 @@ function renderChemicalWellFocus(wellName){
       </div>
       <div class="substation-note" style="margin-top:8px;">Manifold: <strong style="color:var(--text)">${escHtml(getManifoldValue(w)||'—')}</strong> • Status: <strong style="color:${DOT[sc(w['Status'])]}">${escHtml(w['Status']||'—')}</strong></div>
     </div>
+    ${(CHEM_SURVEY && rec.surveyData && rec.surveyData.length) ? `
+    <div class="section">
+      <div class="sec-title">💉 Injection Details <span style="font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;">${escHtml(CHEM_SURVEY.reportDate||'')}</span></div>
+      <div style="padding:12px 14px;">${rec.surveyData.map(chemSurveyCard).join('')}</div>
+    </div>` : ''}
     <div class="section">
       <div class="sec-title">Injected Chemicals</div>
       <div style="padding:12px 14px;">
@@ -3840,28 +4811,66 @@ function renderChemicalResult(key){
   const mixedCount = group.records.length - singleCount;
   const pairText = group.pairSummary.slice(0,3).map(([name,count])=>`${escHtml(name)} (${count})`).join(' • ');
   const filter = currentChemicalWellFilter.trim().toLowerCase();
+  // Match against every column actually shown in the table below (well,
+  // quantity, injection point, brand, TK battery, manifold, status,
+  // chemicals), not just well/battery/manifold/substation.
   const filteredRecords = filter
     ? group.records.filter(rec => {
-        const wellName = String(rec.well['Well']||'').toLowerCase();
-        const battery = String(getBatteryValue(rec.well)||'').toLowerCase();
-        const manifold = String(getManifoldValue(rec.well)||'').toLowerCase();
-        const substation = String(getSubstationValue(rec.well)||'').toLowerCase();
-        return wellName.includes(filter) || battery.includes(filter) || manifold.includes(filter) || substation.includes(filter);
+        const w = rec.well;
+        const wellName = String(w['Well']||'').toLowerCase();
+        const battery = String(getBatteryValue(w)||'').toLowerCase();
+        const manifold = String(getManifoldValue(w)||'').toLowerCase();
+        const substation = String(getSubstationValue(w)||'').toLowerCase();
+        const status = String(w['Status']||'').toLowerCase();
+        const sd = chemSurveyDataForKey(rec, key);
+        const brand = String((sd && sd.brand) || '').toLowerCase();
+        const point = String((sd && sd.pointType) || '').toLowerCase();
+        const quantity = (sd && sd.actDose!=null && sd.actDose!=='') ? String(fmtChemDose(parseFloat(sd.actDose)||0,0)) : '';
+        const chemLabel = (rec.chemicals.length > 1 ? `${rec.chemicals.length} chem.` : 'single');
+        return wellName.includes(filter) || battery.includes(filter) || manifold.includes(filter) ||
+               substation.includes(filter) || status.includes(filter) || brand.includes(filter) ||
+               point.includes(filter) || quantity.includes(filter) || chemLabel.includes(filter);
       })
     : group.records;
 
-  // Sort state
-  window._chemWcSort  = window._chemWcSort  || 'none';
-  window._chemNetSort = window._chemNetSort || 'none';
+  // Total consumption for this chemical — summed from each well's actual
+  // dose (survey "QUANTITY" column), so it works uniformly for every
+  // chemical tab regardless of whether the source sheet also has its own
+  // "Consumption Dashboard" table (which today only exists for H2S/Demulsifier).
+  const totalConsumption = group.records.reduce((sum, rec) => {
+    const sd = chemSurveyDataForKey(rec, key);
+    const v = (sd && sd.actDose!=null && sd.actDose!=='') ? parseFloat(sd.actDose) : NaN;
+    return sum + (isNaN(v) ? 0 : v);
+  }, 0);
+
+  // Sort state — Injection Point, Brand, T.B. (Tank Battery), Net
+  window._chemPointSort = window._chemPointSort || 'none';
+  window._chemBrandSort = window._chemBrandSort || 'none';
+  window._chemTbSort    = window._chemTbSort    || 'none';
+  window._chemNetSort   = window._chemNetSort   || 'none';
   const cycle = s => s==='none'?'desc':s==='desc'?'asc':'none';
   const arr = {none:'⇅', desc:'↓', asc:'↑'};
 
   function sortedRecords(recs){
-    if(window._chemWcSort==='none' && window._chemNetSort==='none') return recs;
+    if(window._chemPointSort==='none' && window._chemBrandSort==='none' && window._chemTbSort==='none' && window._chemNetSort==='none') return recs;
     return [...recs].sort((a,b)=>{
-      if(window._chemWcSort!=='none'){
-        const av=safeNum(currentWcForWell(a.well),0), bv=safeNum(currentWcForWell(b.well),0);
-        if(av!==bv) return window._chemWcSort==='asc' ? av-bv : bv-av;
+      if(window._chemPointSort!=='none'){
+        const av = String((chemSurveyDataForKey(a,key)||{}).pointType||'').toLowerCase();
+        const bv = String((chemSurveyDataForKey(b,key)||{}).pointType||'').toLowerCase();
+        const cmp = av.localeCompare(bv, undefined, {numeric:true, sensitivity:'base'});
+        if(cmp!==0) return window._chemPointSort==='asc' ? cmp : -cmp;
+      }
+      if(window._chemBrandSort!=='none'){
+        const av = String((chemSurveyDataForKey(a,key)||{}).brand||'').toLowerCase();
+        const bv = String((chemSurveyDataForKey(b,key)||{}).brand||'').toLowerCase();
+        const cmp = av.localeCompare(bv, undefined, {numeric:true, sensitivity:'base'});
+        if(cmp!==0) return window._chemBrandSort==='asc' ? cmp : -cmp;
+      }
+      if(window._chemTbSort!=='none'){
+        const av = String(getBatteryValue(a.well)||'').toLowerCase();
+        const bv = String(getBatteryValue(b.well)||'').toLowerCase();
+        const cmp = av.localeCompare(bv, undefined, {numeric:true, sensitivity:'base'});
+        if(cmp!==0) return window._chemTbSort==='asc' ? cmp : -cmp;
       }
       if(window._chemNetSort!=='none'){
         const av=safeNum(getWellValue(a.well,['ACT NET','ACT NET ','ACT. NET']),0);
@@ -3873,51 +4882,44 @@ function renderChemicalResult(key){
   }
 
   function buildChemCards(recs){
-    if(!recs.length) return `<div class="chem-search-empty">No wells matched this search inside ${escHtml(group.name)}.</div>`;
-    return sortedRecords(recs).map(rec=>{
-      const w = rec.well;
-      const statusClass = sc(w['Status']);
-      const isMixed = rec.chemicals.length > 1;
-      const pills = rec.chemicals.map(token=>{
-        const active = normalizeChemicalName(token)===key ? 'active' : '';
-        return `<span class="chem-pill ${active}">${escHtml(token)}</span>`;
-      }).join('');
-      return `<div class="chem-well" data-action="goToWellFromChem" data-key="${escAttr(w['Well']||'')}" style="cursor:pointer;">
-        <div class="chem-well-top">
-          <div>
-            <div class="chem-well-name">${escHtml(w['Well']||'—')} <span style="font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;">↗ Open</span></div>
-            <div class="chem-well-meta">TK ${escHtml(getBatteryValue(w)||'—')} • Manifold ${escHtml(getManifoldValue(w)||'—')} • <span style="color:${DOT[statusClass]}">${escHtml(w['Status']||'—')}</span></div>
-          </div>
-          <div class="badges" style="margin-top:0;">
-            <div class="badge ${isMixed ? 'waiting' : 'producer'}">${isMixed ? rec.chemicals.length + ' Chemicals' : 'Single Chemical'}</div>
-            <div class="badge other">${escHtml(getSubstationValue(w)||'No Substation')}</div>
-          </div>
-        </div>
-        <div class="chem-pill-row">${pills}</div>
-      </div>`;
-    }).join('');
+    if(!recs.length) return `<tr><td colspan="11" class="chem-search-empty" style="text-align:center;">No wells matched this search inside ${escHtml(group.name)}.</td></tr>`;
+    return sortedRecords(recs).map(rec=>buildChemWellRow(rec, key)).join('');
   }
 
   window._chemSortAndRender = function(){
-    const wcBtn  = document.getElementById('chemSortWc');
-    const netBtn = document.getElementById('chemSortNet');
-    if(wcBtn){
-      wcBtn.textContent = `W.C% ${arr[window._chemWcSort]}`;
-      wcBtn.style.borderColor = window._chemWcSort!=='none' ? 'var(--accent)' : 'var(--border)';
-      wcBtn.style.color       = window._chemWcSort!=='none' ? 'var(--accent)' : 'var(--text)';
+    const pointBtn = document.getElementById('chemSortPoint');
+    const brandBtn = document.getElementById('chemSortBrand');
+    const tbBtn    = document.getElementById('chemSortTb');
+    const netBtn   = document.getElementById('chemSortNet');
+    if(pointBtn){
+      pointBtn.textContent = `INJ. POINT ${arr[window._chemPointSort]}`;
+      pointBtn.style.borderColor = window._chemPointSort!=='none' ? 'var(--accent)' : 'var(--border)';
+      pointBtn.style.color       = window._chemPointSort!=='none' ? 'var(--accent)' : 'var(--text)';
+    }
+    if(brandBtn){
+      brandBtn.textContent = `BRAND ${arr[window._chemBrandSort]}`;
+      brandBtn.style.borderColor = window._chemBrandSort!=='none' ? 'var(--accent)' : 'var(--border)';
+      brandBtn.style.color       = window._chemBrandSort!=='none' ? 'var(--accent)' : 'var(--text)';
+    }
+    if(tbBtn){
+      tbBtn.textContent = `T.B. ${arr[window._chemTbSort]}`;
+      tbBtn.style.borderColor = window._chemTbSort!=='none' ? 'var(--accent)' : 'var(--border)';
+      tbBtn.style.color       = window._chemTbSort!=='none' ? 'var(--accent)' : 'var(--text)';
     }
     if(netBtn){
-      netBtn.textContent = `ACT NET ${arr[window._chemNetSort]}`;
+      netBtn.textContent = `NET ${arr[window._chemNetSort]}`;
       netBtn.style.borderColor = window._chemNetSort!=='none' ? 'var(--accent)' : 'var(--border)';
       netBtn.style.color       = window._chemNetSort!=='none' ? 'var(--accent)' : 'var(--text)';
     }
-    const container = document.getElementById('chemCardsContainer');
-    if(container) container.innerHTML = buildChemCards(filteredRecords);
+    const tbody = document.getElementById('chemTableBody');
+    if(tbody) tbody.innerHTML = buildChemCards(filteredRecords);
   };
 
   window.chemSort = function(field){
-    if(field==='wc')  window._chemWcSort  = cycle(window._chemWcSort);
-    else              window._chemNetSort = cycle(window._chemNetSort);
+    if(field==='point')      window._chemPointSort = cycle(window._chemPointSort);
+    else if(field==='brand') window._chemBrandSort = cycle(window._chemBrandSort);
+    else if(field==='tb')    window._chemTbSort    = cycle(window._chemTbSort);
+    else                     window._chemNetSort   = cycle(window._chemNetSort);
     window._chemSortAndRender();
   };
 
@@ -3928,6 +4930,10 @@ function renderChemicalResult(key){
           <div class="substation-note" style="margin-top:4px;">Open wells below to review which ones are injected with only this chemical and which ones are injected with multiple chemicals.</div>
         </div>
         <div style="display:flex;justify-content:flex-end;margin-top:8px;"><button class="nav-back-btn" onclick="backToChemicalLanding()">← Back</button></div>
+      <div class="chem-cons-kpi" style="margin-top:10px;padding:12px 14px;background:var(--card);border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Total Consumption</div>
+        <div style="font-size:20px;font-weight:800;color:var(--accent2);">${numEn(Math.round(totalConsumption))} <span style="font-size:11px;font-weight:400;color:var(--muted);">L/D</span></div>
+      </div>
       <div class="substation-meta">
         <div class="badge live">${group.records.length} Wells</div>
         <div class="badge producer">${group.records.filter(r=>sc(r.well['Status'])==='producer').length} Producing</div>
@@ -3950,13 +4956,34 @@ function renderChemicalResult(key){
           </div>
         </div>
       </div>
-      <div style="display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--surface);border-bottom:1px solid var(--border);">
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--surface);border-bottom:1px solid var(--border);flex-wrap:wrap;">
         <span style="font-size:11px;color:var(--muted);flex-shrink:0">Sort:</span>
-        <button id="chemSortWc"  onclick="chemSort('wc')"  style="flex:1;padding:6px 0;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12px;cursor:pointer;">W.C% ⇅</button>
-        <button id="chemSortNet" onclick="chemSort('net')" style="flex:1;padding:6px 0;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12px;cursor:pointer;">ACT NET ⇅</button>
+        <button id="chemSortPoint" onclick="chemSort('point')" style="flex:1;min-width:80px;padding:6px 0;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12px;cursor:pointer;">INJ. POINT ⇅</button>
+        <button id="chemSortBrand" onclick="chemSort('brand')" style="flex:1;min-width:80px;padding:6px 0;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12px;cursor:pointer;">BRAND ⇅</button>
+        <button id="chemSortTb"    onclick="chemSort('tb')"    style="flex:1;min-width:80px;padding:6px 0;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12px;cursor:pointer;">T.B. ⇅</button>
+        <button id="chemSortNet"   onclick="chemSort('net')"   style="flex:1;min-width:80px;padding:6px 0;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12px;cursor:pointer;">NET ⇅</button>
       </div>
-      <div id="chemCardsContainer" style="padding:0 14px 12px;">
-        ${buildChemCards(filteredRecords)}
+      <div class="substation-table-wrap">
+        <table class="substation-table chem-well-table">
+          <thead>
+            <tr>
+              <th>WELL</th>
+              <th>QUANTITY</th>
+              <th>INJ. POINT</th>
+              <th>BRAND</th>
+              <th>ACT NET</th>
+              <th>W.C.</th>
+              <th>TK BATTERY</th>
+              <th>MANIFOLD</th>
+              <th>STATUS</th>
+              <th>CHEMICALS</th>
+              <th>ENTER</th>
+            </tr>
+          </thead>
+          <tbody id="chemTableBody">
+            ${buildChemCards(filteredRecords)}
+          </tbody>
+        </table>
       </div>
     </div>
   `;
@@ -3974,8 +5001,10 @@ function renderChemicalResult(key){
     });
   }
   // Reset sort state when opening a new chemical group
-  window._chemWcSort  = 'none';
-  window._chemNetSort = 'none';
+  window._chemPointSort = 'none';
+  window._chemBrandSort = 'none';
+  window._chemTbSort    = 'none';
+  window._chemNetSort   = 'none';
 }
 function selectChemical(key){
   const group = getChemicalByKey(key);
@@ -4033,6 +5062,7 @@ function clearChemicalSearch(){
   currentChemicalName = '';
   currentChemicalWellFilter = '';
   currentChemicalFocusedWell = '';
+  currentChemLocationView = null;
   chemicalInput.value = '';
   document.getElementById('chemicalClearBtn').style.display = 'none';
   chemicalSuggEl.classList.remove('show');
@@ -4042,6 +5072,7 @@ function backToChemicalLanding(){
   currentChemicalName = '';
   currentChemicalWellFilter = '';
   currentChemicalFocusedWell = '';
+  currentChemLocationView = null;
   chemicalInput.value = '';
   document.getElementById('chemicalClearBtn').style.display = 'none';
   chemicalSuggEl.classList.remove('show');
@@ -4126,6 +5157,8 @@ function importDataFile(){
     pendingSituationDate = null;
   }
   saveWells(WELLS);
+  // Auto-save a dated baseline snapshot for the Loss Analysis tab (additive; admin only)
+  try { if(typeof saveWellsSnapshot === 'function') saveWellsSnapshot(WELLS, loadSituationDate()); } catch(e){ console.warn('snapshot save', e); }
   document.getElementById('dataPreviewArea').style.display='none';
   document.getElementById('dataUploadOk').style.display='block';
   const sitDateStr = formatSituationDate(loadSituationDate());
@@ -4952,7 +5985,7 @@ window.addEventListener('popstate', () => {
   }
 
   // ── 7. Chemical with a detail/focus open ──
-  if (pgId === 'chemical' && (currentChemicalFocusedWell || currentChemicalName)) {
+  if (pgId === 'chemical' && (currentChemicalFocusedWell || currentChemicalName || currentChemLocationView)) {
     history.pushState({page:'app'}, '', '');
     backToChemicalLanding();
     return;
@@ -4986,15 +6019,8 @@ window.addEventListener('popstate', () => {
   history.replaceState({page:'app'}, '', '');
 });
 
-  // This makes the loading screen fade away — guaranteed removal
-function hideLoadingScreen() {
-    var loader = document.getElementById('loading-screen');
-    if(!loader || loader.dataset.hidden) return;
-    loader.dataset.hidden = '1';
-    loader.style.transition = 'opacity 0.5s ease';
-    loader.style.opacity = '0';
-    setTimeout(function() { loader.style.display = 'none'; }, 550);
-}
+  // hideLoadingScreen() is now defined earlier in the file (near handleLogout) —
+  // see the comment there for why it had to move.
 // Multiple triggers to guarantee the loading screen always disappears
 document.addEventListener('DOMContentLoaded', function() {
   // Auth onAuthStateChanged now controls hideLoadingScreen
@@ -5012,13 +6038,15 @@ document.addEventListener('DOMContentLoaded', function() {
     if(!el) return;
     const action = el.dataset.action;
     if(!action) return;
-    const key = el.dataset.key || '';
+    const key  = el.dataset.key  || '';
+    const key2 = el.dataset.key2 || '';
     switch(action){
       case 'selectSubstation':    selectSubstation(key); break;
       case 'selectManifoldBat':   selectManifoldBattery(key); break;
       case 'selectManifold':      selectManifold(key); break;
       case 'selectChemical':      selectChemical(key); break;
       case 'selectChemicalWell':  selectChemicalWell(key); break;
+      case 'viewChemLocation':    viewChemLocationWells(key, key2); break;
       case 'openFromSubstation':  e.stopPropagation(); openWellFromSubstation(key); break;
       case 'openFromManifold':    e.stopPropagation(); openWellFromManifold(key); break;
       case 'openFromOverlay':     openWellFromOverlay(key); break;
@@ -7293,6 +8321,610 @@ function initMorningReport() {
       });
     }
     </script>
+
+<!-- ══════════════════════════════════════════
+     PRODUCTION LOSS ANALYSIS  (monthly baseline comparison)
+     Snapshots: wellsSnapshots/<date>  +  wellsSnapshotsMeta/info
+     Purely additive — does not touch the live wells dataset or other tabs.
+     ══════════════════════════════════════════ -->
+<script>
+(function(){
+  const SNAP_COL   = 'wellsSnapshots';
+  const SNAP_META  = { col:'wellsSnapshotsMeta', doc:'info' };
+  const ANL_M3_BBL = 6.28981;
+  const ANL_MIN    = 5;          // ignore |net change| below this (m³/d) — test-separator fluctuation
+  let   SNAP_DATES = [];         // available snapshot dates, sorted DESC
+  let   _snapMetaUnsub = null;
+  const SNAP_CACHE = {};         // date -> slim wells array (loaded on demand)
+  let   _anlLast = null;         // last computed comparison rows
+  let   _anlView = 'losses';     // 'losses' | 'gains' | 'pumps'
+  let   _anlFilter = '';
+  let   _anlMin    = 5;          // loss/gain magnitude lower bound (m³/d)
+  let   _anlMax    = Infinity;   // loss/gain magnitude upper bound (m³/d)
+  let   _anlWoOnly = false;      // when true, show only W.O./Rig status-change wells
+
+  function _snapId(date){ return String(date||'').replace(/[^0-9A-Za-z_-]/g,'_'); }
+  function n(v){ const x=(v===''||v==null)?NaN:parseFloat(v); return isNaN(x)?0:x; }
+  function fmt(v,d){ if(v==null||v===''||isNaN(v)) return '—'; const p=Math.pow(10,d==null?1:d); return (Math.round(Number(v)*p)/p).toLocaleString('en-US'); }
+  function canonW(s){ return String(s==null?'':s).toUpperCase().replace(/[^A-Z0-9]/g,''); }
+
+  // Extract only the analysis-relevant fields from a full well row → keeps the snapshot doc small.
+  function slimWell(w){
+    const gv = (c)=>getWellValue(w,c);
+    return {
+      well: String(w['Well']||'').trim(),
+      type: String(w['Type']||'').trim(),
+      status: String(w['Status']||'').trim(),
+      shut: String(w['Shut Down Reason']||'').trim(),
+      manifold: getManifoldValue(w),
+      battery: getBatteryValue(w),
+      substation: getSubstationValue(w),
+      actRate: safeNum(gv(['ACT , M3/D','ACT, M3/D','ACT M3/D','TEST G.RATE M3/D']),0),
+      actWc:   safeNum(gv(['ACT.W.C %','ACT. W.C  %  VOL','ACT.W.C%','ACT W.C %','ACT.  W.C  %  VOL']),0),
+      actNet:  safeNum(gv(['ACT NET','ACT NET ','ACT. NET','ACT   NET M3/D','ACT.   NET M3/D']),0),
+      repRate: safeNum(gv(['RATE , M3/D','REP. G.RATE M3/D','RATE, M3/D','RATE M3/D']),0),
+      repWc:   safeNum(gv(['W.C %','REP. W.C  %  VOL','W.C  %  VOL','W.C%']),0),
+      repNet:  safeNum(gv(['REP. NET','REP NET','REP.   NET   M3/D','REP. NET ']),0),
+      pump: String(gv(['DH Pump','DH PUMP','Pump','DH pump'])||'').trim(),
+      stg:  String(gv(['STG','Stages','STG '])||'').trim(),
+      hz:   String(getHz(w)||'').trim(),
+      motorHp: String(getMotorHp(w)||'').trim()
+    };
+  }
+
+  // ── Pump comparison heuristic ──
+  function pumpInfo(p){
+    const s=String(p||'').trim(); const up=s.toUpperCase();
+    const family=(up.match(/[A-Z]+/g)||[]).join('');
+    const nums=(up.match(/\d+/g)||[]).map(Number).filter(x=>x>=100);
+    const cap=nums.length?Math.max.apply(null,nums):null;
+    return {raw:s,up:up,family:family,cap:cap};
+  }
+  function classifyPump(a,b){
+    const pa=pumpInfo(a), pb=pumpInfo(b);
+    if(!pa.raw&&!pb.raw) return {changed:false,dir:'none',label:''};
+    if(canonW(pa.raw)===canonW(pb.raw)) return {changed:false,dir:'none',label:''};
+    const from=(pa.raw||'—')+' → '+(pb.raw||'—');
+    if(pa.cap!=null&&pb.cap!=null){
+      if(pb.cap<pa.cap) return {changed:true,dir:'down',label:'Pump downsized ('+from+')'};
+      if(pb.cap>pa.cap) return {changed:true,dir:'up',label:'Pump upsized ('+from+')'};
+      return {changed:true,dir:'type',label:'Pump changed ('+from+')'};
+    }
+    return {changed:true,dir:'type',label:'Pump changed ('+from+')'};
+  }
+
+  // ── Status helper: classify a well into one state (mutually exclusive) ──
+  //  'prod' wins first, so a producing well is never treated as W.O./Rig even
+  //  if its shutdown-reason text still mentions rig/work-over.
+  function woCategory(status,shut){
+    const s=(status||'').toLowerCase();
+    if(/producer/.test(s)) return 'prod';
+    const t=s+' '+(shut||'').toLowerCase();
+    if(t.indexOf('w.o')>=0||t.indexOf('work over')>=0||t.indexOf('workover')>=0||t.indexOf('rig')>=0) return 'wo';
+    return 'other';
+  }
+  // ── Core comparison: baseline vs current slim-well arrays ──
+  function compute(baseArr,currArr){
+    const bm={},cm={};
+    (baseArr||[]).forEach(w=>{const k=canonW(w.well); if(k)bm[k]=w;});
+    (currArr||[]).forEach(w=>{const k=canonW(w.well); if(k)cm[k]=w;});
+    const rows=[];
+    for(const k in cm){
+      const b=bm[k]; if(!b) continue; const c=cm[k];
+      const bNet=n(b.actNet), cNet=n(c.actNet);
+      const bRate=n(b.actRate), cRate=n(c.actRate);
+      const bWc=n(b.actWc), cWc=n(c.actWc);
+      const netLoss=bNet-cNet;              // + = production lost
+      const rateDelta=cRate-bRate;          // - = gross rate dropped
+      const wcDelta=cWc-bWc;                // + = water cut increased
+      const pump=classifyPump(b.pump,c.pump);
+      // Additive decomposition of the net change into rate-effect + wc-effect
+      const frac=x=>1-n(x)/100;
+      const lossRate=(bRate*frac(bWc))-(cRate*frac(bWc));  // effect of rate change (old W.C.)
+      const lossWc  =(cRate*frac(bWc))-(cRate*frac(cWc));  // effect of W.C. change (new rate)
+      const chips=[];
+      if(rateDelta<=-1) chips.push({cls:'rate',text:'Rate ↓ '+fmt(bRate,0)+'→'+fmt(cRate,0)});
+      else if(rateDelta>=1) chips.push({cls:'rate',text:'Rate ↑ '+fmt(bRate,0)+'→'+fmt(cRate,0)});
+      if(wcDelta>=1) chips.push({cls:'wc',text:'W.C ↑ '+fmt(bWc,1)+'→'+fmt(cWc,1)+'%'});
+      else if(wcDelta<=-1) chips.push({cls:'wc',text:'W.C ↓ '+fmt(bWc,1)+'→'+fmt(cWc,1)+'%'});
+      if(pump.dir==='down') chips.push({cls:'pump-down',text:pump.label});
+      else if(pump.dir==='up') chips.push({cls:'pump-up',text:pump.label});
+      else if(pump.dir==='type') chips.push({cls:'pump-type',text:pump.label});
+      const bProd=/producer/i.test(b.status), cProd=/producer/i.test(c.status);
+      const bCat=woCategory(b.status,b.shut), cCat=woCategory(c.status,c.shut);
+      const woRestart=(bCat==='wo'&&cCat==='prod');   // was down for W.O./Rig, now producing again
+      const woStop=(bCat==='prod'&&cCat==='wo');       // was producing, now down for W.O./Rig
+      if(woRestart) chips.push({cls:'wo-restart',text:'Restarted after W.O.'});
+      else if(woStop) chips.push({cls:'wo-stop',text:'Stopped for '+(c.status||'W.O.')});
+      else if(bProd&&!cProd) chips.push({cls:'pump-down',text:'Now '+(c.status||'off')});
+      // Primary cause (only meaningful for a significant loss or gain)
+      let primary='';
+      if(Math.abs(netLoss)>=ANL_MIN){
+        const absLR=Math.abs(lossRate), absLW=Math.abs(lossWc);
+        if((pump.dir==='down'||pump.dir==='up') && absLR>=absLW && absLR>0.5) primary='pump';
+        else if(absLR>=absLW && absLR>0.5) primary='rate';
+        else if(absLW>0.5) primary='wc';
+      }
+      rows.push({well:c.well,type:c.type,status:c.status,bStatus:b.status,
+        bNet:bNet,cNet:cNet,netLoss:netLoss,bRate:bRate,cRate:cRate,rateDelta:rateDelta,
+        bWc:bWc,cWc:cWc,wcDelta:wcDelta,bPump:b.pump,cPump:c.pump,pump:pump,
+        lossRate:lossRate,lossWc:lossWc,primary:primary,chips:chips,
+        woRestart:woRestart,woStop:woStop,
+        manifold:c.manifold,battery:c.battery,substation:c.substation,
+        bStg:b.stg,cStg:c.stg,hz:c.hz,motorHp:c.motorHp});
+    }
+    // Baseline-only wells (present in baseline, absent from current) = full production loss, flagged
+    for(const k in bm){
+      if(cm[k]) continue;
+      const b=bm[k]; const bNet=n(b.actNet);
+      if(bNet<ANL_MIN) continue; // ignore wells whose baseline was within fluctuation
+      rows.push({well:b.well,type:b.type,status:b.status,bStatus:b.status,
+        bNet:bNet,cNet:0,netLoss:bNet,bRate:n(b.actRate),cRate:0,rateDelta:-n(b.actRate),
+        bWc:n(b.actWc),cWc:0,wcDelta:0,bPump:b.pump,cPump:'',pump:{changed:false,dir:'none',label:''},
+        lossRate:bNet,lossWc:0,primary:'missing',missing:true,woRestart:false,woStop:false,
+        chips:[{cls:'pump-down',text:'Missing in current snapshot'}],
+        manifold:b.manifold,battery:b.battery,substation:b.substation,
+        bStg:b.stg,cStg:'',hz:'',motorHp:''});
+    }
+    rows.sort((x,y)=>y.netLoss-x.netLoss);
+    return rows;
+  }
+
+  // ── Rendering ──
+  function summaryCards(rows){
+    const losers=rows.filter(r=>r.netLoss>=ANL_MIN);
+    const gainers=rows.filter(r=>r.netLoss<=-ANL_MIN);
+    const totalLoss=losers.reduce((s,r)=>s+r.netLoss,0);
+    const totalGain=gainers.reduce((s,r)=>s+(-r.netLoss),0);
+    const net=totalLoss-totalGain;   // >0 = net oil lost, <0 = net oil gained
+    const netLbl=(net>=0?'-':'+')+fmt(Math.abs(net),1)+' m³/d';
+    const cards=[
+      ['Wells with loss',losers.length,'loss'],
+      ['Net oil lost','-'+fmt(totalLoss,1)+' m³/d','loss'],
+      ['Wells improved',gainers.length,'gain'],
+      ['Net oil gained','+'+fmt(totalGain,1)+' m³/d','gain'],
+      ['Total net change',netLbl,net>=0?'loss':'gain'],
+      ['≈ Barrels/day',(net>=0?'-':'+')+fmt(Math.abs(net)*ANL_M3_BBL,0),net>=0?'loss':'gain']
+    ];
+    return cards.map(c=>'<div class="anl-sum-card"><div class="anl-sum-val'+(c[2]==='loss'?' loss':(c[2]==='gain'?' gain':''))+'">'+c[1]+'</div><div class="anl-sum-lbl">'+c[0]+'</div></div>').join('');
+  }
+  function detailHTML(r){
+    const cell=(l,v)=>'<div class="anl-dcell"><div class="dl">'+l+'</div><div class="dv">'+v+'</div></div>';
+    return '<div class="anl-dgrid">'+
+      cell('ACT Rate',fmt(r.bRate,0)+'→'+fmt(r.cRate,0))+
+      cell('ACT W.C %',fmt(r.bWc,1)+'→'+fmt(r.cWc,1))+
+      cell('ACT Net',fmt(r.bNet,1)+'→'+fmt(r.cNet,1))+
+      cell('Pump',escHtml((r.bPump||'—')+' → '+(r.cPump||'—')))+
+      cell('Stages',escHtml((r.bStg||'—')+' → '+(r.cStg||'—')))+
+      cell('Loss rate / W.C',fmt(r.lossRate,1)+' / '+fmt(r.lossWc,1))+
+      '</div>'+
+      '<div style="font-size:11px;color:var(--muted);margin-top:8px">Manifold '+escHtml(r.manifold||'—')+' • TB '+escHtml(r.battery||'—')+' • Sub '+escHtml(r.substation||'—')+'</div>';
+  }
+  function rowHTML(r,i,note){
+    const lossCls=r.netLoss>=ANL_MIN?'pos':(r.netLoss<=-ANL_MIN?'neg':'');
+    const sign=r.netLoss>0.05?'-':(r.netLoss<-0.05?'+':'');
+    const chips=r.chips.map(ch=>{
+      const prim=(r.primary==='rate'&&ch.cls==='rate')||(r.primary==='wc'&&ch.cls==='wc')||(r.primary==='pump'&&(ch.cls==='pump-down'||ch.cls==='pump-up'));
+      return '<span class="anl-chip '+ch.cls+(prim?' primary':'')+'">'+escHtml(ch.text)+'</span>';
+    }).join('');
+    const noteChip=note?'<span class="anl-chip pump-down">'+escHtml(note)+'</span>':'';
+    return '<div class="anl-row" data-well="'+escAttr(r.well)+'">'+
+      '<div class="anl-row-top"><div class="anl-well">'+(i!=null?'<span class="rank">#'+(i+1)+'</span>':'')+escHtml(r.well)+' <span style="font-size:10px;color:var(--muted)">'+escHtml(r.type)+'</span></div>'+
+      '<div class="anl-loss '+lossCls+'">'+sign+fmt(Math.abs(r.netLoss),1)+'</div></div>'+
+      '<div class="anl-nets">NET '+fmt(r.bNet,1)+' → '+fmt(r.cNet,1)+' m³/d</div>'+
+      ((chips||noteChip)?'<div class="anl-chips">'+noteChip+chips+'</div>':'')+
+      '<div class="anl-detail" data-detail="'+escAttr(r.well)+'">'+detailHTML(r)+'</div>'+
+    '</div>';
+  }
+  function pumpsHTML(rows){
+    const changed=rows.filter(r=>r.pump.changed);
+    if(!changed.length) return '<div class="empty-state"><div class="big">🔧</div><p>No pump changes between these two dates</p></div>';
+    const downs=changed.filter(r=>r.pump.dir==='down');
+    const ineff=changed.filter(r=>r.pump.dir==='up' && (r.cNet-r.bNet)<ANL_MIN);
+    const effUp=changed.filter(r=>r.pump.dir==='up' && (r.cNet-r.bNet)>=ANL_MIN);
+    const types=changed.filter(r=>r.pump.dir==='type');
+    const sec=(title,arr,note)=> arr.length?('<div class="anl-sec-title">'+title+' ('+arr.length+')</div>'+arr.map(r=>rowHTML(r,null,note)).join('')):'';
+    return sec('⬇ Downsized pumps',downs,'')+
+           sec('⚠ Upsized — no production gain',ineff,'No gain')+
+           sec('⬆ Upsized — with gain',effUp,'')+
+           sec('↔ Pump type changed',types,'');
+  }
+  function renderList(){
+    const wrap=document.getElementById('anlListWrap'); if(!wrap) return;
+    const rows=_anlLast||[];
+    if(_anlView==='pumps'){ wrap.innerHTML=pumpsHTML(rows); return; }
+    if(_anlView==='wobal'){ wrap.innerHTML=woBalanceHTML(rows); return; }
+    if(_anlView==='balance'){ wrap.innerHTML=balanceHTML(rows); return; }
+    let list;
+    const inSize=function(mag){ return mag>=_anlMin && mag<=_anlMax; };
+    if(_anlView==='gains'){ list=rows.filter(r=>r.netLoss<0 && inSize(-r.netLoss)).slice().sort((a,b)=>a.netLoss-b.netLoss); }
+    else { list=rows.filter(r=>r.netLoss>0 && inSize(r.netLoss)); }
+    if(_anlWoOnly) list=list.filter(r=> (_anlView==='gains')?r.woRestart:r.woStop );
+    if(_anlFilter) list=list.filter(r=>r.well.toLowerCase().indexOf(_anlFilter)>=0);
+    const cntEl=document.getElementById('anlFltCount'); if(cntEl) cntEl.textContent=list.length+' well'+(list.length===1?'':'s');
+    if(!list.length){ const rng=(_anlMax===Infinity?(_anlMin+'+'):(_anlMin+'–'+_anlMax)); wrap.innerHTML='<div class="empty-state"><div class="big">✅</div><p>No '+(_anlView==='gains'?'gains':'losses')+' in '+rng+' m³/d</p></div>'; return; }
+    wrap.innerHTML=list.map((r,i)=>rowHTML(r,i)).join('');
+  }
+  function sizeFilterHTML(){
+    const kind=(_anlView==='gains')?'Gain':'Loss';
+    const mins=[[0,'&lt;5 (all)'],[5,'5'],[10,'10'],[20,'20'],[30,'30'],[50,'50']];
+    const maxs=[[5,'5'],[10,'10'],[20,'20'],[30,'30'],[50,'50'],['inf','∞ (no limit)']];
+    const mo=mins.map(o=>'<option value="'+o[0]+'"'+(parseFloat(o[0])===_anlMin?' selected':'')+'>'+o[1]+'</option>').join('');
+    const curMax=(_anlMax===Infinity)?'inf':String(_anlMax);
+    const xo=maxs.map(o=>'<option value="'+o[0]+'"'+(String(o[0])===curMax?' selected':'')+'>'+o[1]+'</option>').join('');
+    return '<div class="anl-fltbar">'+
+      '<span class="anl-flt-lbl">'+kind+' m³/d</span>'+
+      '<select class="anl-flt-sel" id="anlMinSel">'+mo+'</select>'+
+      '<span class="anl-flt-arrow">→</span>'+
+      '<select class="anl-flt-sel" id="anlMaxSel">'+xo+'</select>'+
+      '<span class="anl-flt-reset" id="anlFltReset">Reset</span>'+
+      '<span class="anl-flt-lbl anl-flt-count" id="anlFltCount"></span>'+
+    '</div>';
+  }
+  function woBalanceHTML(rows){
+    const stopped=rows.filter(r=>r.woStop).slice().sort((a,b)=>b.netLoss-a.netLoss);
+    const restarted=rows.filter(r=>r.woRestart).slice().sort((a,b)=>a.netLoss-b.netLoss);
+    if(!stopped.length&&!restarted.length) return '<div class="empty-state"><div class="big">🔧</div><p>No wells changed to/from Waiting W.O. or Rig On between these two dates</p></div>';
+    const netLost=stopped.reduce((s,r)=>s+(r.bNet-r.cNet),0);
+    const grossLost=stopped.reduce((s,r)=>s+(r.bRate-r.cRate),0);
+    const netGained=restarted.reduce((s,r)=>s+(r.cNet-r.bNet),0);
+    const grossGained=restarted.reduce((s,r)=>s+(r.cRate-r.bRate),0);
+    const netBal=netGained-netLost, grossBal=grossGained-grossLost;
+    const sec=function(title,arr){ return arr.length?('<div class="anl-sec-title">'+title+' ('+arr.length+')</div>'+arr.map((r,i)=>rowHTML(r,i)).join('')):('<div class="anl-sec-title">'+title+' (0)</div><div class="anl-woempty">None in this comparison</div>'); };
+    const card=function(lbl,val,cls){ return '<div class="anl-sum-card"><div class="anl-sum-val '+cls+'">'+val+'</div><div class="anl-sum-lbl">'+lbl+'</div></div>'; };
+    const foot='<div class="anl-sec-title">📊 Work-Over balance (all shut / restart wells)</div>'+
+      '<div class="anl-summary">'+
+        card('Lost to shut-in (net)','-'+fmt(netLost,1)+' m³/d','loss')+
+        card('Gained from restart (net)','+'+fmt(netGained,1)+' m³/d','gain')+
+        card('Net oil balance',(netBal>=0?'+':'-')+fmt(Math.abs(netBal),1)+' m³/d',netBal>=0?'gain':'loss')+
+        card('Gross lost','-'+fmt(grossLost,0)+' m³/d','loss')+
+        card('Gross gained','+'+fmt(grossGained,0)+' m³/d','gain')+
+        card('Net gross balance',(grossBal>=0?'+':'-')+fmt(Math.abs(grossBal),0)+' m³/d',grossBal>=0?'gain':'loss')+
+      '</div>';
+    return sec('🔻 Lost to W.O. / Rig On',stopped)+sec('🔼 Restarted after W.O. / Rig On',restarted)+foot;
+  }
+
+  // ── Balance tab: combined losses + gains list with net result footer ──
+  function balanceHTML(rows){
+    const lossRows=rows.filter(function(r){ return r.netLoss>0; }).slice().sort(function(a,b){ return b.netLoss-a.netLoss; });
+    const gainRows=rows.filter(function(r){ return r.netLoss<0; }).slice().sort(function(a,b){ return a.netLoss-b.netLoss; });
+    const totalLost  =lossRows.reduce(function(s,r){ return s+r.netLoss; },0);
+    const totalGained=gainRows.reduce(function(s,r){ return s+(-r.netLoss); },0);
+    const netM3 =totalGained-totalLost;
+    const netZero=(Math.abs(netM3)<0.05);      // treat ±0.05 m³/d as effectively zero
+    const netCls =netZero?'zero':(netM3>0?'gain':'loss');
+    const netSign=netZero?'±':(netM3>0?'+':'−');
+    const netNote=netZero?'No net change vs baseline':(netM3>0?'Net production gain vs baseline':'Net production loss vs baseline');
+    const netBbl =Math.abs(netM3)*ANL_M3_BBL;
+    const lostBbl =totalLost*ANL_M3_BBL;
+    const gainedBbl=totalGained*ANL_M3_BBL;
+    const lossSec=lossRows.length
+      ? '<div class="anl-sec-title">📉 Losses — '+lossRows.length+' well'+(lossRows.length===1?'':'s')+'</div>'+lossRows.map(function(r,i){ return rowHTML(r,i); }).join('')
+      : '<div class="anl-sec-title">📉 Losses</div><div class="anl-woempty">No significant losses in this period</div>';
+    const gainSec=gainRows.length
+      ? '<div class="anl-sec-title">📈 Gains — '+gainRows.length+' well'+(gainRows.length===1?'':'s')+'</div>'+gainRows.map(function(r,i){ return rowHTML(r,i); }).join('')
+      : '<div class="anl-sec-title">📈 Gains</div><div class="anl-woempty">No significant gains in this period</div>';
+    const footer=
+      '<div class="anl-bal-footer">'+
+        '<div class="anl-bal-row">'+
+          '<div class="anl-bal-item loss">'+
+            '<div class="anl-bal-icon">📉</div>'+
+            '<div class="anl-bal-lbl">Total Lost</div>'+
+            '<div class="anl-bal-m3">−'+fmt(totalLost,1)+' m³/d</div>'+
+            '<div class="anl-bal-bbl">−'+fmt(lostBbl,0)+' bbl/d</div>'+
+          '</div>'+
+          '<div class="anl-bal-item gain">'+
+            '<div class="anl-bal-icon">📈</div>'+
+            '<div class="anl-bal-lbl">Total Gained</div>'+
+            '<div class="anl-bal-m3">+'+fmt(totalGained,1)+' m³/d</div>'+
+            '<div class="anl-bal-bbl">+'+fmt(gainedBbl,0)+' bbl/d</div>'+
+          '</div>'+
+        '</div>'+
+        '<div class="anl-bal-net '+netCls+'">'+
+          '<div class="anl-bal-net-lbl">⚖ Net Period Balance</div>'+
+          '<div class="anl-bal-net-m3">'+netSign+fmt(Math.abs(netM3),1)+' m³/d</div>'+
+          '<div class="anl-bal-net-bbl">'+netSign+fmt(Math.abs(netBbl),0)+' bbl/d</div>'+
+          '<div class="anl-bal-net-note">'+netNote+'</div>'+
+        '</div>'+
+      '</div>';
+    return footer+lossSec+gainSec;
+  }
+
+  function woFilterHTML(count){
+    if(!count) return '';
+    const stop=(_anlView==='losses');
+    const lbl=stop?'🔧 Stopped for W.O./Rig':'🔧 Restarted after W.O.';
+    return '<button class="anl-wo-btn'+(_anlWoOnly?' active':'')+'" id="anlWoBtn">'+lbl+' ('+count+')'+(_anlWoOnly?'  ✕ clear':'')+'</button>';
+  }
+  function render(){
+    const rows=_anlLast||[];
+    const sumEl=document.getElementById('anlSummary');
+    sumEl.style.display='grid'; sumEl.innerHTML=summaryCards(rows);
+    const losers=rows.filter(r=>r.netLoss>=ANL_MIN).length;
+    const gainers=rows.filter(r=>r.netLoss<=-ANL_MIN).length;
+    const changed=rows.filter(r=>r.pump.changed).length;
+    const woCount=rows.filter(function(r){
+      if(_anlView==='losses') return r.woStop && r.netLoss>0 && r.netLoss>=_anlMin && r.netLoss<=_anlMax;
+      return r.woRestart && r.netLoss<0 && (-r.netLoss)>=_anlMin && (-r.netLoss)<=_anlMax;
+    }).length;
+    const woBal=rows.filter(function(r){ return r.woStop||r.woRestart; }).length;
+    const body=document.getElementById('anlBody');
+    body.innerHTML=
+      '<div class="anl-subtabs">'+
+        '<div class="anl-subtab '+(_anlView==='losses'?'active':'')+'" data-view="losses">Losses ('+losers+')</div>'+
+        '<div class="anl-subtab '+(_anlView==='gains'?'active':'')+'" data-view="gains">Gains ('+gainers+')</div>'+
+        '<div class="anl-subtab '+(_anlView==='balance'?'active':'')+'" data-view="balance">⚖ Balance</div>'+
+        '<div class="anl-subtab '+(_anlView==='pumps'?'active':'')+'" data-view="pumps">Pump changes ('+changed+')</div>'+
+        '<div class="anl-subtab '+(_anlView==='wobal'?'active':'')+'" data-view="wobal">Shut/Start ('+woBal+')</div>'+
+      '</div>'+
+      ((_anlView==='losses'||_anlView==='gains')?('<input class="anl-search" id="anlSearch" placeholder="Filter well name…">'+sizeFilterHTML()+woFilterHTML(woCount)):'')+
+      '<div id="anlListWrap"></div>';
+    renderList();
+    const s=document.getElementById('anlSearch');
+    if(s){ s.value=_anlFilter; s.addEventListener('input',function(){ _anlFilter=this.value.trim().toLowerCase(); renderList(); }); }
+    const mn=document.getElementById('anlMinSel');
+    if(mn) mn.addEventListener('change',function(){ _anlMin=parseFloat(this.value)||0; if(_anlMin>_anlMax) _anlMax=Infinity; render(); });
+    const mx=document.getElementById('anlMaxSel');
+    if(mx) mx.addEventListener('change',function(){ _anlMax=(this.value==='inf')?Infinity:(parseFloat(this.value)||Infinity); if(_anlMax<_anlMin) _anlMin=0; render(); });
+    const rs=document.getElementById('anlFltReset');
+    if(rs) rs.addEventListener('click',function(){ _anlMin=5; _anlMax=Infinity; render(); });
+  }
+
+  // ── Firestore snapshot layer ──
+  function loadSnapshot(date){
+    if(SNAP_CACHE[date]) return Promise.resolve(SNAP_CACHE[date]);
+    return db.collection(SNAP_COL).doc(_snapId(date)).get().then(function(doc){
+      if(!doc.exists) return null;
+      const w=(doc.data()||{}).wells||[]; SNAP_CACHE[date]=w; return w;
+    });
+  }
+  window.saveWellsSnapshot=function(wellsArr,dateStr){
+    if(typeof isAdmin==='undefined'||!isAdmin) return Promise.resolve();
+    const date=String(dateStr||'').trim(); if(!date) return Promise.resolve();
+    const slim=(wellsArr||[]).map(slimWell).filter(w=>w.well);
+    if(!slim.length) return Promise.resolve();
+    return db.collection(SNAP_COL).doc(_snapId(date)).set({
+      date:date, wells:slim,
+      uploadedAt:firebase.firestore.FieldValue.serverTimestamp(),
+      uploadedBy:(typeof currentUser!=='undefined'&&currentUser)?currentUser.name:'admin'
+    }).then(function(){
+      const dates=Array.from(new Set([].concat(SNAP_DATES,[date]))).sort().reverse();
+      return db.collection(SNAP_META.col).doc(SNAP_META.doc).set({dates:dates,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
+    }).then(function(){ SNAP_CACHE[date]=slim; showToast('📸 Baseline snapshot saved: '+formatSituationDate(date)); })
+    .catch(function(err){ console.error('[Snapshot] save error',err); showToast('⚠️ Snapshot save failed',true); });
+  };
+  window.startSnapshotsListener=function(){
+    window.stopSnapshotsListener();
+    _snapMetaUnsub=db.collection(SNAP_META.col).doc(SNAP_META.doc).onSnapshot(function(doc){
+      SNAP_DATES = doc.exists ? ((doc.data().dates||[]).slice().sort().reverse()) : [];
+      try{ renderSnapStatus(); }catch(_){}
+      const p=document.getElementById('page-analysis');
+      if(p&&p.classList.contains('active')) refreshAnalysisPage();
+    },function(err){ console.warn('[Snapshot] meta listener',err.code); });
+  };
+  window.stopSnapshotsListener=function(){ if(_snapMetaUnsub){ _snapMetaUnsub(); _snapMetaUnsub=null; } };
+
+  function populatePickers(){
+    const baseSel=document.getElementById('anlBaseDate');
+    const currSel=document.getElementById('anlCurrDate');
+    if(!baseSel||!currSel) return;
+    const prevBase=baseSel.value, prevCurr=currSel.value;
+    const dates=SNAP_DATES.slice();
+    if(!dates.length){ baseSel.innerHTML='<option value="">No snapshots yet</option>'; currSel.innerHTML='<option value="">No snapshots yet</option>'; return; }
+    const opts=dates.map(d=>'<option value="'+escAttr(d)+'">'+escHtml(formatSituationDate(d))+'</option>').join('');
+    baseSel.innerHTML=opts; currSel.innerHTML=opts;
+    const newest=dates[0];
+    currSel.value=(prevCurr&&dates.indexOf(prevCurr)>=0)?prevCurr:newest;
+    let base=(prevBase&&dates.indexOf(prevBase)>=0)?prevBase:null;
+    if(!base){
+      const target=new Date(newest+'T00:00:00').getTime()-30*86400000;
+      let best=dates[dates.length-1], bestDiff=Infinity;
+      dates.forEach(d=>{ if(d===newest) return; const diff=Math.abs(new Date(d+'T00:00:00').getTime()-target); if(diff<bestDiff){bestDiff=diff;best=d;} });
+      base=best;
+    }
+    baseSel.value=base;
+  }
+
+  window.refreshAnalysisPage=function(){
+    populatePickers();
+    if(_anlLast){ render(); return; }
+    const body=document.getElementById('anlBody');
+    const sum=document.getElementById('anlSummary'); if(sum) sum.style.display='none';
+    if(!body) return;
+    if(SNAP_DATES.length<2){
+      const adm=(typeof isAdmin!=='undefined'&&isAdmin);
+      body.innerHTML='<div class="empty-state"><div class="big">📉</div><p>Need at least two dated snapshots to compare.<br>'+(adm?'Upload months via <b>Update DB</b> (each upload is saved automatically).':'Ask an admin to upload monthly data.')+'</p></div>';
+    } else {
+      body.innerHTML='<div class="empty-state"><div class="big">📉</div><p>Select two dates and tap Compare</p></div>';
+    }
+  };
+
+  window.anlRun=function(){
+    const bd=document.getElementById('anlBaseDate').value;
+    const cd=document.getElementById('anlCurrDate').value;
+    if(!bd||!cd){ showToast('⚠️ Pick both dates',true); return; }
+    if(bd===cd){ showToast('⚠️ Pick two different dates',true); return; }
+    if(bd>=cd){ showToast('⚠️ Baseline must be an older date than Compare',true); return; }
+    const body=document.getElementById('anlBody');
+    body.innerHTML='<div class="empty-state"><div class="big">⏳</div><p>Loading snapshots…</p></div>';
+    Promise.all([loadSnapshot(bd),loadSnapshot(cd)]).then(function(res){
+      const base=res[0],curr=res[1];
+      if(!base||!curr){ body.innerHTML='<div class="empty-state"><div class="big">⚠️</div><p>Snapshot data missing for a selected date</p></div>'; return; }
+      _anlLast=compute(base,curr); _anlView='losses'; _anlFilter=''; _anlMin=5; _anlMax=Infinity; _anlWoOnly=false;
+      render();
+    }).catch(function(err){ console.error('[Analysis] run error',err); body.innerHTML='<div class="empty-state"><div class="big">⚠️</div><p>Error loading data: '+escHtml(err.message||'failed')+'</p></div>'; });
+  };
+
+  // ── Wiring (DOM already parsed — this script is at end of body) ──
+  const bodyEl=document.getElementById('anlBody');
+  if(bodyEl){
+    bodyEl.addEventListener('click',function(e){
+      const tab=e.target.closest('.anl-subtab');
+      if(tab){ _anlView=tab.getAttribute('data-view'); _anlWoOnly=false; render(); return; }
+      const wob=e.target.closest('#anlWoBtn');
+      if(wob){ _anlWoOnly=!_anlWoOnly; render(); return; }
+      const row=e.target.closest('.anl-row');
+      if(row){ const d=row.querySelector('.anl-detail'); if(d) d.classList.toggle('open'); }
+    });
+  }
+  // Shared: parse an Excel file and store it as a dated baseline snapshot (does NOT touch live data)
+  window.uploadBaselineSnapshot=function(file,onDone){
+    if(!file) return;
+    if(typeof isAdmin==='undefined'||!isAdmin){ showToast('Admin only',true); return; }
+    const reader=new FileReader();
+    reader.onload=function(e){
+      try{
+        const wb=XLSX.read(e.target.result,{type:'array'});
+        const sit=extractSituationDateFromWorkbook(wb);
+        if(!sit||sit==='NOT_FOUND'){ showToast('⚠️ Situation date not found in file — cannot store snapshot',true); return; }
+        const UP=['DATA BASE','DATABASE','DATA','WELLS','WELL DATA','LAND WELLS','SHEET1'];
+        let sheetName=wb.SheetNames.find(s=>UP.indexOf(s.trim().toUpperCase())>=0);
+        if(!sheetName){ let mx=-1; wb.SheetNames.forEach(sn=>{const rf=wb.Sheets[sn]['!ref']; if(rf){const rr=XLSX.utils.decode_range(rf).e.r; if(rr>mx){mx=rr;sheetName=sn;}}}); }
+        if(!sheetName){ showToast('⚠️ No data sheet found in file',true); return; }
+        const ws=wb.Sheets[sheetName];
+        let hr=0; try{ const raw=XLSX.utils.sheet_to_json(ws,{header:1,defval:'',raw:false}); for(let r=0;r<Math.min(6,raw.length);r++){ if((raw[r]||[]).some(c=>String(c||'').trim().toLowerCase()==='well')){ hr=r; break; } } }catch(_){}
+        const rows=XLSX.utils.sheet_to_json(ws,{range:hr,defval:'',raw:false});
+        const norm=normalizeWellDataset(rows);
+        if(!norm.length){ showToast('⚠️ No valid wells found in file',true); return; }
+        saveWellsSnapshot(norm,sit).then(function(){ if(typeof onDone==='function') onDone(sit,norm.length); });
+      }catch(err){ console.error('[Snapshot] upload error',err); showToast('Error reading file: '+(err.message||''),true); }
+    };
+    reader.readAsArrayBuffer(file);
+  };
+
+  // Show stored snapshot dates in the Update DB panel
+  function renderSnapStatus(){
+    const cnt=document.getElementById('snapCloudCount');
+    if(cnt) cnt.textContent = SNAP_DATES.length ? String(SNAP_DATES.length) : 'None yet';
+    const st=document.getElementById('cmpAdminStatus');
+    if(!st) return;
+    if(!SNAP_DATES.length){ st.style.display='none'; st.innerHTML=''; return; }
+    const admin=(typeof isAdmin!=='undefined'&&isAdmin);
+    st.style.display='block';
+    // Buttons use data-snapdate; clicks are handled by the delegated listener below
+    // (no inline onclick → avoids JS-string injection risk)
+    st.innerHTML=
+      '<div style="font-size:10px;color:var(--muted);font-family:\'JetBrains Mono\',monospace;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">Stored baseline snapshots</div>'+
+      SNAP_DATES.map(function(d){
+        return '<div class="snap-row">'+
+          '<span class="snap-row-date">📅 '+escHtml(formatSituationDate(d))+'</span>'+
+          (admin
+            ? '<button class="snap-del-btn" data-snapdate="'+escAttr(d)+'" title="Remove this snapshot" aria-label="Delete snapshot for '+escAttr(formatSituationDate(d))+'">🗑️</button>'
+            : '')+
+        '</div>';
+      }).join('');
+  }
+  window.anlRenderSnapStatus=renderSnapStatus;
+
+  // ── Delete a stored baseline snapshot (admin only) ──
+  // Uses a Firestore batch so the snapshot doc delete and meta update are atomic —
+  // if either write fails the whole batch is rolled back, preventing orphaned entries.
+  function _doDeleteSnapshot(date){
+    if(typeof isAdmin==='undefined'||!isAdmin){ showToast('Admin only',true); return; }
+    const label=formatSituationDate(date);
+    if(!window.confirm(
+      'Delete baseline snapshot for:\n\n  '+label+'\n\nThis will permanently remove it from the Analysis comparison tool and cannot be undone.'
+    )) return;
+    showToast('Deleting snapshot…');
+    // Compute new dates list before committing so the batch carries the final value
+    const newDates=SNAP_DATES.filter(function(d){ return d!==date; });
+    const batch=db.batch();
+    batch.delete(db.collection(SNAP_COL).doc(_snapId(date)));
+    batch.set(db.collection(SNAP_META.col).doc(SNAP_META.doc),{
+      dates:newDates,
+      updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    batch.commit()
+      .then(function(){
+        // Prune local state immediately for instant UI feedback.
+        // The live meta listener will also fire and confirm the change.
+        delete SNAP_CACHE[date];
+        SNAP_DATES=newDates;
+        // Clear any stale analysis results so the user cannot compare against
+        // a snapshot that no longer exists
+        _anlLast=null;
+        renderSnapStatus();
+        // If the Analysis tab is currently open, reset it to the empty/picker state
+        const anlPage=document.getElementById('page-analysis');
+        if(anlPage&&anlPage.classList.contains('active')) refreshAnalysisPage();
+        showToast('🗑️ Snapshot deleted: '+label);
+      })
+      .catch(function(err){
+        console.error('[Snapshot] delete error',err);
+        showToast('⚠️ Delete failed: '+(err.message||'unknown error'),true);
+      });
+  }
+  // Delegated listener — handles delete button clicks inside the status panel
+  // without exposing any function through window or inline handlers
+  (function(){
+    const st=document.getElementById('cmpAdminStatus');
+    if(st){ st.addEventListener('click',function(e){
+      const btn=e.target.closest('.snap-del-btn');
+      if(btn) _doDeleteSnapshot(btn.getAttribute('data-snapdate'));
+    }); }
+  })();
+
+  // Wiring — Update DB "Comparison File" input stores a dated baseline snapshot
+  const cmpFile=document.getElementById('cmpFileInput');
+  if(cmpFile){ cmpFile.addEventListener('change',function(){ const f=this.files&&this.files[0]; this.value=''; window.uploadBaselineSnapshot(f,function(sit,c){ renderSnapStatus(); showToast('✅ '+c+' wells stored as baseline: '+formatSituationDate(sit)); }); }); }
+})();
+</script>
+
+<!-- ══════════════════════════════════════════
+     DAY / NIGHT THEME  — system-aware + manual toggle
+     ══════════════════════════════════════════ -->
+<script>
+(function(){
+  var KEY = 'petrobel-theme';
+
+  /* Apply a theme: 'light' or 'dark'.
+     Pass persist=true ONLY for explicit user toggles so that
+     the OS-change listener can still fire when no manual pref is set. */
+  function applyTheme(mode, persist){
+    var light = (mode === 'light');
+    document.body.classList.toggle('light-mode', light);
+    /* Sync loading screen background so there is no dark flash on light devices */
+    var ls = document.getElementById('loading-screen');
+    if(ls) ls.style.background = light ? '#ECE5DD' : '#060b12';
+    var btn = document.getElementById('themeToggleBtn');
+    if(btn) btn.textContent = light ? '☀️' : '🌙';
+    /* Keep PWA title-bar colour in sync with the active palette */
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if(meta) meta.setAttribute('content', light ? '#075E54' : '#22d3ee');
+    if(persist){ try{ localStorage.setItem(KEY, mode); }catch(_){} }
+  }
+
+  /* Button handler — always persists the manual choice */
+  window.toggleTheme = function(){
+    applyTheme(document.body.classList.contains('light-mode') ? 'dark' : 'light', true);
+  };
+
+  /* Init: saved manual pref → OS system theme → default dark */
+  function init(){
+    var saved;
+    try{ saved = localStorage.getItem(KEY); }catch(_){}
+    if(saved === 'light' || saved === 'dark'){ applyTheme(saved, false); return; }
+    /* No manual pref — default to light (day) mode */
+    applyTheme('light', false);
+  }
+
+  /* Watch live OS theme changes — only applies when the user has no saved pref */
+  var mq = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)');
+  if(mq){
+    var onChange = function(e){
+      var saved; try{ saved = localStorage.getItem(KEY); }catch(_){}
+      if(!saved) applyTheme(e.matches ? 'light' : 'dark', false);
+    };
+    /* Support modern addEventListener + legacy addListener (older Safari/WebView) */
+    try{
+      if(typeof mq.addEventListener === 'function') mq.addEventListener('change', onChange);
+      else if(typeof mq.addListener === 'function') mq.addListener(onChange);
+    }catch(_){}
+  }
+
+  init();
+})();
+</script>
 
 </body>
 </html>
