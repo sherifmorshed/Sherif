@@ -4,7 +4,7 @@
 //  requests are NEVER cached to prevent stale data.
 // ══════════════════════════════════════════
 
-const CACHE_NAME = 'land-wells-v90';
+const CACHE_NAME = 'land-wells-v105';
 
 // Only cache static files that don't change between sessions
 const STATIC_ASSETS = [
@@ -15,11 +15,19 @@ const STATIC_ASSETS = [
   './icon-192.png',
   './xlsx.full.min.js',
   './html2canvas.min.js',
+  // Firebase SDK — served locally so it CAN be cached. It used to be loaded
+  // from www.gstatic.com, which is in NO_CACHE_DOMAINS below, so on a cold
+  // offline start the SDK never loaded and the app could not boot at all.
+  './firebase-app-compat.js',
+  './firebase-firestore-compat.js',
+  './firebase-auth-compat.js',
   './well_locations.json',
   './manifold_substation_locations.json'
 ];
 
-// Domains that must NEVER be cached (Firebase services)
+// Domains that must NEVER be cached (live Firebase data / auth traffic).
+// www.gstatic.com stays listed, but the app no longer loads the SDK from
+// there — the three firebase-*-compat.js files above are local copies.
 const NO_CACHE_DOMAINS = [
   'firestore.googleapis.com',
   'www.googleapis.com',
@@ -31,13 +39,19 @@ const NO_CACHE_DOMAINS = [
 ];
 
 // Install — pre-cache static assets
+// Each asset is cached individually on purpose. cache.addAll() is atomic: one
+// 404 (a renamed icon, a missing json) rejects the whole batch and leaves the
+// cache EMPTY, so the app silently loses offline support with only a console
+// warning. Caching one-by-one means a single bad entry costs only that entry.
 self.addEventListener('install', function(event) {
   console.log('[SW] Installing, cache:', CACHE_NAME);
   event.waitUntil(
     caches.open(CACHE_NAME).then(function(cache) {
-      return cache.addAll(STATIC_ASSETS).catch(function(err) {
-        console.warn('[SW] Some assets failed to cache:', err);
-      });
+      return Promise.all(STATIC_ASSETS.map(function(url) {
+        return cache.add(url).catch(function(err) {
+          console.warn('[SW] Failed to cache', url, err);
+        });
+      }));
     })
   );
 });
